@@ -39,16 +39,16 @@
   --accent:#1f6feb;--font:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
   --radius:8px;--radius-lg:12px;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:15px}
 
 /* ── Header ── */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap}
 .header-left h1{font-size:16px;font-weight:600}
-.header-left .sub{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.header-left .sub{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:2px}
 .header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.live-pill{display:flex;align-items:center;gap:5px;background:var(--del-bg);border:1px solid rgba(46,160,67,.3);color:var(--delivered);border-radius:20px;padding:4px 10px;font-size:11px;font-family:var(--mono)}
+.live-pill{display:flex;align-items:center;gap:5px;background:var(--del-bg);border:1px solid rgba(46,160,67,.3);color:var(--delivered);border-radius:20px;padding:4px 10px;font-size:12px;font-family:var(--mono)}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--delivered);animation:pulse 2s infinite}
-.offline-pill{display:flex;align-items:center;gap:5px;background:var(--del2-bg);border:1px solid rgba(248,81,73,.3);color:var(--delayed);border-radius:20px;padding:4px 10px;font-size:11px;font-family:var(--mono)}
+.offline-pill{display:flex;align-items:center;gap:5px;background:var(--del2-bg);border:1px solid rgba(248,81,73,.3);color:var(--delayed);border-radius:20px;padding:4px 10px;font-size:12px;font-family:var(--mono)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── Buttons ── */
@@ -77,16 +77,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .stat-card:hover{transform:translateY(-1px)}
 .stat-card.active{border-color:var(--accent)}
 .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono)}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono)}
 .stat-dot{width:8px;height:8px;border-radius:50%}
 .stat-val{font-size:26px;font-weight:600;font-family:var(--mono);letter-spacing:-1px}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
 
 /* ── Charts ── */
 .charts-row{display:grid;grid-template-columns:240px 1fr;gap:16px;margin-bottom:24px}
 @media(max-width:800px){.charts-row{grid-template-columns:1fr}}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
-.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;font-family:var(--mono)}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;font-family:var(--mono)}
 .donut-wrap{width:150px;height:150px;margin:0 auto 16px}
 .legend{display:flex;flex-direction:column;gap:8px}
 .leg-item{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:2px 4px;border-radius:4px;transition:background .1s}
@@ -95,7 +95,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .leg-name{color:var(--muted);flex:1}
 .leg-val{font-family:var(--mono);font-size:12px;font-weight:500}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.bar-name{width:160px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:11px;cursor:pointer}
+.bar-name{width:160px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:12px;cursor:pointer}
 .bar-name:hover{color:var(--text)}
 .bar-track{flex:1;background:rgba(255,255,255,.07);border-radius:4px;height:20px}
 .bar-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .6s ease}
@@ -112,9 +112,9 @@ select.filter:focus{border-color:var(--accent)}
 
 /* ── Table ── */
 .table-wrap{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
 thead{background:var(--surface2);position:sticky;top:61px;z-index:10}
-th{padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-family:var(--mono);font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+th{padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-family:var(--mono);font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
 th:hover{color:var(--text)}
 td{padding:9px 14px;border-bottom:1px solid rgba(42,52,66,.5);color:var(--text);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr:last-child td{border-bottom:none}
@@ -123,7 +123,7 @@ tr.row-new td{animation:rowFlash 3s ease-out forwards}
 @keyframes rowFlash{0%{background:rgba(31,111,235,.2)}100%{background:transparent}}
 
 /* ── Badges ── */
-.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;font-family:var(--mono);white-space:nowrap}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:var(--mono);white-space:nowrap}
 .s-delivered{background:var(--del-bg);color:var(--delivered)}
 .s-delayed{background:var(--del2-bg);color:var(--delayed)}
 .s-po{background:var(--po-bg);color:var(--po)}
@@ -142,7 +142,7 @@ tr.row-new td{animation:rowFlash 3s ease-out forwards}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:500px){.form-row{grid-template-columns:1fr}}
 .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.form-group label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
+.form-group label{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
 .form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:100%}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
 .form-group textarea{resize:vertical;min-height:70px}
@@ -150,7 +150,7 @@ tr.row-new td{animation:rowFlash 3s ease-out forwards}
 
 /* Detail modal */
 .info-grid{display:grid;grid-template-columns:130px 1fr;gap:8px 12px;margin-bottom:8px}
-.info-label{color:var(--muted);font-size:11px;font-family:var(--mono);padding-top:2px}
+.info-label{color:var(--muted);font-size:12px;font-family:var(--mono);padding-top:2px}
 .info-val{font-size:13px;word-break:break-word}
 
 /* ── Toast ── */
@@ -165,6 +165,14 @@ tr.row-new td{animation:rowFlash 3s ease-out forwards}
 .spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:48px;color:var(--muted);font-size:13px}
+
+/* ── FLUID TYPOGRAPHY ── */
+html{font-size:clamp(13px, 0.85vw + 5px, 18px)}
+body{font-size:1rem}
+
+.admin-only{display:none!important}
+.admin-btn{display:none!important}
+
 </style>
 </head>
 <body>
@@ -219,7 +227,11 @@ tr.row-new td{animation:rowFlash 3s ease-out forwards}
   </div>
 
   <!-- Controls -->
-  <div class="controls">
+  <div style="background:rgba(0,180,216,.06);border:1px solid rgba(0,180,216,.15);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:12px;color:var(--t2);line-height:1.7">
+  <strong style="color:var(--t1);display:block;margin-bottom:4px">How to use the Orders Tracker</strong>
+  When you submit a PR or PO, add it here immediately. Set the status to <strong style="color:var(--amber)">PR Submitted</strong> and update it as it progresses through to <strong style="color:var(--green)">Delivered</strong>.
+</div>
+<div class="controls">
     <input class="search-box" id="search" placeholder="Search orders, items, PO / PR numbers…" oninput="render()">
     <select class="filter" id="statusFilter" onchange="render()">
       <option value="">All statuses</option>
@@ -688,8 +700,9 @@ function render() {
       <td>${o.delivery || '—'}</td>
       <td style="color:var(--muted);font-size:11px">${o.addedBy || '—'}</td>
       <td style="white-space:nowrap">
-        <button class="btn-ghost" style="font-size:11px;padding:4px 8px;margin-right:4px" onclick="viewDetail('${o._key}')">View</button>
-        <button class="btn-ghost" style="font-size:11px;padding:4px 8px" onclick="editOrder('${o._key}')">Edit</button>
+        <button class="btn-ghost" style="font-size:12px;padding:4px 8px;margin-right:4px" onclick="viewDetail('${o._key}')">View</button>
+        <button class="btn-ghost" style="font-size:12px;padding:4px 8px" onclick="editOrder('${o._key}')">Edit</button>
+        ${IS_ADMIN && o.status!=='Delivered'?`<button class="btn-ghost admin-btn" style="font-size:12px;padding:4px 8px;color:var(--delivered);border-color:var(--delivered);margin-left:4px" onclick="adminMarkDelivered('${o._key}')">Mark Delivered</button>`:''}
       </td>
     </tr>`;
   }).join('');
@@ -698,7 +711,7 @@ function render() {
   document.getElementById('pag-info').textContent = `Page ${page} of ${pages} · ${total} records`;
   const s = Math.max(1, page-2), e = Math.min(pages, page+2);
   let ph = '';
-  for (let p = s; p <= e; p++) ph += `<button class="btn-ghost" style="font-size:11px;padding:4px 9px;${p===page?'border-color:var(--accent);color:var(--accent)':''}" onclick="goPage(${p})">${p}</button>`;
+  for (let p = s; p <= e; p++) ph += `<button class="btn-ghost" style="font-size:12px;padding:4px 9px;${p===page?'border-color:var(--accent);color:var(--accent)':''}" onclick="goPage(${p})">${p}</button>`;
   document.getElementById('pag-pages').innerHTML = ph;
 }
 
@@ -829,6 +842,30 @@ function exportCSV() {
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 initFirebase();
+
+// ─── ADMIN AUTH ───
+let IS_ADMIN=false;
+function _sha256(s){const e=new TextEncoder();return crypto.subtle.digest('SHA-256',e.encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));}
+function promptAdmin(cb){const pw=prompt('Enter admin password:');if(!pw)return;_sha256(pw).then(h=>{if(h==='469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466'){IS_ADMIN=true;sessionStorage.setItem('fa','1');_showAdminUI();if(cb)cb();}else alert('Incorrect password');});}
+function checkAdminSession(){if(sessionStorage.getItem('fa')==='1'){IS_ADMIN=true;_showAdminUI();}}
+function _showAdminUI(){
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.removeProperty('display'));
+  document.querySelectorAll('.admin-btn').forEach(el=>el.style.removeProperty('display'));
+  let b=document.getElementById('_ab');
+  if(!b){b=document.createElement('div');b.id='_ab';
+    b.style='position:fixed;bottom:16px;left:16px;background:rgba(0,180,216,.13);border:1px solid rgba(0,180,216,.3);color:#00b4d8;border-radius:20px;padding:5px 14px;z-index:9990;font-size:11px;font-family:var(--mono,"monospace");display:flex;align-items:center;gap:8px';
+    b.innerHTML='Admin mode&nbsp;<button onclick="logoutAdmin()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-family:inherit">Exit</button>';
+    document.body.appendChild(b);}
+}
+function logoutAdmin(){IS_ADMIN=false;sessionStorage.removeItem('fa');location.reload();}
+
+function adminMarkDelivered(key) {
+  if (!IS_ADMIN) return;
+  DB[key] && dbRef.child(key).update({ status: 'Delivered', deliveredAt: new Date().toISOString().slice(0,10) })
+    .then(() => toast('Marked as delivered', 't-green'));
+}
+
+checkAdminSession();
 </script>
 </body>
 </html>

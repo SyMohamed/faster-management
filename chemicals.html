@@ -22,7 +22,7 @@
   --font:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
   --r:8px;--rl:12px;--rxl:16px;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:15px}
 
 /* Scrollbar */
 ::-webkit-scrollbar{width:6px;height:6px}
@@ -34,13 +34,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .brand{display:flex;align-items:center;gap:12px;margin-right:36px;cursor:pointer;text-decoration:none}
 .brand img{width:38px;height:38px;border-radius:50%;background:#fff;object-fit:contain}
 .brand-label span{display:block;font-size:15px;font-weight:600;color:var(--text)}
-.brand-label small{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.3px}
+.brand-label small{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.3px}
 .nav-items{display:flex;height:100%;gap:0}
 .nav-item{display:flex;align-items:center;gap:7px;padding:0 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none;white-space:nowrap}
 .nav-item:hover{color:var(--text)}
 .nav-item.active{color:var(--accent);border-bottom-color:var(--accent)}
 .nav-right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.conn-pill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 11px;font-size:11px;font-family:var(--mono);border:1px solid;transition:all .3s}
+.conn-pill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 11px;font-size:12px;font-family:var(--mono);border:1px solid;transition:all .3s}
 .conn-on{background:var(--green-bg);border-color:rgba(34,197,94,.3);color:var(--green)}
 .conn-off{background:var(--red-bg);border-color:rgba(239,68,68,.3);color:var(--red)}
 .conn-dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite}
@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .btn:hover{opacity:.85}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);padding:7px 14px;border-radius:var(--r);font-size:12px;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:5px;transition:background .15s;white-space:nowrap}
 .btn-ghost:hover{background:var(--surface2)}
-.btn-sm{padding:4px 10px;font-size:11px;border-radius:6px}
+.btn-sm{padding:4px 10px;font-size:12px;border-radius:6px}
 .btn-danger{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.35);padding:6px 12px;border-radius:var(--r);font-size:12px;cursor:pointer;font-family:var(--font)}
 .btn-danger:hover{background:var(--red-bg)}
 
@@ -73,9 +73,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .stat:hover::before{opacity:1}
 .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .stat-icon{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px}
-.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono)}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono)}
 .stat-val{font-size:26px;font-weight:700;font-family:var(--mono);letter-spacing:-1px;line-height:1}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
 
 /* Location pills */
 .loc-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
@@ -97,9 +97,9 @@ select.sel:focus{border-color:var(--accent)}
 
 /* Table */
 .table-wrap{overflow-x:auto;border-radius:var(--rl);border:1px solid var(--border);background:var(--surface)}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
 thead{background:var(--surface2);position:sticky;top:58px;z-index:5}
-th{padding:11px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-family:var(--mono);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th{padding:11px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-family:var(--mono);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
 th:hover{color:var(--text)}
 td{padding:10px 14px;border-bottom:1px solid rgba(35,46,61,.7);color:var(--text);vertical-align:middle}
 td:first-child{font-weight:500}
@@ -107,12 +107,12 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,.018)}
 tr.row-new td{animation:rowflash 2.5s ease-out}
 @keyframes rowflash{0%{background:rgba(0,180,216,.15)}100%{background:transparent}}
-.td-mono{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.td-mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .td-actions{display:flex;gap:4px;white-space:nowrap}
 .td-trunc{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Badges */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;font-family:var(--mono);white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:var(--mono);white-space:nowrap}
 .b-green{background:var(--green-bg);color:var(--green)}
 .b-red{background:var(--red-bg);color:var(--red)}
 .b-amber{background:var(--amber-bg);color:var(--amber)}
@@ -142,7 +142,7 @@ tr.row-new td{animation:rowflash 2.5s ease-out}
 .loc-card-bar{position:absolute;top:0;left:0;right:0;height:3px}
 .loc-card h3{font-size:16px;font-weight:600;margin:10px 0 6px}
 .loc-card-count{font-size:28px;font-weight:700;font-family:var(--mono)}
-.loc-card-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.loc-card-sub{font-size:12px;color:var(--muted);margin-top:4px}
 
 /* Modals */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
@@ -156,19 +156,19 @@ tr.row-new td{animation:rowflash 2.5s ease-out}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:520px){.form-row{grid-template-columns:1fr}}
 .fg{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
-.fg label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
+.fg label{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px}
 .fg input,.fg select,.fg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:100%;transition:border-color .15s}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
 .fg textarea{resize:vertical;min-height:76px;line-height:1.5}
-.fg .hint{font-size:11px;color:var(--muted2)}
+.fg .hint{font-size:12px;color:var(--muted2)}
 .divider{border:none;border-top:1px solid var(--border);margin:18px 0}
-.section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;font-family:var(--mono)}
+.section-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;font-family:var(--mono)}
 
 /* Detail modal */
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}
 .detail-row{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-bottom:1px solid rgba(35,46,61,.6)}
 .detail-row:last-child{border-bottom:none}
-.detail-lbl{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+.detail-lbl{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
 .detail-val{font-size:13px;color:var(--text);line-height:1.5}
 .detail-val.mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .chem-name-display{font-size:19px;font-weight:600;color:var(--accent);margin-bottom:16px;line-height:1.3}
@@ -191,10 +191,10 @@ tr.row-new td{animation:rowflash 2.5s ease-out}
 .row{display:flex;gap:16px;flex-wrap:wrap}
 .col{flex:1;min-width:240px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:20px}
-.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:var(--mono)}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:var(--mono)}
 .tag-input-wrap{display:flex;gap:6px;flex-wrap:wrap;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px;min-height:42px;cursor:text}
 .tag-input-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:13px;flex:1;min-width:80px}
-.tag{display:inline-flex;align-items:center;gap:4px;background:rgba(0,180,216,.12);color:var(--accent);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:500}
+.tag{display:inline-flex;align-items:center;gap:4px;background:rgba(0,180,216,.12);color:var(--accent);border-radius:4px;padding:2px 8px;font-size:12px;font-weight:500}
 .tag button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;line-height:1;padding:0 2px}
 </style>
 </head>
@@ -627,7 +627,7 @@ function renderOverview() {
     <div style="padding:8px 0;border-bottom:1px solid rgba(35,46,61,.6);cursor:pointer;display:flex;align-items:center;gap:8px" onclick="openDetail('${c._key}')">
       <div style="width:6px;height:6px;border-radius:50%;background:${LOC_CFG[c.location]?.color||"#888"};flex-shrink:0"></div>
       <div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500">${c.name}</div>
-      <div style="font-size:10px;color:var(--muted);white-space:nowrap">${c._ts ? new Date(c._ts).toLocaleDateString("en-GB",{day:"2-digit",month:"short"}) : ""}</div>
+      <div style="font-size:11px;color:var(--muted);white-space:nowrap">${c._ts ? new Date(c._ts).toLocaleDateString("en-GB",{day:"2-digit",month:"short"}) : ""}</div>
     </div>`).join("") : '<div class="empty" style="padding:16px">No chemicals yet</div>';
 
   // On order
@@ -635,7 +635,7 @@ function renderOverview() {
   document.getElementById("ov-ordered").innerHTML = ordered.length ? ordered.map(c => `
     <div style="padding:8px 0;border-bottom:1px solid rgba(35,46,61,.6);cursor:pointer" onclick="openDetail('${c._key}')">
       <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.owner||"No owner"}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${c.owner||"No owner"}</div>
     </div>`).join("") : '<div style="text-align:center;padding:16px;color:var(--green);font-size:12px">✓ No pending orders</div>';
 
   // Low stock
@@ -697,7 +697,7 @@ function render() {
         <td>${statusBadge(c.status||"available")}</td>
         <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.owner||""}">${c.owner||"—"}</td>
         <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.currentUser||""}">${c.currentUser||"—"}</td>
-        <td style="font-size:11px;color:var(--muted)">${c.qty||"—"}</td>
+        <td style="font-size:12px;color:var(--muted)">${c.qty||"—"}</td>
         <td class="td-trunc" title="${c.desc||""}">${descDisplay}</td>
         <td><div class="td-actions">
           <button class="btn-ghost btn-sm" onclick="openDetail('${c._key}')">View</button>

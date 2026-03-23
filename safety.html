@@ -22,7 +22,7 @@
   --font:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
   --r:8px;--rl:12px;--rxl:16px;
 }
-body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100vh;font-size:14px}
+body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100vh;font-size:15px}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--br);border-radius:3px}
@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .brand{display:flex;align-items:center;gap:10px;margin-right:28px;cursor:pointer;flex-shrink:0;text-decoration:none}
 .brand img{width:36px;height:36px;border-radius:50%;object-fit:contain;background:#fff}
 .brand-t span{display:block;font-size:15px;font-weight:600;color:var(--t1)}
-.brand-t small{font-size:10px;color:var(--t2);font-family:var(--mono)}
+.brand-t small{font-size:11px;color:var(--t2);font-family:var(--mono)}
 .nav-tabs{display:flex;height:100%;overflow-x:auto;flex:1;scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .ntab{display:flex;align-items:center;gap:6px;padding:0 16px;font-size:13px;font-weight:500;
@@ -43,7 +43,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .ntab.on{color:var(--t1);border-bottom-color:var(--ac)}
 .nav-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0;padding-left:12px}
 .livepill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 10px;
-  font-size:11px;font-family:var(--mono);border:1px solid;transition:all .3s}
+  font-size:12px;font-family:var(--mono);border:1px solid;transition:all .3s}
 .lon{background:var(--gbg);border-color:rgba(34,197,94,.3);color:var(--green)}
 .loff{background:var(--rbg);border-color:rgba(248,81,73,.3);color:var(--red)}
 .ldot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
@@ -58,7 +58,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
   border-radius:var(--r);font-size:12px;cursor:pointer;font-family:var(--font);display:inline-flex;
   align-items:center;gap:5px;transition:background .15s;white-space:nowrap}
 .btn-o:hover{background:var(--sf2)}
-.btn-sm{padding:4px 10px;font-size:11px;border-radius:6px}
+.btn-sm{padding:4px 10px;font-size:12px;border-radius:6px}
 .btn-g{background:var(--green);color:#fff;border:none;padding:8px 16px;border-radius:var(--r);
   font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);display:inline-flex;
   align-items:center;gap:6px;transition:opacity .15s;white-space:nowrap}
@@ -72,7 +72,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .view{display:none}.view.on{display:block}
 .sh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap}
 .sh h2{font-size:20px;font-weight:600;letter-spacing:-.4px}
-.sh-sub{font-size:11px;color:var(--t2);margin-top:3px;font-family:var(--mono)}
+.sh-sub{font-size:12px;color:var(--t2);margin-top:3px;font-family:var(--mono)}
 .shr{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
 /* STATS */
@@ -80,17 +80,17 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .sc{background:var(--sf);border:1px solid var(--br);border-radius:var(--rl);padding:16px;transition:all .15s}
 .sc:hover{border-color:var(--br2);transform:translateY(-1px)}
 .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.sc-lbl{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+.sc-lbl{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
 .sc-dot{width:8px;height:8px;border-radius:50%}
 .sc-val{font-size:26px;font-weight:600;font-family:var(--mono);letter-spacing:-1px;line-height:1}
-.sc-sub{font-size:11px;color:var(--t2);margin-top:3px}
+.sc-sub{font-size:12px;color:var(--t2);margin-top:3px}
 
 /* ── PODIUM ── */
 .podium-wrap{background:var(--sf);border:1px solid var(--br);border-radius:var(--rxl);
   padding:32px 24px 24px;margin-bottom:24px;position:relative;overflow:hidden}
 .podium-wrap::before{content:'';position:absolute;inset:0;
   background:radial-gradient(ellipse at 50% 0%,rgba(245,158,11,.06) 0%,transparent 65%);pointer-events:none}
-.podium-title{text-align:center;font-size:11px;font-weight:600;color:var(--t2);
+.podium-title{text-align:center;font-size:12px;font-weight:600;color:var(--t2);
   text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);margin-bottom:28px}
 .podium-month{text-align:center;font-size:22px;font-weight:600;color:var(--t1);margin-bottom:4px;letter-spacing:-.3px}
 .podium-3{display:flex;align-items:flex-end;justify-content:center;gap:0;margin-bottom:20px}
@@ -116,7 +116,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .pod-base.gold{background:linear-gradient(180deg,#d4a017 0%,#92700e 100%);height:80px}
 .pod-base.silver{background:linear-gradient(180deg,#7d8fa3 0%,#4f6070 100%);height:60px}
 .pod-base.bronze{background:linear-gradient(180deg,#a0622a 0%,#6b4018 100%);height:45px}
-.pod-rank{font-size:10px;font-family:var(--mono);color:var(--t2);margin-top:2px}
+.pod-rank{font-size:11px;font-family:var(--mono);color:var(--t2);margin-top:2px}
 
 /* FULL LEADERBOARD */
 .lb-table{background:var(--sf);border:1px solid var(--br);border-radius:var(--rl);overflow:hidden}
@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
   flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
 .lb-info{flex:1;min-width:0}
 .lb-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-sub{font-size:11px;color:var(--t2);font-family:var(--mono);margin-top:2px}
+.lb-sub{font-size:12px;color:var(--t2);font-family:var(--mono);margin-top:2px}
 .lb-pts{font-family:var(--mono);font-weight:600;font-size:14px;flex-shrink:0}
 .pts-bar-wrap{width:120px;flex-shrink:0}
 .pts-bar{background:var(--sf2);border-radius:4px;height:6px;overflow:hidden}
@@ -150,14 +150,14 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .report-card.sev-low{border-left:3px solid var(--green)}
 .rc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
 .rc-title{font-size:13px;font-weight:600;line-height:1.4;flex:1}
-.rc-meta{font-size:11px;color:var(--t2);font-family:var(--mono);margin-bottom:8px;
+.rc-meta{font-size:12px;color:var(--t2);font-family:var(--mono);margin-bottom:8px;
   display:flex;gap:10px;flex-wrap:wrap}
 .rc-desc{font-size:12px;color:var(--t2);line-height:1.5;
   overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
   -webkit-line-clamp:2;-webkit-box-orient:vertical}
 .rc-footer{display:flex;align-items:center;justify-content:space-between;
   margin-top:12px;padding-top:10px;border-top:1px solid var(--br)}
-.rc-reporter{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)}
+.rc-reporter{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2)}
 .rc-img{width:100%;border-radius:var(--r);margin-bottom:10px;max-height:160px;object-fit:cover;display:block}
 
 /* MEMBERS GRID */
@@ -170,15 +170,15 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
   font-size:26px;font-weight:600;color:#fff;border:2px solid var(--br2)}
 .member-av img{width:72px;height:72px;border-radius:50%;object-fit:cover}
 .member-name{font-size:14px;font-weight:600;margin-bottom:3px}
-.member-role{font-size:11px;color:var(--t2);margin-bottom:12px}
+.member-role{font-size:12px;color:var(--t2);margin-bottom:12px}
 .member-pts{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--ac);margin-bottom:4px}
-.member-pts-lbl{font-size:10px;color:var(--t2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.member-pts-lbl{font-size:11px;color:var(--t2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
 .member-actions{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
 .member-edit-btn{position:absolute;top:10px;right:10px}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;
-  font-size:10px;font-weight:600;font-family:var(--mono);white-space:nowrap}
+  font-size:11px;font-weight:600;font-family:var(--mono);white-space:nowrap}
 .b-g{background:var(--gbg);color:var(--green)}
 .b-r{background:var(--rbg);color:var(--red)}
 .b-a{background:var(--abg);color:var(--amber)}
@@ -216,7 +216,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .mftr{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;
   padding-top:16px;border-top:1px solid var(--br);flex-wrap:wrap;align-items:center}
 .fg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.fg label{font-size:11px;color:var(--t2);font-family:var(--mono);
+.fg label{font-size:12px;color:var(--t2);font-family:var(--mono);
   text-transform:uppercase;letter-spacing:.4px}
 .fg input,.fg select,.fg textarea{background:var(--sf2);border:1px solid var(--br);
   border-radius:var(--r);padding:9px 12px;color:var(--t1);font-family:var(--font);
@@ -225,14 +225,14 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .fg textarea{resize:vertical;min-height:76px;line-height:1.5}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:520px){.fr{grid-template-columns:1fr}}
-.sec-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;
+.sec-lbl{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;
   letter-spacing:.5px;margin:16px 0 10px;font-family:var(--mono);
   padding-bottom:5px;border-bottom:1px solid var(--br);display:block}
 .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
 .det-row{padding:8px 0;border-bottom:1px solid rgba(35,46,61,.5);
   display:flex;flex-direction:column;gap:2px}
 .det-row:last-child{border-bottom:none}
-.det-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+.det-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
 .det-val{font-size:13px;color:var(--t1);line-height:1.5;word-break:break-word}
 
 /* PHOTO UPLOAD */
@@ -258,13 +258,46 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .tb{background:var(--ac);color:#fff}
 .tr{background:var(--red);color:#fff}
 
+
+/* LAB ORG */
+.org-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--rl);
+  overflow:hidden;transition:all .15s;cursor:pointer}
+.org-card:hover{border-color:var(--br2);transform:translateY(-2px)}
+.org-card-img{width:100%;height:180px;object-fit:cover;display:block;background:var(--sf2)}
+.org-card-img-empty{width:100%;height:180px;display:flex;align-items:center;
+  justify-content:center;background:var(--sf2);color:var(--t2);font-size:13px;flex-direction:column;gap:8px}
+.org-card-body{padding:14px}
+.org-card-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.org-card-meta{font-size:11px;color:var(--t2);font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap}
+.org-card-footer{display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding-top:8px;border-top:1px solid var(--br)}
+.stars{display:flex;gap:2px}
+.star{font-size:16px;cursor:pointer;transition:transform .1s;user-select:none}
+.star:hover{transform:scale(1.2)}
+.org-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.score-badge{font-family:var(--mono);font-weight:700;font-size:13px;
+  padding:3px 10px;border-radius:6px}
+.score-5{background:rgba(34,197,94,.12);color:var(--green)}
+.score-4{background:rgba(34,197,94,.08);color:var(--green)}
+.score-3{background:rgba(210,153,34,.12);color:var(--amber)}
+.score-2{background:rgba(248,81,73,.08);color:var(--red)}
+.score-1{background:rgba(248,81,73,.12);color:var(--red)}
+
 /* EMPTY */
 .empty{text-align:center;padding:56px;color:var(--t2);font-size:13px}
 .row{display:flex;gap:16px;flex-wrap:wrap}
 .col{flex:1;min-width:240px}
 .card{background:var(--sf);border:1px solid var(--br);border-radius:var(--rl);padding:18px}
-.ct{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;
+.ct{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;
   letter-spacing:.6px;margin-bottom:12px;font-family:var(--mono)}
+
+/* ── FLUID TYPOGRAPHY ── */
+html{font-size:clamp(13px, 0.85vw + 5px, 18px)}
+body{font-size:1rem}
+
+.admin-only{display:none!important}
+.admin-btn{display:none!important}
+
 </style>
 </head>
 <body>
@@ -279,6 +312,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
     <button class="ntab on" data-v="leaderboard"  onclick="gv('leaderboard')">Leaderboard</button>
     <button class="ntab"    data-v="reports"       onclick="gv('reports')">Safety Reports</button>
     <button class="ntab"    data-v="members"       onclick="gv('members')">Members</button>
+    <button class="ntab"    data-v="laborg"        onclick="gv('laborg')">Lab Organisation</button>
   </div>
   <div class="nav-r">
     <div class="livepill loff" id="pill">
@@ -286,7 +320,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
       <span id="ltxt">Connecting…</span>
     </div>
     <button class="btn btn-sm" onclick="openReport()">+ Report Issue</button>
-  </div>
+    <button class="btn-o btn-sm" onclick="IS_ADMIN?logoutAdmin():promptAdmin(()=>location.reload())" style="font-size:11px;margin-left:4px">Admin</button>
+</div>
 </nav>
 
 <div class="page">
@@ -313,7 +348,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
   <div class="podium-wrap">
     <div class="podium-title">Safety Champions</div>
     <div class="podium-month" id="podium-month"></div>
-    <div style="font-size:11px;color:var(--t2);text-align:center;margin-bottom:20px;font-family:var(--mono)">
+    <div style="font-size:12px;color:var(--t2);text-align:center;margin-bottom:20px;font-family:var(--mono)">
       Report issue +1pt · Fix issue +2pts · Caused issue -1pt
     </div>
     <div class="podium-3" id="podium"></div>
@@ -359,6 +394,31 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
     <button class="btn btn-sm" onclick="openAddMember()">+ Add Member</button>
   </div>
   <div class="members-grid" id="members-grid"></div>
+</div>
+
+
+<!-- ══ LAB ORGANISATION ══ -->
+<div class="view" id="view-laborg">
+  <div class="sh">
+    <div>
+      <h2>Lab Organisation</h2>
+      <div class="sh-sub" id="org-sub">Keep the lab tidy and earn points — best setup wins</div>
+    </div>
+    <div class="shr">
+      <select class="sel" id="org-area-f" onchange="renderOrg()">
+        <option value="">All areas</option>
+        <option>LPST</option><option>HPST</option><option>RCM</option>
+        <option>Laser Table 1</option><option>Laser Table 2</option>
+        <option>Chemical Shelf</option><option>Office</option><option>Other</option>
+      </select>
+      <button class="btn btn-sm" onclick="openOrgPost()">+ Post Setup Photo</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats" id="org-stats"></div>
+
+  <div class="org-grid" id="org-grid"></div>
 </div>
 
 </div><!-- .page -->
@@ -462,6 +522,45 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
   </div>
 </div>
 
+
+<!-- ══ ORG POST MODAL ══ -->
+<div class="mbg" id="m-org">
+  <div class="modal">
+    <div class="mhdr"><h2 id="m-org-title">Post Lab Setup Photo</h2><button class="mx" onclick="cm('m-org')">✕</button></div>
+    <div class="fg"><label>Photo of your setup *</label>
+      <div class="photo-upload" id="org-photo-area" onclick="document.getElementById('org-photo-input').click()">
+        <img id="org-photo-preview" class="photo-preview" alt="">
+        <div id="org-photo-text">
+          <div style="font-size:28px;color:var(--t2)">📸</div>
+          <p>Click to upload a photo of your lab area</p>
+        </div>
+      </div>
+      <input type="file" id="org-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'org-photo-preview','org-photo-text')">
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Posted by *</label>
+        <select id="org-member"><option value="">— Select member —</option></select>
+      </div>
+      <div class="fg"><label>Lab area *</label>
+        <select id="org-area">
+          <option value="">— Select area —</option>
+          <option>LPST</option><option>HPST</option><option>RCM</option>
+          <option>Laser Table 1</option><option>Laser Table 2</option>
+          <option>Chemical Shelf</option><option>Office</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Notes (optional)</label>
+      <textarea id="org-notes" placeholder="Anything to highlight about your setup…"></textarea>
+    </div>
+    <div class="mftr">
+      <button class="btn-del" id="org-del-btn" style="display:none;margin-right:auto" onclick="deleteOrg()">Delete</button>
+      <button class="btn-o btn-sm" onclick="cm('m-org')">Cancel</button>
+      <button class="btn-g btn-sm" onclick="saveOrg()">Post (+1 pt)</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -481,7 +580,7 @@ const FB = {
 };
 const DB_PATH = "faster_safety";
 let db, refs = {};
-let MEMBERS = {}, REPORTS = {};
+let MEMBERS = {}, REPORTS = {}, ORG = {};
 let editRepId = null, editMemId = null, detRepId = null;
 let selColor = "#1f6feb", repPhotoB64 = "", memPhotoB64 = "";
 
@@ -490,6 +589,7 @@ function boot() {
   db = firebase.database();
   refs.members = db.ref(DB_PATH + "/members");
   refs.reports = db.ref(DB_PATH + "/reports");
+  refs.org     = db.ref(DB_PATH + "/laborg");
 
   db.ref(".info/connected").on("value", s => {
     const on = s.val() === true;
@@ -500,6 +600,7 @@ function boot() {
 
   refs.members.on("value", s => { MEMBERS = s.val() || {}; redraw(); });
   refs.reports.on("value", s => { REPORTS = s.val() || {}; redraw(); });
+  refs.org.on("value",     s => { ORG     = s.val() || {}; if(curView==="laborg") renderOrg(); });
 }
 
 // ════════════════════════════════════════════
@@ -517,6 +618,7 @@ function redraw() {
   if (curView === "leaderboard") renderLeaderboard();
   else if (curView === "reports") renderReports();
   else if (curView === "members") renderMembers();
+  else if (curView === "laborg")  renderOrg();
   populateMonthSel();
 }
 
@@ -687,7 +789,7 @@ function renderLeaderboard() {
     div.className = "pod-slot " + cls;
     if (!entry) {
       div.innerHTML = `<div style="height:${sz}px;width:${sz}px"></div>
-        <div style="font-size:11px;color:var(--t2);font-family:var(--mono);margin-bottom:4px">—</div>
+        <div style="font-size:12px;color:var(--t2);font-family:var(--mono);margin-bottom:4px">—</div>
         <div class="pod-base ${medal}">${rank}</div>`;
     } else {
       const [id, p] = entry;
@@ -1084,12 +1186,197 @@ function showToast(msg, cls="tg") {
   el.classList.add("on"); setTimeout(() => el.classList.remove("on"), 3200);
 }
 
+
+// ════════════════════════════════════════════
+// LAB ORGANISATION
+// ════════════════════════════════════════════
+let editOrgId = null;
+let orgPhotoB64 = "";
+
+function renderOrg() {
+  const areaF = document.getElementById("org-area-f")?.value || "";
+  let list = Object.entries(refs.org ? ORG : {}).map(([k,v]) => ({...v, _key:k}));
+  list = list.filter(o => !areaF || o.area === areaF);
+  list.sort((a,b) => (b._ts||0) - (a._ts||0));
+
+  document.getElementById("org-sub").textContent =
+    list.length + " setup photos · Rate your colleagues' workspaces!";
+
+  const topScorer = calcTopOrg();
+  const avgScore  = list.length ? (list.reduce((s,o) => s+(o.score||0),0)/list.length).toFixed(1) : "—";
+
+  document.getElementById("org-stats").innerHTML = [
+    {l:"Total posts",    v:Object.keys(ORG).length, c:"var(--ac)"},
+    {l:"Avg cleanliness",v:avgScore+"★",             c:"var(--amber)"},
+    {l:"This month",     v:list.filter(o=>new Date(o._ts).toISOString().slice(0,7)===new Date().toISOString().slice(0,7)).length, c:"var(--green)"},
+    {l:"Top member",     v:topScorer||"—",           c:"var(--purple)"},
+  ].map(s => `<div class="sc">
+    <div class="sc-top"><div class="sc-lbl">${s.l}</div><div class="sc-dot" style="background:${s.c}"></div></div>
+    <div class="sc-val" style="color:${s.c};font-size:${s.l==='Top member'?'14px':'26px'};letter-spacing:0">${s.v}</div>
+  </div>`).join("");
+
+  if (!list.length) {
+    document.getElementById("org-grid").innerHTML =
+      '<div class="empty" style="grid-column:1/-1">No posts yet. Be the first to show off a tidy workspace and earn points!</div>';
+    return;
+  }
+
+  document.getElementById("org-grid").innerHTML = list.map(o => {
+    const score = o.score || 0;
+    const scoreClass = score>=4.5?"score-5":score>=3.5?"score-4":score>=2.5?"score-3":score>=1.5?"score-2":"score-1";
+    const starsHtml = [1,2,3,4,5].map(n =>
+      `<span class="star" onclick="event.stopPropagation();rateOrg('${o._key}',${n})" title="${n} star${n>1?'s':''}">${n <= Math.round(score) ? "★" : "☆"}</span>`
+    ).join("");
+    return `<div class="org-card" onclick="openOrgDetail('${o._key}')">
+      ${o.photo
+        ? `<img class="org-card-img" src="${o.photo}" alt="">`
+        : `<div class="org-card-img-empty"><span style="font-size:32px">📷</span><span>No photo</span></div>`}
+      <div class="org-card-body">
+        <div class="org-card-title">${esc(o.area||"Lab area")}</div>
+        <div class="org-card-meta">
+          <span>${esc(memName(o.member))}</span>
+          <span>${fmtDate(o._ts)}</span>
+        </div>
+        ${o.notes ? `<div style="font-size:12px;color:var(--t2);margin-top:6px;line-height:1.5">${esc(o.notes)}</div>` : ""}
+        <div class="org-card-footer">
+          <div class="stars">${starsHtml}</div>
+          <span class="score-badge ${scoreClass}">${score>0?score.toFixed(1)+"★":"No votes"}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function calcTopOrg() {
+  const scores = {};
+  const counts = {};
+  Object.values(ORG).forEach(o => {
+    if (!o.member || !o.score) return;
+    scores[o.member] = (scores[o.member]||0) + o.score;
+    counts[o.member] = (counts[o.member]||0) + 1;
+  });
+  const avgs = Object.entries(scores).map(([id,s]) => [id, s/counts[id]]);
+  if (!avgs.length) return null;
+  const best = avgs.sort((a,b)=>b[1]-a[1])[0];
+  return memName(best[0]);
+}
+
+async function rateOrg(key, stars) {
+  const o = ORG[key]; if (!o) return;
+  const prev = o.score || 0;
+  const prevN = o.scoreCount || 0;
+  // Running average
+  const newScore = parseFloat(((prev * prevN + stars) / (prevN + 1)).toFixed(2));
+  await refs.org.child(key).update({ score: newScore, scoreCount: prevN + 1 });
+  showToast("Rated " + stars + " star" + (stars>1?"s":""), "tg");
+  // +1 pt to the poster for getting rated
+  if (o.member && refs.members) {
+    const pts = MEMBERS[o.member]?.orgPts || 0;
+    refs.members.child(o.member).update({ orgPts: pts + 0.2 });
+  }
+}
+
+function openOrgPost() {
+  editOrgId = null;
+  document.getElementById("m-org-title").textContent = "Post Lab Setup Photo";
+  document.getElementById("org-del-btn").style.display = "none";
+  orgPhotoB64 = "";
+  document.getElementById("org-photo-preview").style.display = "none";
+  document.getElementById("org-photo-text").style.display = "block";
+  document.getElementById("org-notes").value = "";
+  document.getElementById("org-area").value = "";
+  // populate member select
+  document.getElementById("org-member").innerHTML =
+    '<option value="">— Select member —</option>' +
+    Object.entries(MEMBERS).map(([id,m]) => `<option value="${id}">${esc(m.name)}</option>`).join("");
+  document.getElementById("m-org").classList.add("on");
+}
+
+function openOrgDetail(key) {
+  const o = ORG[key]; if (!o) return;
+  editOrgId = key;
+  document.getElementById("m-org-title").textContent = "Edit Post";
+  document.getElementById("org-del-btn").style.display = "inline-flex";
+  orgPhotoB64 = o.photo || "";
+  document.getElementById("org-notes").value = o.notes || "";
+  document.getElementById("org-area").value  = o.area  || "";
+  document.getElementById("org-member").innerHTML =
+    '<option value="">— Select member —</option>' +
+    Object.entries(MEMBERS).map(([id,m]) => `<option value="${id}" ${id===o.member?"selected":""}>${esc(m.name)}</option>`).join("");
+  if (orgPhotoB64) {
+    document.getElementById("org-photo-preview").src = orgPhotoB64;
+    document.getElementById("org-photo-preview").style.display = "block";
+    document.getElementById("org-photo-text").style.display = "none";
+  } else {
+    document.getElementById("org-photo-preview").style.display = "none";
+    document.getElementById("org-photo-text").style.display = "block";
+  }
+  document.getElementById("m-org").classList.add("on");
+}
+
+function saveOrg() {
+  const member = document.getElementById("org-member").value;
+  const area   = document.getElementById("org-area").value;
+  if (!member) { showToast("Please select a member", "tr"); return; }
+  if (!area)   { showToast("Please select a lab area", "tr"); return; }
+  if (!orgPhotoB64) { showToast("Please upload a photo", "tr"); return; }
+  const data = {
+    member, area, photo: orgPhotoB64,
+    notes: document.getElementById("org-notes").value.trim(),
+    score: 0, scoreCount: 0, _ts: Date.now()
+  };
+  cm("m-org");
+  if (editOrgId) {
+    refs.org.child(editOrgId).update(data).then(() => showToast("Post updated", "tg"));
+  } else {
+    refs.org.push(data).then(() => { showToast("Posted! +1 point", "tg"); popPts("+1 pt", "var(--green)"); });
+  }
+}
+
+function deleteOrg() {
+  if (!editOrgId || !confirm("Delete this post?")) return;
+  cm("m-org");
+  refs.org.child(editOrgId).remove().then(() => showToast("Post deleted", "tb"));
+}
+
+
 // ════════════════════════════════════════════
 // BOOT
 // ════════════════════════════════════════════
 document.getElementById("lb-date").textContent =
   new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+checkAdminSession();
 boot();
+
+// ─── ADMIN AUTH ───
+let IS_ADMIN=false;
+function _sha256(s){const e=new TextEncoder();return crypto.subtle.digest('SHA-256',e.encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));}
+function promptAdmin(cb){const pw=prompt('Enter admin password:');if(!pw)return;_sha256(pw).then(h=>{if(h==='469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466'){IS_ADMIN=true;sessionStorage.setItem('fa','1');_showAdminUI();if(cb)cb();}else alert('Incorrect password');});}
+function checkAdminSession(){if(sessionStorage.getItem('fa')==='1'){IS_ADMIN=true;_showAdminUI();}}
+function _showAdminUI(){
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.removeProperty('display'));
+  document.querySelectorAll('.admin-btn').forEach(el=>el.style.removeProperty('display'));
+  let b=document.getElementById('_ab');
+  if(!b){b=document.createElement('div');b.id='_ab';
+    b.style='position:fixed;bottom:16px;left:16px;background:rgba(0,180,216,.13);border:1px solid rgba(0,180,216,.3);color:#00b4d8;border-radius:20px;padding:5px 14px;z-index:9990;font-size:11px;font-family:var(--mono,"monospace");display:flex;align-items:center;gap:8px';
+    b.innerHTML='Admin mode&nbsp;<button onclick="logoutAdmin()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-family:inherit">Exit</button>';
+    document.body.appendChild(b);}
+}
+function logoutAdmin(){IS_ADMIN=false;sessionStorage.removeItem('fa');location.reload();}
+
+function adminCloseReport(key) {
+  if (!IS_ADMIN) return;
+  refs.reports.child(key).update({ status: 'Resolved', resolvedAt: Date.now(), adminClosed: true })
+    .then(() => showToast('Report closed by admin', 'tg'));
+}
+function adminAdjustPoints(memberId, delta) {
+  if (!IS_ADMIN) return;
+  const cur = MEMBERS[memberId]?.adminBonus || 0;
+  refs.members.child(memberId).update({ adminBonus: cur + delta })
+    .then(() => showToast('Points adjusted', 'tg'));
+}
+
+checkAdminSession();
 </script>
 </body>
 </html>
