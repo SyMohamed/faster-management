@@ -992,7 +992,15 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function afterLogin(){
     const dest=sessionStorage.getItem('faster_redirect');
     if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
-    else{ onAuthOk(); }
+    else{
+      onAuthOk();
+      const name=sessionStorage.getItem(USER_KEY)||'';
+      const first=name.split(' ')[0]||name;
+      const h=new Date().getHours();
+      const tod=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+      const isGuest=(sessionStorage.getItem(ROLE_KEY)==='viewer');
+      _toast(isGuest?'Welcome, Guest! 👋':tod+', '+first+'! Welcome back 👋','ok');
+    }
   }
 
   /* ── Direct login (username + password) ────────────────────────────── */
