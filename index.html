@@ -385,10 +385,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 .lc-primary{background:linear-gradient(135deg,rgba(0,204,245,.06),rgba(0,144,255,.04))}
 
 /* Rotating tagline — post-login workspace */
-#ws-tagline{min-height:20px;position:relative;overflow:hidden;margin-top:3px}
+#ws-tagline{min-height:36px;position:relative;overflow:hidden;margin-top:3px}
 #ws-tagline-text{
   font-size:12px;font-family:var(--mono);color:var(--ac);letter-spacing:.3px;
-  position:absolute;
+  position:absolute;width:100%;
+  white-space:normal;line-height:1.5;
   opacity:0;transform:translateY(6px);
   transition:opacity .45s ease,transform .45s ease}
 #ws-tagline-text.ws-in{opacity:1;transform:translateY(0)}
@@ -561,9 +562,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       </div>
       <div class="user-menu" id="user-menu">
         <button class="user-menu-item" onclick="openPwChange()">🔑 Change Password</button>
+        <button class="user-menu-item" onclick="triggerPhotoUpload()" id="photo-menu-btn">📷 Change Profile Photo</button>
         <div class="user-menu-sep"></div>
         <button class="user-menu-item" style="color:var(--red)" onclick="signOut()">⏏ Sign Out</button>
       </div>
+      <input type="file" id="profile-photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
     </div>
     <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);font-family:var(--mono)">
       <span class="nav-dot"></span>Live
@@ -581,10 +584,15 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 <!-- ── Greeting + Live Stats ──────────────────────────────────────────── -->
 <div style="padding:0 40px 18px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px">
-    <div>
-      <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
-      <div id="ws-date" style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:3px"></div>
-      <div id="ws-tagline"><span id="ws-tagline-text"></span></div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div id="ws-profile-pic" style="display:none;width:54px;height:54px;border-radius:50%;overflow:hidden;border:2px solid var(--ac);flex-shrink:0;cursor:pointer" title="Change photo" onclick="triggerPhotoUpload()">
+        <img id="ws-profile-img" src="" alt="" style="width:100%;height:100%;object-fit:cover">
+      </div>
+      <div>
+        <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
+        <div id="ws-date" style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:3px"></div>
+        <div id="ws-tagline"><span id="ws-tagline-text"></span></div>
+      </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <div class="stat-card" onclick="location.href='orders.html'" title="View Orders">
@@ -793,7 +801,20 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function onAuthOk(){
     document.getElementById('login-screen').style.display='none';
     const name=sessionStorage.getItem(USER_KEY);
-    if(name) updateUserBadge(name);
+    const photo=sessionStorage.getItem('faster_photo_v1')||null;
+    if(name) updateUserBadge(name, photo);
+    /* If no photo in session, try fetching from Firebase (e.g. page reload) */
+    const uname=sessionStorage.getItem(UNAME_KEY);
+    if(uname&&uname!=='guest'&&!photo){
+      function tryFetchPhoto(tries){
+        if(!db){ if(tries<8) setTimeout(function(){tryFetchPhoto(tries+1);},400); return; }
+        db.ref('faster_users/'+uname+'/photoURL').once('value').then(function(s){
+          const url=s.val();
+          if(url){ sessionStorage.setItem('faster_photo_v1',url); updateUserBadge(name,url); }
+        });
+      }
+      tryFetchPhoto(0);
+    }
     showWorkspace();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
   }
@@ -838,6 +859,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       sessionStorage.setItem(UNAME_KEY,username);
       sessionStorage.setItem(ROLE_KEY,role);
       if(role==='admin') sessionStorage.setItem('fa','1');
+      if(user.photoURL) sessionStorage.setItem('faster_photo_v1',user.photoURL);
+      else sessionStorage.removeItem('faster_photo_v1');
       document.getElementById('ml-overlay').classList.remove('open');
       afterLogin();
     }catch(e){ errEl.textContent='Connection error — try again'; console.error(e); }
@@ -918,12 +941,32 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   };
 
   /* ── User badge & menu ───────────────────────────────────────────────── */
-  function updateUserBadge(name){
+  function updateUserBadge(name, photoURL){
     const initials=name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
     const dot=document.getElementById('ub-dot-inner');
     const nm=document.getElementById('ub-name-inner');
-    if(dot) dot.textContent=initials;
+    if(dot){
+      if(photoURL){
+        dot.innerHTML='<img src="'+photoURL+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="">';
+      } else {
+        dot.textContent=initials;
+      }
+    }
     if(nm) nm.textContent=name;
+    /* Update profile pic in greeting area */
+    const picWrap=document.getElementById('ws-profile-pic');
+    const picImg=document.getElementById('ws-profile-img');
+    if(picWrap&&picImg){
+      if(photoURL){
+        picImg.src=photoURL;
+        picWrap.style.display='block';
+      } else {
+        picWrap.style.display='none';
+      }
+    }
+    /* Also hide photo menu item for guests */
+    const photoBtn=document.getElementById('photo-menu-btn');
+    if(photoBtn) photoBtn.style.display=(sessionStorage.getItem(ROLE_KEY)==='viewer')?'none':'';
     /* Also update greeting */
     const h=new Date().getHours();
     const tod=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
@@ -933,6 +976,40 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(dateEl) dateEl.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
     if(typeof window._startWsTagline==='function') window._startWsTagline();
   }
+
+  /* ── Profile photo upload ────────────────────────────────────────────── */
+  window.triggerPhotoUpload=function(){
+    document.getElementById('user-menu').classList.remove('open');
+    if(sessionStorage.getItem(ROLE_KEY)==='viewer'){ _toast('Guest access cannot upload a photo','warn'); return; }
+    document.getElementById('profile-photo-input').click();
+  };
+  window.handlePhotoUpload=function(input){
+    const file=input.files&&input.files[0];
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const img=new Image();
+      img.onload=function(){
+        const canvas=document.createElement('canvas');
+        const MAX=200;
+        let w=img.width,h=img.height;
+        if(w>h){ if(w>MAX){h=Math.round(h*MAX/w);w=MAX;} } else { if(h>MAX){w=Math.round(w*MAX/h);h=MAX;} }
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        const dataURL=canvas.toDataURL('image/jpeg',0.75);
+        const username=sessionStorage.getItem(UNAME_KEY);
+        if(!username||!db){ _toast('Not connected','warn'); return; }
+        db.ref('faster_users/'+username+'/photoURL').set(dataURL).then(function(){
+          sessionStorage.setItem('faster_photo_v1',dataURL);
+          updateUserBadge(sessionStorage.getItem(USER_KEY)||'', dataURL);
+          _toast('Profile photo updated!','ok');
+        }).catch(function(){ _toast('Failed to save photo','warn'); });
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+    input.value='';
+  };
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
   document.addEventListener('click',e=>{
     const wrap=document.getElementById('user-badge-wrap');
