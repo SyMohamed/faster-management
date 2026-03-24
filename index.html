@@ -305,6 +305,74 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   .stat-val{font-size:17px}
   [style*="padding:0 40px 18px"]{padding:0 20px 14px!important}
 }
+
+/* ════════════════════════════════════════════
+   ANIMATED LANDING — login screen enhancements
+   ════════════════════════════════════════════ */
+
+/* Aurora glow behind login screen */
+#login-screen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%,rgba(0,204,245,.13),transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 90%,rgba(15,218,122,.07),transparent 70%),
+    radial-gradient(ellipse 50% 35% at 15% 80%,rgba(100,80,255,.06),transparent 70%);
+  animation:aurora-shift 8s ease-in-out infinite alternate}
+@keyframes aurora-shift{
+  0%{opacity:.8;transform:scale(1)}
+  100%{opacity:1;transform:scale(1.04)}}
+
+/* Logo glow pulse */
+.wau-header img{
+  filter:drop-shadow(0 0 18px rgba(0,204,245,.45));
+  animation:logo-glow 3.5s ease-in-out infinite}
+@keyframes logo-glow{
+  0%,100%{filter:drop-shadow(0 0 12px rgba(0,204,245,.3));transform:scale(1)}
+  50%{filter:drop-shadow(0 0 30px rgba(0,204,245,.65));transform:scale(1.04)}}
+
+/* Make header text pop more */
+.wau-header h2{font-size:28px;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,#e4edf8 0%,#7ec8e3 50%,#00ccf5 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wau-header p{font-size:13px;color:var(--t3);font-family:var(--mono);letter-spacing:.3px}
+
+/* Rotating tagline — login screen */
+#ls-tagline{
+  min-height:38px;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:0 24px;max-width:420px;width:100%}
+#ls-tagline-text{
+  font-size:15px;font-family:var(--mono);color:var(--ac);text-align:center;
+  letter-spacing:.4px;white-space:nowrap;
+  position:absolute;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1)}
+#ls-tagline-text.ls-in{opacity:1;transform:translateY(0)}
+#ls-tagline-text.ls-out{opacity:0;transform:translateY(-12px)}
+
+/* Divider above login cards */
+.ls-divider{
+  width:100%;max-width:420px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--b2) 30%,var(--b2) 70%,transparent);
+  flex-shrink:0}
+
+/* Login card polish */
+.login-card{position:relative;overflow:hidden}
+.login-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at left top,rgba(255,255,255,.04),transparent 60%);
+  pointer-events:none}
+.lc-primary{background:linear-gradient(135deg,rgba(0,204,245,.06),rgba(0,144,255,.04))}
+
+/* Rotating tagline — post-login workspace */
+#ws-tagline{min-height:20px;position:relative;overflow:hidden;margin-top:3px}
+#ws-tagline-text{
+  font-size:12px;font-family:var(--mono);color:var(--ac);letter-spacing:.3px;
+  position:absolute;
+  opacity:0;transform:translateY(6px);
+  transition:opacity .45s ease,transform .45s ease}
+#ws-tagline-text.ws-in{opacity:1;transform:translateY(0)}
+#ws-tagline-text.ws-out{opacity:0;transform:translateY(-6px)}
+
 </style>
 <link rel="stylesheet" href="shared.css">
 </head>
@@ -316,6 +384,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <h2>FASTER Lab</h2>
     <p>Digital Workspace — KAUST</p>
   </div>
+
+  <!-- Animated tagline rotator -->
+  <div id="ls-tagline"><span id="ls-tagline-text"></span></div>
+
+  <div class="ls-divider"></div>
 
   <!-- Action cards -->
   <div class="login-cards">
@@ -487,6 +560,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <div>
       <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
       <div id="ws-date" style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:3px"></div>
+      <div id="ws-tagline"><span id="ws-tagline-text"></span></div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <div class="stat-card" onclick="location.href='orders.html'" title="View Orders">
@@ -833,6 +907,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(greet) greet.textContent=tod+', '+name.split(' ')[0]+'!';
     const dateEl=document.getElementById('ws-date');
     if(dateEl) dateEl.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if(typeof window._startWsTagline==='function') window._startWsTagline();
   }
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
   document.addEventListener('click',e=>{
@@ -1141,6 +1216,75 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(sessionStorage.getItem(ROLE_KEY)==='admin'){ loadMembers(); loadPendingRequests(); }
   }catch(e){console.warn('Firebase init skipped:',e.message);}
 
+})();
+</script>
+
+<script>
+/* ── Animated rotating taglines ─────────────────────────────────────── */
+(function(){
+  const LOGIN_TAGS = [
+    "I am a FASTER member.",
+    "I am an innovator.",
+    "Welcome to the FASTER family ♥",
+    "Keeping everyone safe, every day.",
+    "Pushing boundaries in photonics.",
+    "Science without limits.",
+    "Together we innovate.",
+    "Precision. Passion. Progress.",
+    "Where curiosity meets discovery.",
+    "Part of something extraordinary."
+  ];
+
+  const WS_TAGS = [
+    "Have a great session, innovator!",
+    "Science is best done together.",
+    "Precision. Passion. Progress.",
+    "You are making a difference.",
+    "Welcome to the FASTER family.",
+    "Keeping everyone safe, every day.",
+    "Innovation starts here.",
+    "Where curiosity meets discovery.",
+    "Pushing the boundaries of photonics.",
+    "Part of something extraordinary."
+  ];
+
+  function rotateTags(spanId, tags, inClass, outClass, hold) {
+    hold = hold || 3200;
+    const el = document.getElementById(spanId);
+    if (!el) return null;
+    let idx = Math.floor(Math.random() * tags.length);
+    let timer = null;
+    function next() {
+      // fade out
+      el.classList.remove(inClass);
+      el.classList.add(outClass);
+      timer = setTimeout(function() {
+        // swap text
+        el.classList.remove(outClass);
+        el.textContent = tags[idx % tags.length];
+        idx++;
+        // force reflow
+        void el.offsetWidth;
+        // fade in
+        el.classList.add(inClass);
+        timer = setTimeout(next, hold);
+      }, 500);
+    }
+    // show first message immediately
+    el.textContent = tags[idx % tags.length];
+    idx++;
+    el.classList.add(inClass);
+    timer = setTimeout(next, hold);
+    return { stop: function(){ clearTimeout(timer); } };
+  }
+
+  // Start login taglines immediately
+  var _loginRotator = rotateTags('ls-tagline-text', LOGIN_TAGS, 'ls-in', 'ls-out', 3400);
+
+  // Expose a function to start workspace taglines after login
+  window._startWsTagline = function() {
+    rotateTags('ws-tagline-text', WS_TAGS, 'ws-in', 'ws-out', 3800);
+  };
 })();
 </script>
 
