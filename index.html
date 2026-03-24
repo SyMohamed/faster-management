@@ -367,7 +367,92 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   <div>
     <div class="workspace-section-title">Workspace tools</div>
     <div class="tools-grid" id="tools-grid-inner">
-      <!-- tool cards injected here by JS (moved from static HTML above) -->
+
+      <!-- ORDERS -->
+      <a href="orders.html" class="tc tool-card" style="--tc:#00ccf5">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">📦</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Orders Tracker</div>
+        <div class="tc-desc">Track all lab procurement from PR submission to delivery. Everyone sees live status updates instantly.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Add &amp; edit orders in real-time</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Status: Delivered · Delayed · PO · PR</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Filter by status, requester, PO/PR</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Export to CSV</div>
+        </div>
+      </a>
+
+      <!-- CHEMICALS -->
+      <a href="chemicals.html" class="tc tool-card" style="--tc:#0fda7a">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🧪</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Chemical Inventory</div>
+        <div class="tc-desc">Full chemical inventory across all storage locations — shelves, fridge and corrosive cabinet.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>232 chemicals pre-loaded from Excel</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Shelf 1, 2, 3 · Corrosive · Fridge</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Owner, user, CAS number, quantity</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Track ordered chemicals &amp; stock</div>
+        </div>
+      </a>
+
+      <!-- ASSETS -->
+      <a href="assets.html" class="tc tool-card" style="--tc:#9b5fff">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🔬</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Asset Registry</div>
+        <div class="tc-desc">Complete lab equipment registry — lasers, detectors, optics, oscilloscopes, pumps and IT.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>401 assets across 8 categories</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Laser wavelength spectrum map</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Classify by type, manufacturer, wavelength</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Track status, location, owner</div>
+        </div>
+      </a>
+
+      <!-- LAB PLANNING -->
+      <a href="planning.html" class="tc tool-card" style="--tc:#ff7525">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">📅</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Lab Facility Planning</div>
+        <div class="tc-desc">Book experiments and view facility availability for LPST, HPST and RCM — with a shared calendar.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>LPST · HPST · RCM facility calendars</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Book experiments with date ranges</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Experiment details &amp; researcher info</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Conflict detection &amp; live sync</div>
+        </div>
+      </a>
+
+      <!-- SAFETY HUB -->
+      <a href="safety.html" class="tc tool-card" style="--tc:#f85149">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🛡️</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Safety Hub</div>
+        <div class="tc-desc">Report lab safety issues, earn points, and compete for the monthly safety champion title.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Report issues · earn +1 pt</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Fix issues · earn +2 pts</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Monthly champion leaderboard</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Team members with profile photos</div>
+        </div>
+      </a>
+
     </div>
   </div>
   <div>
@@ -655,14 +740,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* ── Workspace ───────────────────────────────────────────────────────── */
   function showWorkspace(){
-    const st=document.querySelector('.tools');
     const dw=document.getElementById('tools-activity-wrap');
-    if(st&&dw){
-      const sg=st.querySelector('.tools-grid');
-      const dg=document.getElementById('tools-grid-inner');
-      if(sg&&dg) dg.innerHTML=sg.innerHTML;
-      st.style.display='none'; dw.style.display='';
-    }
+    if(dw) dw.style.display='';
   }
 
   /* ── Admin panel ─────────────────────────────────────────────────────── */
