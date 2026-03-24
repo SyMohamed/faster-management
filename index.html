@@ -1146,6 +1146,29 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         _renderNotifs();
       });
     }
+    /* Members: their own booking approval/rejection results (last 7 days) */
+    if(!isAdmin){
+      const myUname=sessionStorage.getItem(UNAME_KEY)||'';
+      const myName=sessionStorage.getItem(USER_KEY)||myUname;
+      const cutoff=Date.now()-7*24*60*60*1000;
+      db.ref('faster_planning').on('value',function(snap){
+        _notifs=_notifs.filter(n=>!/^my-/.test(n.key));
+        const all=Object.values(snap.val()||{}).filter(b=>b&&typeof b==='object');
+        const mine=all.filter(b=>{
+          const who=(b.requestedBy||b.createdBy||'').toLowerCase();
+          return who===myUname.toLowerCase()||who===myName.toLowerCase();
+        });
+        const approved=mine.filter(b=>b.status==='Approved'&&b.resolvedAt&&new Date(b.resolvedAt).getTime()>=cutoff);
+        const rejected=mine.filter(b=>b.status==='Rejected'&&b.resolvedAt&&new Date(b.resolvedAt).getTime()>=cutoff);
+        const extOk=mine.filter(b=>b.extensionRequest&&b.extensionRequest.status==='approved'&&b.extensionRequest.resolvedAt&&new Date(b.extensionRequest.resolvedAt).getTime()>=cutoff);
+        const extRej=mine.filter(b=>b.extensionRequest&&b.extensionRequest.status==='rejected'&&b.extensionRequest.resolvedAt&&new Date(b.extensionRequest.resolvedAt).getTime()>=cutoff);
+        if(approved.length) _notifs.push({key:'my-book-ok', icon:'✅',title:'Booking approved',   sub:approved.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        if(rejected.length) _notifs.push({key:'my-book-rej',icon:'❌',title:'Booking rejected',   sub:rejected.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        if(extOk.length)    _notifs.push({key:'my-ext-ok',  icon:'✅',title:'Extension approved', sub:extOk.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        if(extRej.length)   _notifs.push({key:'my-ext-rej', icon:'❌',title:'Extension rejected', sub:extRej.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        _renderNotifs();
+      });
+    }
     /* Everyone: open safety reports */
     db.ref('faster_safety/reports').on('value',function(snap){
       _notifs=_notifs.filter(n=>n.key!=='safety');

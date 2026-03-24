@@ -1027,14 +1027,20 @@ function toast(msg, cls="tg") {
 // ════════════════════════════════════════════════
 function approveBook(id) {
   if (!IS_ADMIN) return;
-  dbRef.child(id).update({ status: 'Approved' })
-    .then(() => toast('Booking approved!', 'tg'));
+  dbRef.child(id).update({
+    status: 'Approved',
+    resolvedAt: new Date().toISOString(),
+    resolvedBy: sessionStorage.getItem('faster_user_v1') || 'Admin'
+  }).then(() => toast('Booking approved!', 'tg'));
 }
 function rejectBook(id) {
   if (!IS_ADMIN) return;
   if (!confirm('Reject this booking request?')) return;
-  dbRef.child(id).update({ status: 'Rejected' })
-    .then(() => toast('Booking rejected', 'tb'));
+  dbRef.child(id).update({
+    status: 'Rejected',
+    resolvedAt: new Date().toISOString(),
+    resolvedBy: sessionStorage.getItem('faster_user_v1') || 'Admin'
+  }).then(() => toast('Booking rejected', 'tb'));
 }
 
 // ════════════════════════════════════════════════
