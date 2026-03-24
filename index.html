@@ -52,10 +52,10 @@ body::before{content:'';position:fixed;inset:0;
 .hero-eye::before,.hero-eye::after{content:'';flex:1;max-width:40px;height:1px;
   background:linear-gradient(90deg,transparent,var(--ac));opacity:.4}
 .hero-eye::after{background:linear-gradient(270deg,transparent,var(--ac))}
-.hero h1{font-size:clamp(20px,2.8vw,34px);font-weight:800;letter-spacing:-1px;line-height:1.1;
+.hero h1{font-size:clamp(22px,3.2vw,52px);font-weight:800;letter-spacing:-1px;line-height:1.1;
   margin-bottom:0.25em;background:linear-gradient(135deg,#e4edf8 0%,#7d99b8 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{font-size:clamp(12px,0.9vw,14px);color:var(--t3);line-height:1.6;margin-bottom:0;
+.hero p{font-size:clamp(13px,1.1vw,20px);color:var(--t3);line-height:1.6;margin-bottom:0;
   max-width:480px;margin-left:auto;margin-right:auto}
 .hero-meta{display:flex;align-items:center;justify-content:center;gap:22px;
   font-size:12px;color:var(--t3);flex-wrap:wrap;font-family:var(--mono)}
@@ -80,15 +80,15 @@ body::before{content:'';position:fixed;inset:0;
 .tool-card:hover::before{opacity:.06}
 .tc-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--tc)}
 .tc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5cqi}
-.tc-icon{width:14cqi;height:14cqi;min-width:32px;min-height:32px;border-radius:12px;display:flex;align-items:center;
-  justify-content:center;font-size:7cqi;background:var(--s2);border:1px solid var(--b1)}
-.tc-arr{color:var(--t3);font-size:4.5cqi;transition:all .22s;margin-top:2px}
+.tc-icon{width:15cqi;height:15cqi;min-width:36px;min-height:36px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:8cqi;background:var(--s2);border:1px solid var(--b1)}
+.tc-arr{color:var(--t3);font-size:5cqi;transition:all .22s;margin-top:2px}
 .tool-card:hover .tc-arr{color:var(--tc);transform:translate(3px,-3px)}
-.tc-name{font-size:clamp(13px,5.5cqi,22px);font-weight:700;margin-bottom:0.35em;letter-spacing:-.2px}
-.tc-desc{font-size:clamp(11px,3.8cqi,16px);color:var(--t3);line-height:1.65;margin-bottom:1em}
-.tc-feats{display:flex;flex-direction:column;gap:clamp(4px,1.8cqi,10px);
-  border-top:1px solid var(--b1);padding-top:clamp(10px,4cqi,22px);margin-top:auto}
-.tc-feat{display:flex;align-items:center;gap:0.5em;font-size:clamp(10px,3.2cqi,14px);color:var(--t3)}
+.tc-name{font-size:clamp(15px,6.5cqi,36px);font-weight:700;margin-bottom:0.35em;letter-spacing:-.2px}
+.tc-desc{font-size:clamp(12px,4.5cqi,22px);color:var(--t3);line-height:1.65;margin-bottom:1em}
+.tc-feats{display:flex;flex-direction:column;gap:clamp(5px,2cqi,14px);
+  border-top:1px solid var(--b1);padding-top:clamp(10px,4.5cqi,28px);margin-top:auto}
+.tc-feat{display:flex;align-items:center;gap:0.5em;font-size:clamp(11px,3.8cqi,20px);color:var(--t3)}
 .tc-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .tc-tag{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;
   font-family:var(--mono);letter-spacing:.4px;padding:3px 8px;border-radius:4px;
@@ -311,15 +311,14 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
   text-align:center;padding:9px 16px;font-size:14px;font-weight:600;z-index:9990;font-family:var(--mono)}
 
 /* ── RESPONSIVE FLUID TYPOGRAPHY ── */
-body { font-size: clamp(15px, 1.4vw, 18px); }
-.hero h1 { font-size: clamp(18px, 2.8vw, 34px); }
-.hero p  { font-size: clamp(12px, 0.9vw, 14px); }
-.brand-t span { font-size: clamp(14px, 1.3vw, 17px); }
-.brand-t small { font-size: clamp(10px, 0.8vw, 12px); }
-footer { font-size: clamp(11px, 0.9vw, 13px); }
-.hero-eye { font-size: clamp(10px, 0.9vw, 12px); }
-
-html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
+html { font-size: clamp(14px, 0.8vw + 5px, 26px); }
+body { font-size: 1rem; }
+.hero h1 { font-size: clamp(22px, 3.2vw, 52px); }
+.hero p  { font-size: clamp(13px, 1.1vw, 20px); }
+.brand-t span { font-size: clamp(14px, 1.2vw, 20px); }
+.brand-t small { font-size: clamp(10px, 0.7vw, 14px); }
+footer { font-size: clamp(11px, 0.8vw, 15px); }
+.hero-eye { font-size: clamp(10px, 0.8vw, 14px); }
 
 /* Compact hero */
 .hero{padding:clamp(12px,1.2vw,20px) 24px clamp(6px,0.7vw,10px)!important}
