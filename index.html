@@ -986,7 +986,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     _startNotifListeners();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
   }
-  if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
+  if(sessionStorage.getItem(AUTH_KEY)==='ok') window.addEventListener('DOMContentLoaded',onAuthOk);
 
   /* Called after a fresh login — always redirect (no extra clicks needed) */
   function afterLogin(){
