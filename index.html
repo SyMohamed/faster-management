@@ -64,8 +64,7 @@ body::before{content:'';position:fixed;inset:0;
 /* TOOLS GRID */
 .tools{position:relative;z-index:1;padding:0 40px 80px;
   max-width:1100px;margin:0 auto;width:100%}
-.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.5vw,24px)}
-@media(max-width:700px){.tools-grid{grid-template-columns:1fr}}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(200px,28%,320px),1fr));gap:clamp(12px,1.5vw,24px)}
 
 .tool-card{background:var(--s1);border:1px solid var(--b1);border-radius:clamp(10px,1vw,16px);
   padding:clamp(18px,2.2vw,34px);cursor:pointer;text-decoration:none;display:block;
