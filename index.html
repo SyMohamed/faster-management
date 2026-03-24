@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FASTER Lab — Digital Workspace</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* shared.css loaded below overrides font/accent; keep page-specific tokens here */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#06080d;--s1:#0c1018;--s2:#121620;--s3:#181e2a;
-  --b1:#1e2b3c;--b2:#263447;
-  --t1:#e4edf8;--t2:#7d99b8;--t3:#405870;
-  --ac:#00ccf5;--font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --bg:#06080d;--s1:#111720;--s2:#181f2a;--s3:#1e2736;
+  --b1:#232e3d;--b2:#2e3f54;
+  --t1:#dde6f0;--t2:#6a7d94;--t3:#3e5068;
+  --ac:#00ccf5;
+  --surface:#111720;--surface2:#181f2a;--surface3:#1e2736;
+  --border:#232e3d;--border2:#2e3f54;
+  --text:#dde6f0;--muted:#6a7d94;--muted2:#3e5068;
+  --accent:#00ccf5;
+  --font:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --r:8px;--rl:12px;--rxl:16px;
+  --red:#ef4444;
 }
 body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100vh;
   display:flex;flex-direction:column;overflow-x:hidden}
@@ -120,7 +127,24 @@ footer { font-size: clamp(11px, 0.9vw, 13px); }
 .hero-eye { font-size: clamp(10px, 0.9vw, 12px); }
 
 html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
+
+/* Compact hero */
+.hero{padding:clamp(12px,1.2vw,20px) 24px clamp(6px,0.7vw,10px)!important}
+.hero h1{font-size:clamp(17px,2vw,26px)!important}
+.hero p{display:none}
+
+/* Homepage layout adjustments */
+.homepage-greeting{display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px 0;margin-bottom:0;flex-wrap:wrap;gap:12px}
+.workspace-section{padding:16px 40px 0}
+.workspace-section-title{font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);margin-bottom:14px}
+.tools-activity-wrap{display:grid;grid-template-columns:1fr 340px;gap:20px;
+  padding:0 40px 60px;align-items:start}
+@media(max-width:900px){.tools-activity-wrap{grid-template-columns:1fr}}
+@media(max-width:640px){.tools-activity-wrap,.workspace-section{padding-left:20px;padding-right:20px}}
 </style>
+<link rel="stylesheet" href="shared.css">
 </head>
 <body>
 
@@ -145,7 +169,18 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       <small>Farooq's group · KAUST</small>
     </div>
   </div>
-  Firebase · Live sync</div>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <button onclick="openGS()" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:5px 12px;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--t2)'" onmouseout="this.style.borderColor='var(--b1)';this.style.color='var(--t3)'">
+      🔍 <span>Search</span><span style="opacity:.5;font-size:10px">⌘K</span>
+    </button>
+    <div class="user-badge" id="user-badge" onclick="resetUser()" title="Click to change user">
+      <div class="ub-dot">?</div>
+      <span class="ub-name" style="font-size:12px;font-family:var(--mono)">Select user</span>
+    </div>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);font-family:var(--mono)">
+      <span class="nav-dot" style="animation:pulse 2s infinite"></span>Live
+    </span>
+  </div>
 </nav>
 
 <div class="hero">
@@ -244,35 +279,322 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   </div>
 </div>
 
+<!-- ── User selection screen (shown after successful auth) ───────────────── -->
+<div id="user-select-screen">
+  <img id="us-logo" style="width:52px;height:52px;border-radius:50%;background:#fff;object-fit:contain;padding:2px" src="" alt="">
+  <h2>Who are you?</h2>
+  <p>Select your name — it will pre-fill forms automatically</p>
+  <div class="us-grid" id="us-grid">
+    <!-- populated by JS from TEAM_MEMBERS list -->
+  </div>
+  <div class="us-custom-wrap">
+    <input class="us-custom-input" id="us-custom" placeholder="Or type your name…">
+    <button class="us-confirm-btn" onclick="confirmUser()">Continue →</button>
+  </div>
+</div>
+
+<!-- ── Global search overlay (⌘K / Ctrl+K) ─────────────────────────────── -->
+<div id="gs-overlay" onclick="if(event.target===this)closeGS()">
+  <div id="gs-box">
+    <div id="gs-input-wrap">
+      <span class="gs-icon">🔍</span>
+      <input id="gs-input" placeholder="Search orders, chemicals, assets…" autocomplete="off"
+             oninput="gsSearch(this.value)" onkeydown="gsKey(event)">
+      <span id="gs-kbd">Esc</span>
+    </div>
+    <div id="gs-results"><div id="gs-empty" style="display:none">No results</div></div>
+  </div>
+</div>
+
+<!-- ── Tools + activity feed side-by-side layout ────────────────────────── -->
+<div class="tools-activity-wrap" id="tools-activity-wrap" style="display:none">
+  <div>
+    <div class="workspace-section-title">Workspace tools</div>
+    <div class="tools-grid" id="tools-grid-inner">
+      <!-- tool cards injected here by JS (moved from static HTML above) -->
+    </div>
+  </div>
+  <div>
+    <div class="workspace-section-title">Recent activity</div>
+    <div class="activity-feed">
+      <div class="activity-feed-header">
+        <h3>Latest changes</h3>
+        <span class="af-live"><span class="af-dot"></span>Live</span>
+      </div>
+      <div class="af-list" id="af-list">
+        <div class="af-empty" id="af-empty">Connect to Firebase to see activity…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer>FASTER Lab · KAUST · Farooq's group for Advanced Sensing Technology &amp; Energy Research</footer>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script>
 (function(){
-  const KEY = 'faster_auth_v1';
-  const CORRECT = 'e44567085f51cde02183a5445edc295fa60c67044474c4ba5d7d3740d5462048';
+  /* ── Auth ─────────────────────────────────────────────────────────────── */
+  const AUTH_KEY = 'faster_auth_v1';
+  const USER_KEY = 'faster_user_v1';
+  const CORRECT  = 'e44567085f51cde02183a5445edc295fa60c67044474c4ba5d7d3740d5462048';
+
+  // Copy logo src into user-select-screen logo
+  const mainLogo = document.querySelector('nav .brand img');
+  if(mainLogo) document.getElementById('us-logo').src = mainLogo.src;
+
   function sha256(str){
     const enc = new TextEncoder();
     return crypto.subtle.digest('SHA-256',enc.encode(str))
       .then(buf=>Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''));
   }
-  if(sessionStorage.getItem(KEY)==='ok'){
+
+  function onAuthOk(){
     document.getElementById('pw-screen').style.display='none';
-    return;
+    const saved = sessionStorage.getItem(USER_KEY);
+    if(saved){
+      showWorkspace();
+      updateUserBadge(saved);
+    } else {
+      showUserSelect();
+    }
+    // redirect if came from a sub-page
+    const dest = sessionStorage.getItem('faster_redirect');
+    if(dest && saved){
+      sessionStorage.removeItem('faster_redirect');
+      location.assign(dest);
+    }
   }
-  window.checkPw=function(){
-    const val=document.getElementById('pw-input').value;
+
+  if(sessionStorage.getItem(AUTH_KEY)==='ok'){
+    onAuthOk();
+  }
+
+  window.checkPw = function(){
+    const val = document.getElementById('pw-input').value;
     sha256(val).then(h=>{
       if(h===CORRECT){
-        sessionStorage.setItem(KEY,'ok');
-        document.getElementById('pw-screen').style.display='none';
+        sessionStorage.setItem(AUTH_KEY,'ok');
+        onAuthOk();
       }else{
-        const err=document.getElementById('pw-err');
+        const err = document.getElementById('pw-err');
         err.classList.add('show');
         document.getElementById('pw-input').value='';
         setTimeout(()=>err.classList.remove('show'),2500);
       }
     });
   };
+
+  /* ── User selection ───────────────────────────────────────────────────── */
+  const TEAM_MEMBERS = [
+    'Aamir Farooq','Khalil Djebbi','Janardhanraj Subburaj',
+    'Waleed Ahmad','Hao Tang','Mohsin Raza',
+    'Samir Busnaina','Abdulaziz Almalki'
+  ];
+
+  function showUserSelect(){
+    const screen = document.getElementById('user-select-screen');
+    screen.classList.add('open');
+    const grid = document.getElementById('us-grid');
+    grid.innerHTML = TEAM_MEMBERS.map(n=>`
+      <button class="us-btn" onclick="selectUser('${n}')">${n}</button>
+    `).join('');
+  }
+
+  window.selectUser = function(name){
+    document.querySelectorAll('.us-btn').forEach(b=>b.classList.remove('selected'));
+    event.target.classList.add('selected');
+    document.getElementById('us-custom').value = '';
+    document.getElementById('us-custom').dataset.selected = name;
+  };
+
+  window.confirmUser = function(){
+    const custom = document.getElementById('us-custom').value.trim();
+    const selected = document.getElementById('us-custom').dataset.selected || '';
+    const name = custom || selected;
+    if(!name){ alert('Please select or type your name.'); return; }
+    sessionStorage.setItem(USER_KEY, name);
+    document.getElementById('user-select-screen').classList.remove('open');
+    updateUserBadge(name);
+    showWorkspace();
+    const dest = sessionStorage.getItem('faster_redirect');
+    if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
+  };
+
+  function updateUserBadge(name){
+    const initials = name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const badge = document.getElementById('user-badge');
+    if(badge){
+      badge.querySelector('.ub-dot').textContent = initials;
+      badge.querySelector('.ub-name').textContent = name;
+    }
+  }
+
+  function showWorkspace(){
+    // Show tools + activity wrap, hide old static tools grid
+    const staticTools = document.querySelector('.tools');
+    const dynamicWrap = document.getElementById('tools-activity-wrap');
+    if(staticTools && dynamicWrap){
+      // Move tool cards to dynamic grid
+      const staticGrid = staticTools.querySelector('.tools-grid');
+      const dynGrid    = document.getElementById('tools-grid-inner');
+      if(staticGrid && dynGrid){
+        dynGrid.innerHTML = staticGrid.innerHTML;
+      }
+      staticTools.style.display = 'none';
+      dynamicWrap.style.display = '';
+    }
+  }
+
+  /* ── Global search (⌘K / Ctrl+K) ─────────────────────────────────────── */
+  document.addEventListener('keydown', e=>{
+    if((e.metaKey||e.ctrlKey) && e.key==='k'){
+      e.preventDefault();
+      openGS();
+    }
+    if(e.key==='Escape') closeGS();
+  });
+
+  window.openGS = function(){
+    document.getElementById('gs-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('gs-input').focus(),50);
+  };
+  window.closeGS = function(){
+    document.getElementById('gs-overlay').classList.remove('open');
+    document.getElementById('gs-input').value='';
+    document.getElementById('gs-results').innerHTML='<div id="gs-empty" style="display:none">No results</div>';
+    gsFocused = -1;
+  };
+
+  let gsItems=[], gsFocused=-1;
+  window.gsSearch = function(q){
+    q = q.trim().toLowerCase();
+    const res = document.getElementById('gs-results');
+    if(!q){ res.innerHTML=''; return; }
+    if(!window._gsDB){ res.innerHTML='<div id="gs-loading">Connecting to Firebase…</div>'; return; }
+    res.innerHTML='<div id="gs-loading">Searching…</div>';
+    const paths = [
+      {path:'faster_orders',  module:'Orders',    icon:'📦', nameKey:'item'},
+      {path:'faster_chemicals',module:'Chemicals', icon:'🧪', nameKey:'name'},
+      {path:'faster_assets_v5',module:'Assets',   icon:'🔬', nameKey:'name'},
+      {path:'faster_planning', module:'Planning',  icon:'📅', nameKey:'title'},
+      {path:'faster_safety',   module:'Safety',    icon:'🛡️', nameKey:'title'}
+    ];
+    gsItems=[];
+    let done=0;
+    paths.forEach(p=>{
+      window._gsDB.ref(p.path).once('value', snap=>{
+        const val=snap.val()||{};
+        Object.values(val).forEach(item=>{
+          if(typeof item!=='object') return;
+          const name=(item[p.nameKey]||item.name||item.item||item.title||'').toString().toLowerCase();
+          const desc=(item.description||item.desc||item.comments||'').toString().toLowerCase();
+          if(name.includes(q)||desc.includes(q)){
+            const displayName = item[p.nameKey]||item.name||item.item||item.title||'(untitled)';
+            const subText = item.status||item.location||item.category||'';
+            gsItems.push({icon:p.icon, module:p.module, name:displayName, sub:subText, href:p.path.replace('faster_','').replace('_v5','').replace('_','')+'.html'});
+          }
+        });
+        done++;
+        if(done===paths.length) renderGSResults();
+      });
+    });
+  };
+
+  function renderGSResults(){
+    const res = document.getElementById('gs-results');
+    if(!gsItems.length){ res.innerHTML='<div id="gs-empty" style="padding:32px 18px;text-align:center;color:var(--muted);font-size:13px">No results found</div>'; return; }
+    const groups={};
+    gsItems.forEach(i=>{ (groups[i.module]=groups[i.module]||[]).push(i); });
+    res.innerHTML = Object.entries(groups).map(([mod,items])=>`
+      <div class="gs-section-title">${mod}</div>
+      ${items.slice(0,5).map((it,idx)=>`
+        <div class="gs-item" onclick="location.href='${it.href}'" tabindex="0">
+          <span class="gs-item-icon">${it.icon}</span>
+          <div><div class="gs-item-name">${it.name}</div>${it.sub?`<div class="gs-item-sub">${it.sub}</div>`:''}</div>
+          <span class="gs-item-module">${mod}</span>
+        </div>
+      `).join('')}
+    `).join('');
+  }
+
+  window.gsKey = function(e){
+    const items=document.querySelectorAll('.gs-item');
+    if(e.key==='ArrowDown'){ e.preventDefault(); gsFocused=Math.min(gsFocused+1,items.length-1); items[gsFocused]&&items[gsFocused].focus(); }
+    if(e.key==='ArrowUp'  ){ e.preventDefault(); gsFocused=Math.max(gsFocused-1,-1); gsFocused>=0?items[gsFocused].focus():document.getElementById('gs-input').focus(); }
+    if(e.key==='Enter' && gsFocused>=0 && items[gsFocused]) items[gsFocused].click();
+  };
+
+  /* ── Activity feed ────────────────────────────────────────────────────── */
+  const AF_SOURCES = [
+    {path:'faster_orders',   icon:'📦', module:'Orders',    labelKey:'item',     timeKey:'created'},
+    {path:'faster_chemicals',icon:'🧪', module:'Chemicals', labelKey:'name',     timeKey:'updatedAt'},
+    {path:'faster_assets_v5',icon:'🔬', module:'Assets',    labelKey:'name',     timeKey:'updatedAt'},
+    {path:'faster_safety',   icon:'🛡️', module:'Safety',    labelKey:'title',    timeKey:'createdAt'},
+    {path:'faster_planning', icon:'📅', module:'Planning',  labelKey:'title',    timeKey:'start'}
+  ];
+  let afEvents=[];
+
+  function timeAgo(ts){
+    if(!ts) return '';
+    const d = new Date(ts); if(isNaN(d)) return ts;
+    const diff=(Date.now()-d)/1000;
+    if(diff<60) return 'just now';
+    if(diff<3600) return Math.floor(diff/60)+'m ago';
+    if(diff<86400) return Math.floor(diff/3600)+'h ago';
+    return d.toLocaleDateString();
+  }
+
+  function renderAF(){
+    const list=document.getElementById('af-list');
+    const empty=document.getElementById('af-empty');
+    if(!afEvents.length){ if(empty) empty.style.display=''; return; }
+    if(empty) empty.style.display='none';
+    list.innerHTML = afEvents.slice(0,15).map(ev=>`
+      <div class="af-item">
+        <div class="af-item-icon">${ev.icon}</div>
+        <div class="af-item-body">
+          <div class="af-item-msg"><strong>${ev.module}:</strong> ${ev.label}</div>
+          <div class="af-item-meta">${timeAgo(ev.time)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.resetUser = function(){
+    sessionStorage.removeItem(USER_KEY);
+    showUserSelect();
+  };
+
+  /* ── Firebase init (for search + activity) ───────────────────────────── */
+  try{
+    const fbApp = firebase.initializeApp({
+      apiKey:"AIzaSyAyt35wSrf1fUnu_Z_kgARwpCjCS1M0b5Q",
+      authDomain:"orders-1a6e6.firebaseapp.com",
+      databaseURL:"https://orders-1a6e6-default-rtdb.firebaseio.com",
+      projectId:"orders-1a6e6"
+    });
+    const db = firebase.database();
+    window._gsDB = db;
+
+    // Activity feed — listen to each collection
+    AF_SOURCES.forEach(src=>{
+      db.ref(src.path).on('value', snap=>{
+        const val=snap.val()||{};
+        // Remove old entries from this source then re-add
+        afEvents=afEvents.filter(e=>e.module!==src.module);
+        Object.values(val).forEach(item=>{
+          if(typeof item!=='object') return;
+          const label=item[src.labelKey]||item.name||item.item||item.title||'(item)';
+          const time=item[src.timeKey]||item.updatedAt||item.createdAt||item.created||'';
+          afEvents.push({icon:src.icon,module:src.module,label,time});
+        });
+        afEvents.sort((a,b)=>new Date(b.time)-new Date(a.time));
+        renderAF();
+      });
+    });
+  } catch(e){ console.warn('Firebase init skipped:',e.message); }
+
 })();
 </script>
 </body>
