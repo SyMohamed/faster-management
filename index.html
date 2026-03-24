@@ -199,6 +199,36 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .admin-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px}
 .admin-panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .admin-panel-header h3{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+/* Member status */
+.status-picker{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;border-top:1px solid var(--b1)}
+.status-opt{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:4px 8px;
+  font-size:12px;cursor:pointer;transition:all .12s;white-space:nowrap}
+.status-opt:hover,.status-opt.active{border-color:var(--ac);background:rgba(0,204,245,.1)}
+#ws-status-tag{font-size:12px;color:var(--t3);margin-left:6px;font-family:var(--mono)}
+/* Notification bell */
+#notif-wrap{position:relative}
+#notif-btn{background:var(--s2);border:1px solid var(--b1);border-radius:8px;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;
+  transition:border-color .15s;flex-shrink:0}
+#notif-btn:hover{border-color:var(--ac)}
+#notif-count{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;
+  border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;font-family:var(--mono);
+  display:none;min-width:16px;text-align:center}
+.notif-menu{position:absolute;top:calc(100% + 8px);right:0;width:300px;
+  background:var(--s1);border:1px solid var(--b2);border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:300;overflow:hidden;display:none}
+.notif-menu.open{display:block}
+.notif-menu-header{padding:12px 16px;font-size:12px;font-weight:700;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b1);font-family:var(--mono)}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;
+  border-bottom:1px solid var(--b1);cursor:pointer;text-decoration:none;color:inherit;transition:background .1s}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--s2)}
+.notif-item-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.notif-item-body{flex:1;min-width:0}
+.notif-item-title{font-size:13px;color:var(--t1);font-weight:500}
+.notif-item-sub{font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.notif-empty{padding:20px 16px;text-align:center;color:var(--t3);font-size:13px}
 /* collapsible panels */
 .admin-panel-header.collapsible{cursor:pointer;user-select:none}
 .admin-panel-header.collapsible:hover{background:var(--surface2)}
@@ -576,6 +606,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <button onclick="openGS()" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:5px 12px;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--t2)'" onmouseout="this.style.borderColor='var(--b1)';this.style.color='var(--t3)'">
       🔍 <span>Search</span><span style="opacity:.5;font-size:10px">⌘K</span>
     </button>
+    <div id="notif-wrap">
+      <div id="notif-btn" onclick="toggleNotif()" title="Notifications">🔔</div>
+      <span id="notif-count">0</span>
+      <div class="notif-menu" id="notif-menu">
+        <div class="notif-menu-header">Notifications</div>
+        <div id="notif-list"><div class="notif-empty">All clear ✓</div></div>
+      </div>
+    </div>
     <div style="position:relative" id="user-badge-wrap">
       <div class="user-badge" id="user-badge" onclick="toggleUserMenu()" title="Account menu" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);color:var(--muted);background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:3px 10px 3px 6px;cursor:pointer">
         <div id="ub-dot-inner" style="width:22px;height:22px;border-radius:50%;background:var(--ac);color:#000;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">?</div>
@@ -584,6 +622,16 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       <div class="user-menu" id="user-menu">
         <button class="user-menu-item" onclick="openPwChange()">🔑 Change Password</button>
         <button class="user-menu-item" onclick="triggerPhotoUpload()" id="photo-menu-btn">📷 Change Profile Photo</button>
+        <div class="user-menu-sep"></div>
+        <div style="padding:6px 12px 2px;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Status</div>
+        <div class="status-picker" id="status-picker">
+          <span class="status-opt" data-s="">— Clear</span>
+          <span class="status-opt" data-s="🔬 In lab">🔬 In lab</span>
+          <span class="status-opt" data-s="🏠 WFH">🏠 WFH</span>
+          <span class="status-opt" data-s="📅 In meeting">📅 In meeting</span>
+          <span class="status-opt" data-s="🚫 Away">🚫 Away</span>
+          <span class="status-opt" data-s="✈️ Travelling">✈️ Travelling</span>
+        </div>
         <div class="user-menu-sep"></div>
         <button class="user-menu-item" style="color:var(--red)" onclick="signOut()">⏏ Sign Out</button>
       </div>
@@ -610,7 +658,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <img id="ws-profile-img" src="" alt="" style="width:100%;height:100%;object-fit:cover">
       </div>
       <div>
-        <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
+          <span id="ws-status-tag"></span>
+        </div>
         <div id="ws-date" style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:3px"></div>
         <div id="ws-tagline"><span id="ws-tagline-text"></span></div>
       </div>
@@ -637,6 +688,18 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Expiry alerts banner ───────────────────────────────────────────── -->
+<div id="expiry-banner" style="display:none;padding:0 40px 14px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:18px">⚠️</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:700;color:#f59e0b" id="expiry-title">Chemical expiry alerts</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:2px;font-family:var(--mono)" id="expiry-list"></div>
+    </div>
+    <a href="chemicals.html" style="font-size:12px;color:#f59e0b;font-family:var(--mono);white-space:nowrap;text-decoration:none">View chemicals →</a>
   </div>
 </div>
 
@@ -849,6 +912,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       tryFetchPhoto(0);
     }
     showWorkspace();
+    _startNotifListeners();
+    _loadStatus();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
   }
   if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
@@ -1045,7 +1110,94 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   };
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
   window.togglePanel=function(id){ document.getElementById(id).classList.toggle('collapsed'); };
+
+  /* ── Member status emoji ─────────────────────────────────────────────── */
+  function _applyStatus(s){
+    const tag=document.getElementById('ws-status-tag');
+    if(tag) tag.textContent=s||'';
+    /* highlight active option */
+    document.querySelectorAll('.status-opt').forEach(function(el){
+      el.classList.toggle('active', el.dataset.s===s);
+    });
+  }
+  function _loadStatus(){
+    const uname=sessionStorage.getItem(UNAME_KEY);
+    if(!uname||uname==='guest'||!db) return;
+    db.ref('faster_users/'+uname+'/status').once('value').then(function(s){
+      _applyStatus(s.val()||'');
+    });
+  }
+  document.querySelectorAll('.status-opt').forEach(function(el){
+    el.addEventListener('click',function(){
+      const s=el.dataset.s||'';
+      const uname=sessionStorage.getItem(UNAME_KEY);
+      if(!uname||uname==='guest'){ _toast('Status not available for guests','warn'); return; }
+      if(!db) return;
+      db.ref('faster_users/'+uname+'/status').set(s).then(function(){
+        _applyStatus(s);
+        document.getElementById('user-menu').classList.remove('open');
+        _toast(s?'Status set: '+s:'Status cleared','ok');
+      });
+    });
+  });
   window.toggleActivityFeed=function(){ document.getElementById('activity-feed-panel').classList.toggle('collapsed'); };
+
+  /* ── Notification bell ───────────────────────────────────────────────── */
+  var _notifs=[];
+  window.toggleNotif=function(){
+    document.getElementById('notif-menu').classList.toggle('open');
+  };
+  document.addEventListener('click',function(e){
+    const wrap=document.getElementById('notif-wrap');
+    if(wrap&&!wrap.contains(e.target)) document.getElementById('notif-menu').classList.remove('open');
+  });
+  function _renderNotifs(){
+    const list=document.getElementById('notif-list');
+    const count=document.getElementById('notif-count');
+    if(!list) return;
+    if(!_notifs.length){
+      list.innerHTML='<div class="notif-empty">All clear ✓</div>';
+      if(count){count.style.display='none';}
+      return;
+    }
+    list.innerHTML=_notifs.map(n=>
+      '<a class="notif-item" href="'+(n.href||'#')+'" style="text-decoration:none">'+
+        '<div class="notif-item-icon">'+n.icon+'</div>'+
+        '<div class="notif-item-body">'+
+          '<div class="notif-item-title">'+n.title+'</div>'+
+          '<div class="notif-item-sub">'+n.sub+'</div>'+
+        '</div>'+
+      '</a>'
+    ).join('');
+    if(count){count.textContent=_notifs.length;count.style.display='block';}
+  }
+  function _startNotifListeners(){
+    if(!db) return;
+    /* Pending registrations */
+    db.ref('faster_pending').on('value',function(snap){
+      _notifs=_notifs.filter(n=>n.key!=='reg');
+      const entries=Object.values(snap.val()||{}).filter(r=>r.status==='pending');
+      if(entries.length) _notifs.push({key:'reg',icon:'👤',title:entries.length+' registration request'+(entries.length>1?'s':''),sub:'New member'+(entries.length>1?'s':'')+' awaiting approval',href:'#'});
+      _renderNotifs();
+    });
+    /* Pending booking approvals */
+    db.ref('faster_planning').on('value',function(snap){
+      _notifs=_notifs.filter(n=>n.key!=='book'&&n.key!=='ext');
+      const all=Object.values(snap.val()||{}).filter(b=>b&&typeof b==='object');
+      const books=all.filter(b=>b.status==='Pending Approval');
+      const exts=all.filter(b=>b.extensionRequest&&b.extensionRequest.status==='pending');
+      if(books.length) _notifs.push({key:'book',icon:'📅',title:books.length+' booking'+(books.length>1?'s':'')+' pending approval',sub:'Facility reservations awaiting review',href:'planning.html'});
+      if(exts.length) _notifs.push({key:'ext',icon:'⏱',title:exts.length+' extension request'+(exts.length>1?'s':''),sub:'Booking time extensions awaiting approval',href:'planning.html'});
+      _renderNotifs();
+    });
+    /* Open safety reports */
+    db.ref('faster_safety/reports').on('value',function(snap){
+      _notifs=_notifs.filter(n=>n.key!=='safety');
+      const open=Object.values(snap.val()||{}).filter(r=>r&&r.status==='Open');
+      if(open.length) _notifs.push({key:'safety',icon:'🛡️',title:open.length+' open safety report'+(open.length>1?'s':''),sub:'Unresolved lab safety issues',href:'safety.html'});
+      _renderNotifs();
+    });
+  }
   document.addEventListener('click',e=>{
     const wrap=document.getElementById('user-badge-wrap');
     if(wrap&&!wrap.contains(e.target)) document.getElementById('user-menu').classList.remove('open');
@@ -1360,11 +1512,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(!db){res.innerHTML='<div id="gs-loading">Connecting\u2026</div>';return;}
     res.innerHTML='<div id="gs-loading">Searching\u2026</div>';
     const paths=[
-      {path:'faster_orders',  module:'Orders',  icon:'\ud83d\udce6',nameKey:'item'},
-      {path:'faster_chemicals',module:'Chemicals',icon:'\ud83e\uddea',nameKey:'name'},
-      {path:'faster_assets_v5',module:'Assets', icon:'\ud83d\udd2c',nameKey:'name'},
-      {path:'faster_planning', module:'Planning',icon:'\ud83d\udcc5',nameKey:'title'},
-      {path:'faster_safety',   module:'Safety',  icon:'\ud83d\udee1\ufe0f',nameKey:'title'}
+      {path:'faster_orders',        module:'Orders',   icon:'📦',nameKey:'item',  href:'orders.html'},
+      {path:'faster_chemicals',     module:'Chemicals',icon:'🧪',nameKey:'name',  href:'chemicals.html'},
+      {path:'faster_assets_v5',     module:'Assets',   icon:'🔬',nameKey:'name',  href:'assets.html'},
+      {path:'faster_planning',      module:'Planning', icon:'📅',nameKey:'title', href:'planning.html'},
+      {path:'faster_safety/reports',module:'Safety',   icon:'🛡️',nameKey:'title', href:'safety.html'}
     ];
     gsItems=[];let done=0;
     paths.forEach(p=>{
@@ -1373,10 +1525,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         Object.values(val).forEach(item=>{
           if(typeof item!=='object')return;
           const name=(item[p.nameKey]||item.name||item.item||item.title||'').toString().toLowerCase();
-          const desc=(item.description||item.desc||item.comments||'').toString().toLowerCase();
+          const desc=(item.description||item.desc||item.comments||item.location||'').toString().toLowerCase();
           if(name.includes(q)||desc.includes(q)){
             const dn=item[p.nameKey]||item.name||item.item||item.title||'(untitled)';
-            gsItems.push({icon:p.icon,module:p.module,name:dn,sub:item.status||item.location||'',href:p.path.replace('faster_','').replace('_v5','').replace('_','')+'.html'});
+            gsItems.push({icon:p.icon,module:p.module,name:dn,sub:item.status||item.location||item.severity||'',href:p.href});
           }
         });
         done++;if(done===paths.length)renderGSResults();
@@ -1407,11 +1559,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* ── Activity feed ───────────────────────────────────────────────────── */
   const AF_SOURCES=[
-    {path:'faster_orders',   icon:'\ud83d\udce6',module:'Orders',   labelKey:'item', timeKey:'created'},
-    {path:'faster_chemicals',icon:'\ud83e\uddea',module:'Chemicals',labelKey:'name', timeKey:'updatedAt'},
-    {path:'faster_assets_v5',icon:'\ud83d\udd2c',module:'Assets',   labelKey:'name', timeKey:'updatedAt'},
-    {path:'faster_safety',   icon:'\ud83d\udee1\ufe0f',module:'Safety',   labelKey:'title',timeKey:'createdAt'},
-    {path:'faster_planning', icon:'\ud83d\udcc5',module:'Planning', labelKey:'title',timeKey:'start'}
+    {path:'faster_orders',        icon:'📦',module:'Orders',   labelKey:'item',  timeKey:'created',   href:'orders.html'},
+    {path:'faster_chemicals',     icon:'🧪',module:'Chemicals',labelKey:'name',  timeKey:'addedAt',   href:'chemicals.html'},
+    {path:'faster_assets_v5',     icon:'🔬',module:'Assets',   labelKey:'name',  timeKey:'addedAt',   href:'assets.html'},
+    {path:'faster_safety/reports',icon:'🛡️',module:'Safety',   labelKey:'title', timeKey:'reportedAt',href:'safety.html'},
+    {path:'faster_planning',      icon:'📅',module:'Planning', labelKey:'title', timeKey:'startDate', href:'planning.html'}
   ];
   let afEvents=[];
   function timeAgo(ts){
@@ -1425,10 +1577,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     const empty=document.getElementById('af-empty');
     if(!afEvents.length){if(empty)empty.style.display='';return;}
     if(empty)empty.style.display='none';
-    list.innerHTML=afEvents.slice(0,15).map(ev=>
-      '<div class="af-item"><div class="af-item-icon">'+ev.icon+'</div>'+
-      '<div class="af-item-body"><div class="af-item-msg"><strong>'+ev.module+':</strong> '+ev.label+'</div>'+
-      '<div class="af-item-meta">'+timeAgo(ev.time)+'</div></div></div>'
+    list.innerHTML=afEvents.slice(0,20).map(ev=>
+      '<a class="af-item" href="'+(ev.href||'#')+'" style="text-decoration:none;color:inherit">'+
+        '<div class="af-item-icon">'+ev.icon+'</div>'+
+        '<div class="af-item-body">'+
+          '<div class="af-item-msg"><strong>'+ev.module+':</strong> '+escHtml(ev.label)+'</div>'+
+          '<div class="af-item-meta">'+timeAgo(ev.time)+'</div>'+
+        '</div>'+
+      '</a>'
     ).join('');
   }
 
@@ -1455,19 +1611,25 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       }catch(e){console.warn('Seed skipped:',e);}
     })();
 
-    /* Stat counter map: Firebase path → stat element id */
+    /* Safety stat listens at root to count reports */
+    db.ref('faster_safety/reports').on('value',snap=>{
+      const count=Object.keys(snap.val()||{}).length;
+      const el=document.getElementById('stat-safety');
+      if(el) el.textContent=count.toLocaleString();
+    });
+
+    /* Stat counters for other paths */
     const STAT_MAP={
       'faster_orders':'stat-orders',
       'faster_chemicals':'stat-chemicals',
       'faster_assets_v5':'stat-assets',
-      'faster_planning':'stat-bookings',
-      'faster_safety':'stat-safety'
+      'faster_planning':'stat-bookings'
     };
 
     AF_SOURCES.forEach(src=>{
       db.ref(src.path).on('value',snap=>{
         const val=snap.val()||{};
-        /* Update stat counter */
+        /* Update stat counter (not safety — handled separately above) */
         const statId=STAT_MAP[src.path];
         if(statId){
           const count=Object.values(val).filter(v=>typeof v==='object').length;
@@ -1478,11 +1640,39 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         afEvents=afEvents.filter(e=>e.module!==src.module);
         Object.values(val).forEach(item=>{
           if(typeof item!=='object')return;
-          afEvents.push({icon:src.icon,module:src.module,label:item[src.labelKey]||item.name||item.item||item.title||'(item)',time:item[src.timeKey]||item.updatedAt||item.createdAt||item.created||''});
+          const label=item[src.labelKey]||item.name||item.item||item.title||'(item)';
+          const time=item[src.timeKey]||item.updatedAt||item.addedAt||item.createdAt||item.created||'';
+          afEvents.push({icon:src.icon,module:src.module,label,time,href:src.href});
         });
         afEvents.sort((a,b)=>new Date(b.time)-new Date(a.time));
         renderAF();
       });
+    });
+
+    /* Chemical expiry alerts */
+    db.ref('faster_chemicals').on('value',function(snap){
+      const all=Object.values(snap.val()||{}).filter(c=>c&&typeof c==='object');
+      const now=new Date(); now.setHours(0,0,0,0);
+      const soon=new Date(now); soon.setDate(soon.getDate()+30);
+      const expired=[], expiring=[];
+      all.forEach(function(c){
+        if(!c.expiryDate) return;
+        const d=new Date(c.expiryDate);
+        if(isNaN(d)) return;
+        if(d<now) expired.push(c.name);
+        else if(d<=soon) expiring.push(c.name);
+      });
+      const banner=document.getElementById('expiry-banner');
+      const title=document.getElementById('expiry-title');
+      const list=document.getElementById('expiry-list');
+      if(!banner) return;
+      if(!expired.length&&!expiring.length){ banner.style.display='none'; return; }
+      banner.style.display='';
+      const parts=[];
+      if(expired.length) parts.push('🔴 Expired: '+expired.slice(0,3).map(escHtml).join(', ')+(expired.length>3?' +'+( expired.length-3)+' more':''));
+      if(expiring.length) parts.push('🟡 Expiring soon: '+expiring.slice(0,3).map(escHtml).join(', ')+(expiring.length>3?' +'+(expiring.length-3)+' more':''));
+      if(title) title.textContent=(expired.length+expiring.length)+' chemical'+(expired.length+expiring.length>1?'s':'')+' need attention';
+      if(list) list.innerHTML=parts.join(' &nbsp;·&nbsp; ');
     });
 
     if(sessionStorage.getItem(ROLE_KEY)==='admin'){ loadMembers(); loadPendingRequests(); loadPendingPlanning(); }
