@@ -217,13 +217,22 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .pending-info{flex:1;min-width:0}
 .pending-name{font-size:15px;color:var(--text)}
 .pending-meta{font-size:12px;color:var(--muted);font-family:var(--mono)}
-.pending-actions{display:flex;gap:6px;flex-shrink:0}
+.pending-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
 .btn-approve{background:var(--green-bg);border:1px solid var(--green);color:var(--green);
   border-radius:7px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
 .btn-approve:hover{background:var(--green);color:#000}
 .btn-reject{background:var(--red-bg);border:1px solid var(--red);color:var(--red);
   border-radius:7px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
 .btn-reject:hover{background:var(--red);color:#fff}
+/* Pending section separators */
+.pending-section{margin-top:4px}
+.pending-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);font-family:var(--mono);padding:10px 0 4px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:6px}
+.pending-section-title:first-child{border-top:none;padding-top:0}
+.pending-section-badge{background:var(--surface2);border:1px solid var(--border);border-radius:99px;
+  font-size:10px;padding:1px 7px;color:var(--text)}
+.pending-empty{padding:6px 0 8px;color:var(--muted);font-size:13px;font-style:italic}
 /* Add-member form */
 .add-member-form{display:flex;flex-direction:column;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border)}
 .add-member-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
@@ -718,7 +727,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <!-- Admin: Pending Requests + Member Management (visible only to admin) -->
     <div id="admin-members-panel" style="display:none;margin-bottom:20px">
 
-      <!-- Pending registration requests -->
+      <!-- Pending requests — all types -->
       <div class="admin-panel">
         <div class="admin-panel-header">
           <h3>Pending Requests
@@ -727,8 +736,20 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <span style="font-size:11px;color:var(--accent);font-family:var(--mono)">Admin</span>
         </div>
         <div class="admin-panel-body">
-          <div id="pending-list">
-            <div style="padding:10px 0;color:var(--muted);font-size:14px">Loading&hellip;</div>
+          <!-- Member registrations -->
+          <div class="pending-section">
+            <div class="pending-section-title">👤 Member Registrations <span class="pending-section-badge" id="reg-count">0</span></div>
+            <div id="pending-reg-list"><div class="pending-empty">Loading…</div></div>
+          </div>
+          <!-- Booking approvals -->
+          <div class="pending-section">
+            <div class="pending-section-title">📅 Booking Approvals <span class="pending-section-badge" id="book-count">0</span></div>
+            <div id="pending-book-list"><div class="pending-empty">Loading…</div></div>
+          </div>
+          <!-- Extension requests -->
+          <div class="pending-section">
+            <div class="pending-section-title">⏱ Extension Requests <span class="pending-section-badge" id="ext-count">0</span></div>
+            <div id="pending-ext-list"><div class="pending-empty">Loading…</div></div>
           </div>
         </div>
       </div>
@@ -1064,7 +1085,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function showAdminPanel(){
     const p=document.getElementById('admin-members-panel');
     if(p) p.style.display='';
-    loadMembers(); loadPendingRequests();
+    loadMembers(); loadPendingRequests(); loadPendingPlanning();
   }
 
   function loadMembers(){
@@ -1087,24 +1108,34 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     });
   }
 
+  /* ── Shared badge counter ─────────────────────────────────────────────── */
+  var _pendingCounts={reg:0,book:0,ext:0};
+  function _refreshBadge(){
+    const total=_pendingCounts.reg+_pendingCounts.book+_pendingCounts.ext;
+    const badge=document.getElementById('pending-badge');
+    if(badge){ badge.textContent=total; badge.style.display=total?'':'none'; }
+  }
+
+  /* ── Section 1: Member registration requests ─────────────────────────── */
   function loadPendingRequests(){
     if(!db){ setTimeout(loadPendingRequests,400); return; }
     db.ref('faster_pending').on('value',snap=>{
       const requests=snap.val()||{};
-      const list=document.getElementById('pending-list');
-      const badge=document.getElementById('pending-badge');
+      const list=document.getElementById('pending-reg-list');
+      const countEl=document.getElementById('reg-count');
       if(!list) return;
       const entries=Object.entries(requests).filter(([,r])=>r.status==='pending');
-      if(badge){ badge.textContent=entries.length||''; badge.style.display=entries.length?'':'none'; }
-      if(!entries.length){ list.innerHTML='<div style="padding:10px 0;color:var(--muted);font-size:14px">No pending requests.</div>'; return; }
+      _pendingCounts.reg=entries.length; _refreshBadge();
+      if(countEl) countEl.textContent=entries.length;
+      if(!entries.length){ list.innerHTML='<div class="pending-empty">No pending registrations.</div>'; return; }
       list.innerHTML=entries.map(([rid,r])=>
         '<div class="pending-row">'+
           '<div class="pending-info">'+
-            '<div class="pending-name">'+r.name+'</div>'+
-            '<div class="pending-meta">@'+r.username+' &middot; '+new Date(r.requestedAt).toLocaleDateString()+'</div>'+
+            '<div class="pending-name">'+escHtml(r.name)+'</div>'+
+            '<div class="pending-meta">@'+escHtml(r.username)+' &middot; '+new Date(r.requestedAt).toLocaleDateString()+'</div>'+
           '</div>'+
           '<div class="pending-actions">'+
-            '<button class="btn-approve" data-rid="'+rid+'" data-uname="'+r.username+'" data-name="'+r.name+'" data-hash="'+r.passwordHash+'">Approve</button>'+
+            '<button class="btn-approve" data-rid="'+rid+'" data-uname="'+escAttr(r.username)+'" data-name="'+escAttr(r.name)+'" data-hash="'+escAttr(r.passwordHash)+'">Approve</button>'+
             '<button class="btn-reject" data-rid="'+rid+'">Reject</button>'+
           '</div>'+
         '</div>'
@@ -1115,6 +1146,132 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       list.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectRequest(btn.dataset.rid); });
     });
   }
+
+  /* ── Section 2 & 3: Booking approvals + Extension requests ──────────── */
+  function loadPendingPlanning(){
+    if(!db){ setTimeout(loadPendingPlanning,400); return; }
+    db.ref('faster_planning').on('value',snap=>{
+      const all=snap.val()||{};
+      const bookList=document.getElementById('pending-book-list');
+      const extList=document.getElementById('pending-ext-list');
+      const bookCountEl=document.getElementById('book-count');
+      const extCountEl=document.getElementById('ext-count');
+
+      const pendingBooks=[], pendingExts=[];
+      Object.entries(all).forEach(([bid,b])=>{
+        if(!b) return;
+        if(b.status==='Pending Approval') pendingBooks.push([bid,b]);
+        if(b.extensionRequest&&b.extensionRequest.status==='pending') pendingExts.push([bid,b]);
+      });
+
+      _pendingCounts.book=pendingBooks.length;
+      _pendingCounts.ext=pendingExts.length;
+      _refreshBadge();
+      if(bookCountEl) bookCountEl.textContent=pendingBooks.length;
+      if(extCountEl)  extCountEl.textContent=pendingExts.length;
+
+      /* — Booking rows — */
+      if(bookList){
+        if(!pendingBooks.length){ bookList.innerHTML='<div class="pending-empty">No pending booking approvals.</div>'; }
+        else{
+          bookList.innerHTML=pendingBooks.map(([bid,b])=>{
+            const start=b.startDate?new Date(b.startDate).toLocaleDateString():'?';
+            const end=b.endDate?new Date(b.endDate).toLocaleDateString():'?';
+            const who=b.requestedBy||'unknown';
+            const label=escHtml((b.title||b.facility||'Booking'));
+            return '<div class="pending-row">'+
+              '<div class="pending-info">'+
+                '<div class="pending-name">'+label+'</div>'+
+                '<div class="pending-meta">'+escHtml(b.facility||'')+(b.facility&&b.title?' &middot; ':'')+
+                  '@'+escHtml(who)+' &middot; '+start+' → '+end+
+                  (b.priority&&b.priority!=='Normal'?' &middot; <span style="color:var(--red)">'+escHtml(b.priority)+'</span>':'')+'</div>'+
+              '</div>'+
+              '<div class="pending-actions">'+
+                '<button class="btn-approve" data-bid="'+bid+'">Approve</button>'+
+                '<button class="btn-reject" data-bid="'+bid+'">Reject</button>'+
+              '</div>'+
+            '</div>';
+          }).join('');
+          bookList.querySelectorAll('.btn-approve').forEach(btn=>{ btn.onclick=()=>approveBooking(btn.dataset.bid); });
+          bookList.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectBooking(btn.dataset.bid); });
+        }
+      }
+
+      /* — Extension rows — */
+      if(extList){
+        if(!pendingExts.length){ extList.innerHTML='<div class="pending-empty">No pending extension requests.</div>'; }
+        else{
+          extList.innerHTML=pendingExts.map(([bid,b])=>{
+            const ex=b.extensionRequest;
+            const oldEnd=b.endDate?new Date(b.endDate).toLocaleDateString():'?';
+            const newEnd=ex.newEndDate?new Date(ex.newEndDate).toLocaleDateString():'?';
+            const who=ex.requestedBy||b.requestedBy||'unknown';
+            const label=escHtml(b.title||b.facility||'Booking');
+            return '<div class="pending-row">'+
+              '<div class="pending-info">'+
+                '<div class="pending-name">'+label+'</div>'+
+                '<div class="pending-meta">@'+escHtml(who)+' &middot; extend to '+newEnd+
+                  (ex.reason?' &middot; "'+escHtml(ex.reason.slice(0,60))+(ex.reason.length>60?'…':'')+'"':'')+'</div>'+
+              '</div>'+
+              '<div class="pending-actions">'+
+                '<button class="btn-approve" data-bid="'+bid+'" data-newend="'+escAttr(ex.newEndDate||'')+'">Approve</button>'+
+                '<button class="btn-reject" data-bid="'+bid+'">Reject</button>'+
+              '</div>'+
+            '</div>';
+          }).join('');
+          extList.querySelectorAll('.btn-approve').forEach(btn=>{ btn.onclick=()=>approveExtension(btn.dataset.bid,btn.dataset.newend); });
+          extList.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectExtension(btn.dataset.bid); });
+        }
+      }
+    });
+  }
+
+  /* helpers */
+  function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+
+  /* ── Booking approve / reject ─────────────────────────────────────────── */
+  window.approveBooking=async function(bid){
+    if(!db) return;
+    try{
+      await db.ref('faster_planning/'+bid+'/status').set('Approved');
+      _toast('Booking approved!','ok');
+    }catch(e){ _toast('Error approving booking','err'); console.error(e); }
+  };
+  window.rejectBooking=async function(bid){
+    if(!confirm('Reject this booking request?')) return;
+    if(!db) return;
+    try{
+      await db.ref('faster_planning/'+bid+'/status').set('Rejected');
+      _toast('Booking rejected.','warn');
+    }catch(e){ _toast('Error rejecting booking','err'); console.error(e); }
+  };
+
+  /* ── Extension approve / reject ──────────────────────────────────────── */
+  window.approveExtension=async function(bid,newEndDate){
+    if(!db) return;
+    try{
+      const updates={};
+      if(newEndDate) updates['faster_planning/'+bid+'/endDate']=newEndDate;
+      updates['faster_planning/'+bid+'/extensionRequest/status']='approved';
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedAt']=new Date().toISOString();
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedBy']=sessionStorage.getItem(UNAME_KEY)||'admin';
+      await db.ref().update(updates);
+      _toast('Extension approved!','ok');
+    }catch(e){ _toast('Error approving extension','err'); console.error(e); }
+  };
+  window.rejectExtension=async function(bid){
+    if(!confirm('Reject this extension request?')) return;
+    if(!db) return;
+    try{
+      const updates={};
+      updates['faster_planning/'+bid+'/extensionRequest/status']='rejected';
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedAt']=new Date().toISOString();
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedBy']=sessionStorage.getItem(UNAME_KEY)||'admin';
+      await db.ref().update(updates);
+      _toast('Extension rejected.','warn');
+    }catch(e){ _toast('Error rejecting extension','err'); console.error(e); }
+  };
 
   window.approveRequest=async function(rid,username,name,passwordHash){
     if(!db) return;
@@ -1314,7 +1471,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       });
     });
 
-    if(sessionStorage.getItem(ROLE_KEY)==='admin'){ loadMembers(); loadPendingRequests(); }
+    if(sessionStorage.getItem(ROLE_KEY)==='admin'){ loadMembers(); loadPendingRequests(); loadPendingPlanning(); }
   }catch(e){console.warn('Firebase init skipped:',e.message);}
 
 })();
