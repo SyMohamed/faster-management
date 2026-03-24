@@ -64,7 +64,8 @@ body::before{content:'';position:fixed;inset:0;
 /* TOOLS GRID */
 .tools{position:relative;z-index:1;padding:0 40px 80px;
   max-width:1100px;margin:0 auto;width:100%}
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:clamp(12px,1.5vw,24px)}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.5vw,24px)}
+@media(max-width:700px){.tools-grid{grid-template-columns:1fr}}
 
 .tool-card{background:var(--s1);border:1px solid var(--b1);border-radius:clamp(10px,1vw,16px);
   padding:clamp(18px,2.2vw,34px);cursor:pointer;text-decoration:none;display:block;
@@ -682,10 +683,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div class="stat-icon">🧪</div>
         <div><div class="stat-val" id="stat-chemicals">—</div><div class="stat-lbl">Chemicals</div></div>
       </div>
-      <div class="stat-card" onclick="location.href='assets.html'" title="View Assets">
-        <div class="stat-icon">🔬</div>
-        <div><div class="stat-val" id="stat-assets">—</div><div class="stat-lbl">Assets</div></div>
-      </div>
       <div class="stat-card" onclick="location.href='planning.html'" title="View Bookings">
         <div class="stat-icon">📅</div>
         <div><div class="stat-val" id="stat-bookings">—</div><div class="stat-lbl">Bookings</div></div>
@@ -693,10 +690,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       <div class="stat-card" onclick="location.href='safety.html'" title="View Safety Hub">
         <div class="stat-icon">🛡️</div>
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
-      </div>
-      <div class="stat-card" onclick="location.href='guide.html'" title="View FASTER Kickstarter">
-        <div class="stat-icon">🚀</div>
-        <div><div class="stat-val" id="stat-guide">—</div><div class="stat-lbl">Docs</div></div>
       </div>
     </div>
   </div>
