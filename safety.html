@@ -929,10 +929,15 @@ function openReport() {
   document.getElementById("rp-loc").value = "";
   document.getElementById("rp-desc").value = "";
   document.getElementById("rp-sev").value = "Medium";
-  document.getElementById("rp-reporter").value = "";
-  // Pre-select reporter from session identity
-  const me = sessionStorage.getItem('faster_user_v1') || '';
-  if(me){ const sel = document.getElementById("rp-reporter"); if(sel) { const opt = Array.from(sel.options).find(o=>o.text===me||o.value===me); if(opt) sel.value=opt.value; } }
+  /* Reporter: auto-select self for members, leave free for admins */
+  const reporterSel = document.getElementById("rp-reporter");
+  if (!IS_ADMIN) {
+    reporterSel.disabled = true;
+    /* value already pre-selected by populateMemberSelects */
+  } else {
+    reporterSel.disabled = false;
+    reporterSel.value = "";
+  }
   document.getElementById("rp-causedby").value = "";
   document.getElementById("rep-del-btn").style.display = "none";
   document.getElementById("rep-resolve-btn").style.display = "none";
@@ -952,6 +957,7 @@ function openEditReport(key) {
   document.getElementById("rp-desc").value = r.description||"";
   document.getElementById("rp-sev").value = r.severity||"Medium";
   populateMemberSelects();
+  document.getElementById("rp-reporter").disabled = !IS_ADMIN;
   document.getElementById("rp-reporter").value = r.reporter||"";
   document.getElementById("rp-causedby").value = r.causedBy||"";
   document.getElementById("rep-del-btn").style.display = "inline-flex";
@@ -970,12 +976,21 @@ function openEditReport(key) {
 }
 
 function populateMemberSelects() {
-  const opts = '<option value="">— Unknown —</option>' +
+  const allOpts = '<option value="">— Unknown —</option>' +
     Object.entries(MEMBERS).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join("");
-  document.getElementById("rp-reporter").innerHTML =
-    '<option value="">— Select reporter —</option>' +
-    Object.entries(MEMBERS).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join("");
-  document.getElementById("rp-causedby").innerHTML = opts;
+  /* Reporter: members can only select themselves; admins see everyone */
+  const me = sessionStorage.getItem('faster_user_v1') || '';
+  let reporterOpts;
+  if (IS_ADMIN) {
+    reporterOpts = '<option value="">— Select reporter —</option>' +
+      Object.entries(MEMBERS).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join("");
+  } else {
+    const myEntry = Object.entries(MEMBERS).find(([,m]) => m.name === me);
+    reporterOpts = '<option value="">— Select reporter —</option>' +
+      (myEntry ? `<option value="${myEntry[0]}" selected>${esc(myEntry[1].name)}</option>` : '');
+  }
+  document.getElementById("rp-reporter").innerHTML = reporterOpts;
+  document.getElementById("rp-causedby").innerHTML = allOpts;
 }
 
 function saveReport() {
