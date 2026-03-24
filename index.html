@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FASTER Lab — Digital Workspace</title>
+<script>/* apply theme before first paint */(function(){if(localStorage.getItem('faster_theme')==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.removeAttribute('data-theme');})();</script>
 <style>
 /* shared.css loaded below overrides font/accent; keep page-specific tokens here */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -199,6 +200,42 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .admin-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px}
 .admin-panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .admin-panel-header h3{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+/* Notification bell */
+#notif-wrap{position:relative}
+#notif-btn{background:var(--s2);border:1px solid var(--b1);border-radius:8px;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;
+  transition:border-color .15s;flex-shrink:0}
+#notif-btn:hover{border-color:var(--ac)}
+#notif-count{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;
+  border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;font-family:var(--mono);
+  display:none;min-width:16px;text-align:center}
+.notif-menu{position:absolute;top:calc(100% + 8px);right:0;width:300px;
+  background:var(--s1);border:1px solid var(--b2);border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:300;overflow:hidden;display:none}
+.notif-menu.open{display:block}
+.notif-menu-header{padding:12px 16px;font-size:12px;font-weight:700;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b1);font-family:var(--mono)}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;
+  border-bottom:1px solid var(--b1);cursor:pointer;text-decoration:none;color:inherit;transition:background .1s}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--s2)}
+.notif-item-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.notif-item-body{flex:1;min-width:0}
+.notif-item-title{font-size:13px;color:var(--t1);font-weight:500}
+.notif-item-sub{font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.notif-empty{padding:20px 16px;text-align:center;color:var(--t3);font-size:13px}
+/* collapsible panels */
+.admin-panel-header.collapsible{cursor:pointer;user-select:none}
+.admin-panel-header.collapsible:hover{background:var(--surface2)}
+.panel-chevron{font-size:13px;color:var(--muted);transition:transform .2s;margin-left:4px}
+.admin-panel.collapsed .panel-chevron{transform:rotate(-90deg)}
+.admin-panel.collapsed .admin-panel-body{display:none}
+.admin-panel.collapsed .admin-panel-header{border-bottom:none}
+/* collapsible activity feed */
+.activity-feed-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 2px;border-radius:6px}
+.activity-feed-header:hover{background:var(--surface2)}
+.activity-feed.collapsed .af-list{display:none}
+.activity-feed.collapsed .panel-chevron{transform:rotate(-90deg)}
 .pending-badge{background:var(--red);color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:2px 8px;font-family:var(--mono)}
 .admin-panel-body{padding:14px 18px}
 .member-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
@@ -217,13 +254,22 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .pending-info{flex:1;min-width:0}
 .pending-name{font-size:15px;color:var(--text)}
 .pending-meta{font-size:12px;color:var(--muted);font-family:var(--mono)}
-.pending-actions{display:flex;gap:6px;flex-shrink:0}
+.pending-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
 .btn-approve{background:var(--green-bg);border:1px solid var(--green);color:var(--green);
   border-radius:7px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
 .btn-approve:hover{background:var(--green);color:#000}
 .btn-reject{background:var(--red-bg);border:1px solid var(--red);color:var(--red);
   border-radius:7px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
 .btn-reject:hover{background:var(--red);color:#fff}
+/* Pending section separators */
+.pending-section{margin-top:4px}
+.pending-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);font-family:var(--mono);padding:10px 0 4px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:6px}
+.pending-section-title:first-child{border-top:none;padding-top:0}
+.pending-section-badge{background:var(--surface2);border:1px solid var(--border);border-radius:99px;
+  font-size:10px;padding:1px 7px;color:var(--text)}
+.pending-empty{padding:6px 0 8px;color:var(--muted);font-size:13px;font-style:italic}
 /* Add-member form */
 .add-member-form{display:flex;flex-direction:column;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border)}
 .add-member-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
@@ -555,6 +601,15 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <button onclick="openGS()" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:5px 12px;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--t2)'" onmouseout="this.style.borderColor='var(--b1)';this.style.color='var(--t3)'">
       🔍 <span>Search</span><span style="opacity:.5;font-size:10px">⌘K</span>
     </button>
+    <button id="faster-theme-btn" onclick="FASTER_toggleTheme()" title="Switch to light mode">☀️</button>
+    <div id="notif-wrap">
+      <div id="notif-btn" onclick="toggleNotif()" title="Notifications">🔔</div>
+      <span id="notif-count">0</span>
+      <div class="notif-menu" id="notif-menu">
+        <div class="notif-menu-header">Notifications</div>
+        <div id="notif-list"><div class="notif-empty">All clear ✓</div></div>
+      </div>
+    </div>
     <div style="position:relative" id="user-badge-wrap">
       <div class="user-badge" id="user-badge" onclick="toggleUserMenu()" title="Account menu" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);color:var(--muted);background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:3px 10px 3px 6px;cursor:pointer">
         <div id="ub-dot-inner" style="width:22px;height:22px;border-radius:50%;background:var(--ac);color:#000;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">?</div>
@@ -616,6 +671,18 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Expiry alerts banner ───────────────────────────────────────────── -->
+<div id="expiry-banner" style="display:none;padding:0 40px 14px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:18px">⚠️</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:700;color:#f59e0b" id="expiry-title">Chemical expiry alerts</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:2px;font-family:var(--mono)" id="expiry-list"></div>
+    </div>
+    <a href="chemicals.html" style="font-size:12px;color:#f59e0b;font-family:var(--mono);white-space:nowrap;text-decoration:none">View chemicals →</a>
   </div>
 </div>
 
@@ -718,7 +785,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <!-- Admin: Pending Requests + Member Management (visible only to admin) -->
     <div id="admin-members-panel" style="display:none;margin-bottom:20px">
 
-      <!-- Pending registration requests -->
+      <!-- Pending requests — all types -->
       <div class="admin-panel">
         <div class="admin-panel-header">
           <h3>Pending Requests
@@ -727,16 +794,28 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <span style="font-size:11px;color:var(--accent);font-family:var(--mono)">Admin</span>
         </div>
         <div class="admin-panel-body">
-          <div id="pending-list">
-            <div style="padding:10px 0;color:var(--muted);font-size:14px">Loading&hellip;</div>
+          <!-- Member registrations -->
+          <div class="pending-section">
+            <div class="pending-section-title">👤 Member Registrations <span class="pending-section-badge" id="reg-count">0</span></div>
+            <div id="pending-reg-list"><div class="pending-empty">Loading…</div></div>
+          </div>
+          <!-- Booking approvals -->
+          <div class="pending-section">
+            <div class="pending-section-title">📅 Booking Approvals <span class="pending-section-badge" id="book-count">0</span></div>
+            <div id="pending-book-list"><div class="pending-empty">Loading…</div></div>
+          </div>
+          <!-- Extension requests -->
+          <div class="pending-section">
+            <div class="pending-section-title">⏱ Extension Requests <span class="pending-section-badge" id="ext-count">0</span></div>
+            <div id="pending-ext-list"><div class="pending-empty">Loading…</div></div>
           </div>
         </div>
       </div>
 
-      <!-- Active team members -->
-      <div class="admin-panel">
-        <div class="admin-panel-header">
-          <h3>Team Members</h3>
+      <!-- Active team members (collapsed by default) -->
+      <div class="admin-panel collapsed" id="members-panel">
+        <div class="admin-panel-header collapsible" onclick="togglePanel('members-panel')">
+          <h3>Team Members <span class="panel-chevron">▾</span></h3>
           <span style="font-size:11px;color:var(--accent);font-family:var(--mono)">Admin</span>
         </div>
         <div class="admin-panel-body">
@@ -756,9 +835,9 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         </div>
       </div>
     </div>
-    <div class="activity-feed">
-      <div class="activity-feed-header">
-        <h3>Latest changes</h3>
+    <div class="activity-feed collapsed" id="activity-feed-panel">
+      <div class="activity-feed-header" onclick="toggleActivityFeed()">
+        <h3 style="font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px">Latest changes <span class="panel-chevron">▾</span></h3>
         <span class="af-live"><span class="af-dot"></span>Live</span>
       </div>
       <div class="af-list" id="af-list">
@@ -816,6 +895,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       tryFetchPhoto(0);
     }
     showWorkspace();
+    _startNotifListeners();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
   }
   if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
@@ -1011,6 +1091,92 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     input.value='';
   };
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
+  window.togglePanel=function(id){ document.getElementById(id).classList.toggle('collapsed'); };
+
+  window.toggleActivityFeed=function(){ document.getElementById('activity-feed-panel').classList.toggle('collapsed'); };
+
+  /* ── Notification bell ───────────────────────────────────────────────── */
+  var _notifs=[];
+  window.toggleNotif=function(){
+    document.getElementById('notif-menu').classList.toggle('open');
+  };
+  document.addEventListener('click',function(e){
+    const wrap=document.getElementById('notif-wrap');
+    if(wrap&&!wrap.contains(e.target)) document.getElementById('notif-menu').classList.remove('open');
+  });
+  function _renderNotifs(){
+    const list=document.getElementById('notif-list');
+    const count=document.getElementById('notif-count');
+    if(!list) return;
+    if(!_notifs.length){
+      list.innerHTML='<div class="notif-empty">All clear ✓</div>';
+      if(count){count.style.display='none';}
+      return;
+    }
+    list.innerHTML=_notifs.map(n=>
+      '<a class="notif-item" href="'+(n.href||'#')+'" style="text-decoration:none">'+
+        '<div class="notif-item-icon">'+n.icon+'</div>'+
+        '<div class="notif-item-body">'+
+          '<div class="notif-item-title">'+n.title+'</div>'+
+          '<div class="notif-item-sub">'+n.sub+'</div>'+
+        '</div>'+
+      '</a>'
+    ).join('');
+    if(count){count.textContent=_notifs.length;count.style.display='block';}
+  }
+  function _startNotifListeners(){
+    if(!db) return;
+    const isAdmin=sessionStorage.getItem(ROLE_KEY)==='admin';
+    /* Admin-only: pending registrations */
+    if(isAdmin){
+      db.ref('faster_pending').on('value',function(snap){
+        _notifs=_notifs.filter(n=>n.key!=='reg');
+        const entries=Object.values(snap.val()||{}).filter(r=>r.status==='pending');
+        if(entries.length) _notifs.push({key:'reg',icon:'👤',title:entries.length+' registration request'+(entries.length>1?'s':''),sub:'New member'+(entries.length>1?'s':'')+' awaiting approval',href:'#'});
+        _renderNotifs();
+      });
+      /* Admin-only: pending booking approvals and extension requests */
+      db.ref('faster_planning').on('value',function(snap){
+        _notifs=_notifs.filter(n=>n.key!=='book'&&n.key!=='ext');
+        const all=Object.values(snap.val()||{}).filter(b=>b&&typeof b==='object');
+        const books=all.filter(b=>b.status==='Pending Approval');
+        const exts=all.filter(b=>b.extensionRequest&&b.extensionRequest.status==='pending');
+        if(books.length) _notifs.push({key:'book',icon:'📅',title:books.length+' booking'+(books.length>1?'s':'')+' pending approval',sub:'Facility reservations awaiting review',href:'planning.html'});
+        if(exts.length) _notifs.push({key:'ext',icon:'⏱',title:exts.length+' extension request'+(exts.length>1?'s':''),sub:'Booking extensions awaiting your approval',href:'planning.html'});
+        _renderNotifs();
+      });
+    }
+    /* Members: their own booking approval/rejection results (last 7 days) */
+    if(!isAdmin){
+      const myUname=sessionStorage.getItem(UNAME_KEY)||'';
+      const myName=sessionStorage.getItem(USER_KEY)||myUname;
+      const cutoff=Date.now()-7*24*60*60*1000;
+      db.ref('faster_planning').on('value',function(snap){
+        _notifs=_notifs.filter(n=>!/^my-/.test(n.key));
+        const all=Object.values(snap.val()||{}).filter(b=>b&&typeof b==='object');
+        const mine=all.filter(b=>{
+          const who=(b.requestedBy||b.createdBy||'').toLowerCase();
+          return who===myUname.toLowerCase()||who===myName.toLowerCase();
+        });
+        const approved=mine.filter(b=>b.status==='Approved'&&b.resolvedAt&&new Date(b.resolvedAt).getTime()>=cutoff);
+        const rejected=mine.filter(b=>b.status==='Rejected'&&b.resolvedAt&&new Date(b.resolvedAt).getTime()>=cutoff);
+        const extOk=mine.filter(b=>b.extensionRequest&&b.extensionRequest.status==='approved'&&b.extensionRequest.resolvedAt&&new Date(b.extensionRequest.resolvedAt).getTime()>=cutoff);
+        const extRej=mine.filter(b=>b.extensionRequest&&b.extensionRequest.status==='rejected'&&b.extensionRequest.resolvedAt&&new Date(b.extensionRequest.resolvedAt).getTime()>=cutoff);
+        if(approved.length) _notifs.push({key:'my-book-ok', icon:'✅',title:'Booking approved',   sub:approved.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        if(rejected.length) _notifs.push({key:'my-book-rej',icon:'❌',title:'Booking rejected',   sub:rejected.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        if(extOk.length)    _notifs.push({key:'my-ext-ok',  icon:'✅',title:'Extension approved', sub:extOk.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        if(extRej.length)   _notifs.push({key:'my-ext-rej', icon:'❌',title:'Extension rejected', sub:extRej.map(b=>escHtml(b.title||b.facility||'Booking')).join(', '),href:'planning.html'});
+        _renderNotifs();
+      });
+    }
+    /* Everyone: open safety reports */
+    db.ref('faster_safety/reports').on('value',function(snap){
+      _notifs=_notifs.filter(n=>n.key!=='safety');
+      const open=Object.values(snap.val()||{}).filter(r=>r&&r.status==='Open');
+      if(open.length) _notifs.push({key:'safety',icon:'🛡️',title:open.length+' open safety report'+(open.length>1?'s':''),sub:'Unresolved lab safety issues',href:'safety.html'});
+      _renderNotifs();
+    });
+  }
   document.addEventListener('click',e=>{
     const wrap=document.getElementById('user-badge-wrap');
     if(wrap&&!wrap.contains(e.target)) document.getElementById('user-menu').classList.remove('open');
@@ -1064,7 +1230,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function showAdminPanel(){
     const p=document.getElementById('admin-members-panel');
     if(p) p.style.display='';
-    loadMembers(); loadPendingRequests();
+    loadMembers(); loadPendingRequests(); loadPendingPlanning();
   }
 
   function loadMembers(){
@@ -1087,24 +1253,34 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     });
   }
 
+  /* ── Shared badge counter ─────────────────────────────────────────────── */
+  var _pendingCounts={reg:0,book:0,ext:0};
+  function _refreshBadge(){
+    const total=_pendingCounts.reg+_pendingCounts.book+_pendingCounts.ext;
+    const badge=document.getElementById('pending-badge');
+    if(badge){ badge.textContent=total; badge.style.display=total?'':'none'; }
+  }
+
+  /* ── Section 1: Member registration requests ─────────────────────────── */
   function loadPendingRequests(){
     if(!db){ setTimeout(loadPendingRequests,400); return; }
     db.ref('faster_pending').on('value',snap=>{
       const requests=snap.val()||{};
-      const list=document.getElementById('pending-list');
-      const badge=document.getElementById('pending-badge');
+      const list=document.getElementById('pending-reg-list');
+      const countEl=document.getElementById('reg-count');
       if(!list) return;
       const entries=Object.entries(requests).filter(([,r])=>r.status==='pending');
-      if(badge){ badge.textContent=entries.length||''; badge.style.display=entries.length?'':'none'; }
-      if(!entries.length){ list.innerHTML='<div style="padding:10px 0;color:var(--muted);font-size:14px">No pending requests.</div>'; return; }
+      _pendingCounts.reg=entries.length; _refreshBadge();
+      if(countEl) countEl.textContent=entries.length;
+      if(!entries.length){ list.innerHTML='<div class="pending-empty">No pending registrations.</div>'; return; }
       list.innerHTML=entries.map(([rid,r])=>
         '<div class="pending-row">'+
           '<div class="pending-info">'+
-            '<div class="pending-name">'+r.name+'</div>'+
-            '<div class="pending-meta">@'+r.username+' &middot; '+new Date(r.requestedAt).toLocaleDateString()+'</div>'+
+            '<div class="pending-name">'+escHtml(r.name)+'</div>'+
+            '<div class="pending-meta">@'+escHtml(r.username)+' &middot; '+new Date(r.requestedAt).toLocaleDateString()+'</div>'+
           '</div>'+
           '<div class="pending-actions">'+
-            '<button class="btn-approve" data-rid="'+rid+'" data-uname="'+r.username+'" data-name="'+r.name+'" data-hash="'+r.passwordHash+'">Approve</button>'+
+            '<button class="btn-approve" data-rid="'+rid+'" data-uname="'+escAttr(r.username)+'" data-name="'+escAttr(r.name)+'" data-hash="'+escAttr(r.passwordHash)+'">Approve</button>'+
             '<button class="btn-reject" data-rid="'+rid+'">Reject</button>'+
           '</div>'+
         '</div>'
@@ -1115,6 +1291,141 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       list.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectRequest(btn.dataset.rid); });
     });
   }
+
+  /* ── Section 2 & 3: Booking approvals + Extension requests ──────────── */
+  function loadPendingPlanning(){
+    if(!db){ setTimeout(loadPendingPlanning,400); return; }
+    db.ref('faster_planning').on('value',snap=>{
+      const all=snap.val()||{};
+      const bookList=document.getElementById('pending-book-list');
+      const extList=document.getElementById('pending-ext-list');
+      const bookCountEl=document.getElementById('book-count');
+      const extCountEl=document.getElementById('ext-count');
+
+      const pendingBooks=[], pendingExts=[];
+      Object.entries(all).forEach(([bid,b])=>{
+        if(!b) return;
+        if(b.status==='Pending Approval') pendingBooks.push([bid,b]);
+        if(b.extensionRequest&&b.extensionRequest.status==='pending') pendingExts.push([bid,b]);
+      });
+
+      _pendingCounts.book=pendingBooks.length;
+      _pendingCounts.ext=pendingExts.length;
+      _refreshBadge();
+      if(bookCountEl) bookCountEl.textContent=pendingBooks.length;
+      if(extCountEl)  extCountEl.textContent=pendingExts.length;
+
+      /* — Booking rows — */
+      if(bookList){
+        if(!pendingBooks.length){ bookList.innerHTML='<div class="pending-empty">No pending booking approvals.</div>'; }
+        else{
+          bookList.innerHTML=pendingBooks.map(([bid,b])=>{
+            const start=b.startDate?new Date(b.startDate).toLocaleDateString():'?';
+            const end=b.endDate?new Date(b.endDate).toLocaleDateString():'?';
+            const who=b.requestedBy||'unknown';
+            const label=escHtml((b.title||b.facility||'Booking'));
+            return '<div class="pending-row">'+
+              '<div class="pending-info">'+
+                '<div class="pending-name">'+label+'</div>'+
+                '<div class="pending-meta">'+escHtml(b.facility||'')+(b.facility&&b.title?' &middot; ':'')+
+                  '@'+escHtml(who)+' &middot; '+start+' → '+end+
+                  (b.priority&&b.priority!=='Normal'?' &middot; <span style="color:var(--red)">'+escHtml(b.priority)+'</span>':'')+'</div>'+
+              '</div>'+
+              '<div class="pending-actions">'+
+                '<button class="btn-approve" data-bid="'+bid+'">Approve</button>'+
+                '<button class="btn-reject" data-bid="'+bid+'">Reject</button>'+
+              '</div>'+
+            '</div>';
+          }).join('');
+          bookList.querySelectorAll('.btn-approve').forEach(btn=>{ btn.onclick=()=>approveBooking(btn.dataset.bid); });
+          bookList.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectBooking(btn.dataset.bid); });
+        }
+      }
+
+      /* — Extension rows — */
+      if(extList){
+        if(!pendingExts.length){ extList.innerHTML='<div class="pending-empty">No pending extension requests.</div>'; }
+        else{
+          extList.innerHTML=pendingExts.map(([bid,b])=>{
+            const ex=b.extensionRequest;
+            const oldEnd=b.endDate?new Date(b.endDate).toLocaleDateString():'?';
+            const newEnd=ex.newEndDate?new Date(ex.newEndDate).toLocaleDateString():'?';
+            const who=ex.requestedBy||b.requestedBy||'unknown';
+            const label=escHtml(b.title||b.facility||'Booking');
+            return '<div class="pending-row">'+
+              '<div class="pending-info">'+
+                '<div class="pending-name">'+label+'</div>'+
+                '<div class="pending-meta">@'+escHtml(who)+' &middot; extend to '+newEnd+
+                  (ex.reason?' &middot; "'+escHtml(ex.reason.slice(0,60))+(ex.reason.length>60?'…':'')+'"':'')+'</div>'+
+              '</div>'+
+              '<div class="pending-actions">'+
+                '<button class="btn-approve" data-bid="'+bid+'" data-newend="'+escAttr(ex.newEndDate||'')+'">Approve</button>'+
+                '<button class="btn-reject" data-bid="'+bid+'">Reject</button>'+
+              '</div>'+
+            '</div>';
+          }).join('');
+          extList.querySelectorAll('.btn-approve').forEach(btn=>{ btn.onclick=()=>approveExtension(btn.dataset.bid,btn.dataset.newend); });
+          extList.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectExtension(btn.dataset.bid); });
+        }
+      }
+    });
+  }
+
+  /* helpers */
+  function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  window.FASTER_toggleTheme=function(){
+    var isLight=document.documentElement.getAttribute('data-theme')==='light';
+    if(isLight){document.documentElement.removeAttribute('data-theme');localStorage.setItem('faster_theme','dark');}
+    else{document.documentElement.setAttribute('data-theme','light');localStorage.setItem('faster_theme','light');}
+    var btn=document.getElementById('faster-theme-btn');
+    if(btn){btn.textContent=isLight?'☀️':'🌙';btn.title=isLight?'Switch to light mode':'Switch to dark mode';}
+  };
+  /* Sync button icon to current theme on load */
+  (function(){var b=document.getElementById('faster-theme-btn');if(b&&document.documentElement.getAttribute('data-theme')==='light'){b.textContent='🌙';b.title='Switch to dark mode';}})();
+  function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+
+  /* ── Booking approve / reject ─────────────────────────────────────────── */
+  window.approveBooking=async function(bid){
+    if(!db) return;
+    try{
+      await db.ref('faster_planning/'+bid+'/status').set('Approved');
+      _toast('Booking approved!','ok');
+    }catch(e){ _toast('Error approving booking','err'); console.error(e); }
+  };
+  window.rejectBooking=async function(bid){
+    if(!confirm('Reject this booking request?')) return;
+    if(!db) return;
+    try{
+      await db.ref('faster_planning/'+bid+'/status').set('Rejected');
+      _toast('Booking rejected.','warn');
+    }catch(e){ _toast('Error rejecting booking','err'); console.error(e); }
+  };
+
+  /* ── Extension approve / reject ──────────────────────────────────────── */
+  window.approveExtension=async function(bid,newEndDate){
+    if(!db) return;
+    try{
+      const updates={};
+      if(newEndDate) updates['faster_planning/'+bid+'/endDate']=newEndDate;
+      updates['faster_planning/'+bid+'/extensionRequest/status']='approved';
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedAt']=new Date().toISOString();
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedBy']=sessionStorage.getItem(UNAME_KEY)||'admin';
+      await db.ref().update(updates);
+      _toast('Extension approved!','ok');
+    }catch(e){ _toast('Error approving extension','err'); console.error(e); }
+  };
+  window.rejectExtension=async function(bid){
+    if(!confirm('Reject this extension request?')) return;
+    if(!db) return;
+    try{
+      const updates={};
+      updates['faster_planning/'+bid+'/extensionRequest/status']='rejected';
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedAt']=new Date().toISOString();
+      updates['faster_planning/'+bid+'/extensionRequest/resolvedBy']=sessionStorage.getItem(UNAME_KEY)||'admin';
+      await db.ref().update(updates);
+      _toast('Extension rejected.','warn');
+    }catch(e){ _toast('Error rejecting extension','err'); console.error(e); }
+  };
 
   window.approveRequest=async function(rid,username,name,passwordHash){
     if(!db) return;
@@ -1189,11 +1500,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(!db){res.innerHTML='<div id="gs-loading">Connecting\u2026</div>';return;}
     res.innerHTML='<div id="gs-loading">Searching\u2026</div>';
     const paths=[
-      {path:'faster_orders',  module:'Orders',  icon:'\ud83d\udce6',nameKey:'item'},
-      {path:'faster_chemicals',module:'Chemicals',icon:'\ud83e\uddea',nameKey:'name'},
-      {path:'faster_assets_v5',module:'Assets', icon:'\ud83d\udd2c',nameKey:'name'},
-      {path:'faster_planning', module:'Planning',icon:'\ud83d\udcc5',nameKey:'title'},
-      {path:'faster_safety',   module:'Safety',  icon:'\ud83d\udee1\ufe0f',nameKey:'title'}
+      {path:'faster_orders',        module:'Orders',   icon:'📦',nameKey:'item',  href:'orders.html'},
+      {path:'faster_chemicals',     module:'Chemicals',icon:'🧪',nameKey:'name',  href:'chemicals.html'},
+      {path:'faster_assets_v5',     module:'Assets',   icon:'🔬',nameKey:'name',  href:'assets.html'},
+      {path:'faster_planning',      module:'Planning', icon:'📅',nameKey:'title', href:'planning.html'},
+      {path:'faster_safety/reports',module:'Safety',   icon:'🛡️',nameKey:'title', href:'safety.html'}
     ];
     gsItems=[];let done=0;
     paths.forEach(p=>{
@@ -1202,10 +1513,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         Object.values(val).forEach(item=>{
           if(typeof item!=='object')return;
           const name=(item[p.nameKey]||item.name||item.item||item.title||'').toString().toLowerCase();
-          const desc=(item.description||item.desc||item.comments||'').toString().toLowerCase();
+          const desc=(item.description||item.desc||item.comments||item.location||'').toString().toLowerCase();
           if(name.includes(q)||desc.includes(q)){
             const dn=item[p.nameKey]||item.name||item.item||item.title||'(untitled)';
-            gsItems.push({icon:p.icon,module:p.module,name:dn,sub:item.status||item.location||'',href:p.path.replace('faster_','').replace('_v5','').replace('_','')+'.html'});
+            gsItems.push({icon:p.icon,module:p.module,name:dn,sub:item.status||item.location||item.severity||'',href:p.href});
           }
         });
         done++;if(done===paths.length)renderGSResults();
@@ -1236,11 +1547,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* ── Activity feed ───────────────────────────────────────────────────── */
   const AF_SOURCES=[
-    {path:'faster_orders',   icon:'\ud83d\udce6',module:'Orders',   labelKey:'item', timeKey:'created'},
-    {path:'faster_chemicals',icon:'\ud83e\uddea',module:'Chemicals',labelKey:'name', timeKey:'updatedAt'},
-    {path:'faster_assets_v5',icon:'\ud83d\udd2c',module:'Assets',   labelKey:'name', timeKey:'updatedAt'},
-    {path:'faster_safety',   icon:'\ud83d\udee1\ufe0f',module:'Safety',   labelKey:'title',timeKey:'createdAt'},
-    {path:'faster_planning', icon:'\ud83d\udcc5',module:'Planning', labelKey:'title',timeKey:'start'}
+    {path:'faster_orders',        icon:'📦',module:'Orders',   labelKey:'item',  timeKey:'created',   href:'orders.html'},
+    {path:'faster_chemicals',     icon:'🧪',module:'Chemicals',labelKey:'name',  timeKey:'addedAt',   href:'chemicals.html'},
+    {path:'faster_assets_v5',     icon:'🔬',module:'Assets',   labelKey:'name',  timeKey:'addedAt',   href:'assets.html'},
+    {path:'faster_safety/reports',icon:'🛡️',module:'Safety',   labelKey:'title', timeKey:'reportedAt',href:'safety.html'},
+    {path:'faster_planning',      icon:'📅',module:'Planning', labelKey:'title', timeKey:'startDate', href:'planning.html'}
   ];
   let afEvents=[];
   function timeAgo(ts){
@@ -1254,10 +1565,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     const empty=document.getElementById('af-empty');
     if(!afEvents.length){if(empty)empty.style.display='';return;}
     if(empty)empty.style.display='none';
-    list.innerHTML=afEvents.slice(0,15).map(ev=>
-      '<div class="af-item"><div class="af-item-icon">'+ev.icon+'</div>'+
-      '<div class="af-item-body"><div class="af-item-msg"><strong>'+ev.module+':</strong> '+ev.label+'</div>'+
-      '<div class="af-item-meta">'+timeAgo(ev.time)+'</div></div></div>'
+    list.innerHTML=afEvents.slice(0,20).map(ev=>
+      '<a class="af-item" href="'+(ev.href||'#')+'" style="text-decoration:none;color:inherit">'+
+        '<div class="af-item-icon">'+ev.icon+'</div>'+
+        '<div class="af-item-body">'+
+          '<div class="af-item-msg"><strong>'+ev.module+':</strong> '+escHtml(ev.label)+'</div>'+
+          '<div class="af-item-meta">'+timeAgo(ev.time)+'</div>'+
+        '</div>'+
+      '</a>'
     ).join('');
   }
 
@@ -1284,19 +1599,25 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       }catch(e){console.warn('Seed skipped:',e);}
     })();
 
-    /* Stat counter map: Firebase path → stat element id */
+    /* Safety stat listens at root to count reports */
+    db.ref('faster_safety/reports').on('value',snap=>{
+      const count=Object.keys(snap.val()||{}).length;
+      const el=document.getElementById('stat-safety');
+      if(el) el.textContent=count.toLocaleString();
+    });
+
+    /* Stat counters for other paths */
     const STAT_MAP={
       'faster_orders':'stat-orders',
       'faster_chemicals':'stat-chemicals',
       'faster_assets_v5':'stat-assets',
-      'faster_planning':'stat-bookings',
-      'faster_safety':'stat-safety'
+      'faster_planning':'stat-bookings'
     };
 
     AF_SOURCES.forEach(src=>{
       db.ref(src.path).on('value',snap=>{
         const val=snap.val()||{};
-        /* Update stat counter */
+        /* Update stat counter (not safety — handled separately above) */
         const statId=STAT_MAP[src.path];
         if(statId){
           const count=Object.values(val).filter(v=>typeof v==='object').length;
@@ -1307,14 +1628,42 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         afEvents=afEvents.filter(e=>e.module!==src.module);
         Object.values(val).forEach(item=>{
           if(typeof item!=='object')return;
-          afEvents.push({icon:src.icon,module:src.module,label:item[src.labelKey]||item.name||item.item||item.title||'(item)',time:item[src.timeKey]||item.updatedAt||item.createdAt||item.created||''});
+          const label=item[src.labelKey]||item.name||item.item||item.title||'(item)';
+          const time=item[src.timeKey]||item.updatedAt||item.addedAt||item.createdAt||item.created||'';
+          afEvents.push({icon:src.icon,module:src.module,label,time,href:src.href});
         });
         afEvents.sort((a,b)=>new Date(b.time)-new Date(a.time));
         renderAF();
       });
     });
 
-    if(sessionStorage.getItem(ROLE_KEY)==='admin'){ loadMembers(); loadPendingRequests(); }
+    /* Chemical expiry alerts */
+    db.ref('faster_chemicals').on('value',function(snap){
+      const all=Object.values(snap.val()||{}).filter(c=>c&&typeof c==='object');
+      const now=new Date(); now.setHours(0,0,0,0);
+      const soon=new Date(now); soon.setDate(soon.getDate()+30);
+      const expired=[], expiring=[];
+      all.forEach(function(c){
+        if(!c.expiryDate) return;
+        const d=new Date(c.expiryDate);
+        if(isNaN(d)) return;
+        if(d<now) expired.push(c.name);
+        else if(d<=soon) expiring.push(c.name);
+      });
+      const banner=document.getElementById('expiry-banner');
+      const title=document.getElementById('expiry-title');
+      const list=document.getElementById('expiry-list');
+      if(!banner) return;
+      if(!expired.length&&!expiring.length){ banner.style.display='none'; return; }
+      banner.style.display='';
+      const parts=[];
+      if(expired.length) parts.push('🔴 Expired: '+expired.slice(0,3).map(escHtml).join(', ')+(expired.length>3?' +'+( expired.length-3)+' more':''));
+      if(expiring.length) parts.push('🟡 Expiring soon: '+expiring.slice(0,3).map(escHtml).join(', ')+(expiring.length>3?' +'+(expiring.length-3)+' more':''));
+      if(title) title.textContent=(expired.length+expiring.length)+' chemical'+(expired.length+expiring.length>1?'s':'')+' need attention';
+      if(list) list.innerHTML=parts.join(' &nbsp;·&nbsp; ');
+    });
+
+    if(sessionStorage.getItem(ROLE_KEY)==='admin'){ loadMembers(); loadPendingRequests(); loadPendingPlanning(); }
   }catch(e){console.warn('Firebase init skipped:',e.message);}
 
 })();

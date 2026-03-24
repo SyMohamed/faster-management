@@ -66,6 +66,65 @@ input, button, select, textarea { font-size: inherit; }
   --rxl: 16px;
 }
 
+/* ─── Light mode token overrides ─────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:       #f0f4f8;
+  --surface:  #ffffff;
+  --surface2: #f5f8fb;
+  --surface3: #edf2f7;
+  --s1: #ffffff;
+  --s2: #f5f8fb;
+  --s3: #edf2f7;
+  --s4: #e2e8f0;
+
+  --border:  #cbd5e1;
+  --border2: #94a3b8;
+  --b1: #cbd5e1;
+  --b2: #94a3b8;
+  --b3: #64748b;
+
+  --text:  #0f172a;
+  --muted: #475569;
+  --muted2:#64748b;
+  --t1: #0f172a;
+  --t2: #475569;
+  --t3: #64748b;
+  --t4: #94a3b8;
+
+  /* Accent stays cyan, slightly deepened for light backgrounds */
+  --ac:     #0099bb;
+  --accent: #0099bb;
+  --accent2:#0077aa;
+
+  /* Semantic colours stay the same — they're vivid enough on light too */
+}
+
+/* Inputs/selects in light mode */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: #fff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: #94a3b8; }
+
+/* ─── Theme toggle button (injected by auth.js + index.html) ─────────────── */
+#faster-theme-btn {
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: 8px;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: border-color .15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+#faster-theme-btn:hover { border-color: var(--ac); }
+
 /* Google Fonts — unified stack loaded once via shared.css */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FASTER Lab — Orders Tracker</title>
+<script>/* apply theme before first paint */(function(){if(localStorage.getItem("faster_theme")==="light")document.documentElement.setAttribute("data-theme","light");else document.documentElement.removeAttribute("data-theme");})();</script>
 <link rel="stylesheet" href="shared.css">
 <script src="auth.js"></script>
 
@@ -191,7 +192,7 @@ body{font-size:1rem}
   <div class="header-right">
     <div id="conn-pill" class="offline-pill"><div class="live-dot" style="background:var(--delayed)"></div>Offline</div>
     <button class="btn-ghost" onclick="exportCSV()">↓ Export CSV</button>
-    <button class="btn" onclick="openAdd()" id="add-btn" disabled>+ New Order</button>
+    <button class="btn" onclick="openAdd()" id="add-btn">+ New Order</button>
   </div>
 </div>
 

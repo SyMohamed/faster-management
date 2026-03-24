@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FASTER Lab — Facility Planning</title>
+<script>/* apply theme before first paint */(function(){if(localStorage.getItem("faster_theme")==="light")document.documentElement.setAttribute("data-theme","light");else document.documentElement.removeAttribute("data-theme");})();</script>
 <link rel="stylesheet" href="shared.css">
 <script src="auth.js"></script>
 <style>
@@ -492,7 +493,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
       <button class="mx" onclick="cm('m-det')">✕</button></div>
     <div id="m-det-body"></div>
     <div class="mftr">
-      <button class="btn-del" id="det-del" style="margin-right:auto">Delete</button>
+      <button class="btn-del admin-only" id="det-del" style="margin-right:auto">Delete</button>
       <button class="btn-o btn-sm" onclick="cm('m-det')">Close</button>
       <button class="btn btn-sm" id="det-edit">✏️ Edit</button>
     </div>
@@ -759,7 +760,7 @@ function renderList() {
             <button class="btn btn-sm" style="background:var(--am);color:#000;font-size:10px;padding:3px 9px" onclick="event.stopPropagation();approveExtension('${b._id}')">Approve Ext.</button>
             <button class="btn-o btn-sm" style="color:var(--red);border-color:rgba(248,81,73,.3);font-size:10px;padding:3px 9px" onclick="event.stopPropagation();rejectExtension('${b._id}')">Reject Ext.</button>
           </div>` : ""}
-        ${IS_ADMIN ? `<button class="btn-o btn-sm" style="font-size:10px" onclick="event.stopPropagation();openEdit('${b._id}')">Edit</button>` : ""}
+        ${IS_ADMIN || b.requestedBy === (sessionStorage.getItem('faster_user_v1')||'') ? `<button class="btn-o btn-sm" style="font-size:10px" onclick="event.stopPropagation();openEdit('${b._id}')">Edit</button>` : ""}
       </div>
     </div>`;
   }).join("");
@@ -876,6 +877,9 @@ function openDet(id) {
     ${extHTML}
     ${extFormHTML}
     ${adminModifyHTML}`;
+  const me = sessionStorage.getItem('faster_user_v1') || '';
+  const canEdit = IS_ADMIN || b.requestedBy === me;
+  document.getElementById("det-edit").style.display = canEdit ? '' : 'none';
   document.getElementById("det-edit").onclick = () => { cm("m-det"); openEdit(id); };
   document.getElementById("det-del").onclick = () => { editId = id; delBook(); };
   document.getElementById("m-det").classList.add("on");
@@ -913,6 +917,8 @@ function openBook(dateStr, fac) {
 function openEdit(id) {
   editId = id;
   const b = DB[id]; if (!b) return;
+  const me = sessionStorage.getItem('faster_user_v1') || '';
+  if (!IS_ADMIN && b.requestedBy !== me) { toast("You can only edit your own bookings","tr"); return; }
   document.getElementById("m-title").textContent = "Edit Booking";
   document.getElementById("m-del").style.display = "inline-flex";
   clearForm();
@@ -1002,6 +1008,7 @@ function saveBook() {
 }
 
 function delBook() {
+  if (!IS_ADMIN) { toast("Only admins can delete bookings","tb"); return; }
   const id = editId;
   if (!id || !confirm("Delete this booking?")) return;
   cm("m-book"); cm("m-det");
@@ -1026,14 +1033,20 @@ function toast(msg, cls="tg") {
 // ════════════════════════════════════════════════
 function approveBook(id) {
   if (!IS_ADMIN) return;
-  dbRef.child(id).update({ status: 'Approved' })
-    .then(() => toast('Booking approved!', 'tg'));
+  dbRef.child(id).update({
+    status: 'Approved',
+    resolvedAt: new Date().toISOString(),
+    resolvedBy: sessionStorage.getItem('faster_user_v1') || 'Admin'
+  }).then(() => toast('Booking approved!', 'tg'));
 }
 function rejectBook(id) {
   if (!IS_ADMIN) return;
   if (!confirm('Reject this booking request?')) return;
-  dbRef.child(id).update({ status: 'Rejected' })
-    .then(() => toast('Booking rejected', 'tb'));
+  dbRef.child(id).update({
+    status: 'Rejected',
+    resolvedAt: new Date().toISOString(),
+    resolvedBy: sessionStorage.getItem('faster_user_v1') || 'Admin'
+  }).then(() => toast('Booking rejected', 'tb'));
 }
 
 // ════════════════════════════════════════════════
