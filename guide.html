@@ -154,6 +154,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .mftr{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--br)}
 
 /* COLOR SWATCHES */
+.icon-chip{font-size:16px;padding:3px 6px;border-radius:6px;background:var(--s3);border:1px solid var(--br);cursor:pointer;line-height:1;transition:background .15s,transform .1s;user-select:none}
+.icon-chip:hover{background:var(--s4);transform:scale(1.15)}
 .cswatch{width:22px;height:22px;border-radius:50%;background:var(--c);cursor:pointer;
   border:2px solid transparent;transition:all .15s;flex-shrink:0}
 .cswatch:hover{transform:scale(1.15)}
@@ -247,7 +249,24 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
     <div class="mhdr"><h2 id="cat-modal-title">Add Category</h2><button class="mx" onclick="cm('m-cat')">✕</button></div>
     <div class="fg"><label>Name *</label><input id="fc-name" placeholder="e.g. Equipment Manuals"></div>
     <div class="fg" style="flex-direction:row;align-items:center;gap:12px">
-      <div style="flex:1"><label>Icon (emoji)</label><input id="fc-icon" placeholder="📖" maxlength="4"></div>
+      <div style="flex:1">
+        <label>Icon (emoji)</label>
+        <input id="fc-icon" placeholder="📖" maxlength="4">
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">
+          <span class="icon-chip" title="Laser" onclick="document.getElementById('fc-icon').value=this.textContent">🔴</span>
+          <span class="icon-chip" title="Detector" onclick="document.getElementById('fc-icon').value=this.textContent">📡</span>
+          <span class="icon-chip" title="Optics / lens" onclick="document.getElementById('fc-icon').value=this.textContent">🔭</span>
+          <span class="icon-chip" title="Camera / sensor" onclick="document.getElementById('fc-icon').value=this.textContent">📷</span>
+          <span class="icon-chip" title="Microscope" onclick="document.getElementById('fc-icon').value=this.textContent">🔬</span>
+          <span class="icon-chip" title="Power / electronics" onclick="document.getElementById('fc-icon').value=this.textContent">⚡</span>
+          <span class="icon-chip" title="Motor / mechanics" onclick="document.getElementById('fc-icon').value=this.textContent">⚙️</span>
+          <span class="icon-chip" title="Fibre / cable" onclick="document.getElementById('fc-icon').value=this.textContent">🌀</span>
+          <span class="icon-chip" title="Software / firmware" onclick="document.getElementById('fc-icon').value=this.textContent">💾</span>
+          <span class="icon-chip" title="Safety" onclick="document.getElementById('fc-icon').value=this.textContent">⚠️</span>
+          <span class="icon-chip" title="Manual / document" onclick="document.getElementById('fc-icon').value=this.textContent">📄</span>
+          <span class="icon-chip" title="Tools / maintenance" onclick="document.getElementById('fc-icon').value=this.textContent">🔧</span>
+        </div>
+      </div>
       <div style="flex:1"><label>Colour</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px" id="color-swatches">
           <div class="cswatch" style="--c:#00b4d8" onclick="selColor('#00b4d8')"></div>
