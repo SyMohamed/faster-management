@@ -341,9 +341,22 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   border-radius:10px;padding:10px 16px;cursor:pointer;transition:all .18s;min-width:100px}
 .stat-card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .stat-icon{font-size:20px;line-height:1}
-.stat-val{font-size:20px;font-weight:800;color:var(--t1);font-family:var(--mono);line-height:1}
+.stat-val{font-size:20px;font-weight:800;color:var(--t1);font-family:var(--mono);line-height:1;transition:color .2s}
 .stat-lbl{font-size:11px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+@keyframes stat-pop{0%{transform:scale(1.25);color:var(--ac)}100%{transform:scale(1);color:var(--t1)}}
+.stat-val.pop{animation:stat-pop .4s ease forwards}
 
+/* ── Quick actions strip ── */
+#quick-actions{display:none;padding:0 40px 20px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box}
+.qa-wrap{display:flex;gap:8px;flex-wrap:wrap}
+.qa-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;text-decoration:none;border:1px solid var(--b2);background:var(--s2);color:var(--t2);
+  transition:border-color .15s,color .15s,background .15s,transform .1s}
+.qa-btn:hover{background:var(--s3);color:var(--t1);transform:translateY(-1px)}
+.qa-btn.qa-primary{border-color:rgba(0,204,245,.4);color:var(--ac);background:rgba(0,204,245,.06)}
+.qa-btn.qa-primary:hover{background:rgba(0,204,245,.12);border-color:var(--ac)}
+.qa-btn.qa-danger{border-color:rgba(248,81,73,.4);color:#f85149;background:rgba(248,81,73,.06)}
+.qa-btn.qa-danger:hover{background:rgba(248,81,73,.12);border-color:#f85149}
 /* ── search overlay (for index page) ── */
 #gs-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
   z-index:9000;align-items:flex-start;justify-content:center;padding-top:10vh}
@@ -695,6 +708,18 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   </div>
 </div>
 
+<!-- ── Quick actions ─────────────────────────────────────────────────── -->
+<div id="quick-actions">
+  <div class="qa-wrap">
+    <a href="orders.html" class="qa-btn qa-primary">📦 New Order</a>
+    <a href="planning.html" class="qa-btn qa-primary">📅 Book Facility</a>
+    <a href="safety.html" class="qa-btn qa-danger">🛡️ Report Issue</a>
+    <a href="chemicals.html" class="qa-btn">🧪 Chemicals</a>
+    <a href="assets.html" class="qa-btn">🔬 Assets</a>
+    <a href="guide.html" class="qa-btn">🚀 Guide</a>
+  </div>
+</div>
+
 <!-- ── Expiry alerts banner ───────────────────────────────────────────── -->
 <div id="expiry-banner" style="display:none;padding:0 40px 14px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box">
   <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -951,6 +976,23 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   let db = null;
   let _sel = null; /* { username, name, hash, color } */
 
+  /* ── Animated stat counter ───────────────────────────────────────────── */
+  function animateStat(el, target){
+    const prev=parseInt(el.dataset.val||'-1',10);
+    el.dataset.val=target;
+    if(prev===target) return;
+    const duration=700, startTime=performance.now();
+    const from=prev<0?0:prev;
+    function tick(now){
+      const p=Math.min((now-startTime)/duration,1);
+      const ease=1-Math.pow(1-p,3);
+      el.textContent=Math.round(from+(target-from)*ease).toLocaleString();
+      if(p<1) requestAnimationFrame(tick);
+      else{ el.textContent=target.toLocaleString(); el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),400); }
+    }
+    requestAnimationFrame(tick);
+  }
+
   function sha256(s){
     return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))
       .then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));
@@ -992,17 +1034,27 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       const h=new Date().getHours();
       const tod=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
       const isGuest=(sessionStorage.getItem(ROLE_KEY)==='viewer');
-      _toast(isGuest?'Welcome, Guest! 👋':tod+', '+first+'! Welcome back 👋','ok');
+      const today=new Date().toDateString();
+      const lastDay=localStorage.getItem('faster_last_day');
+      const isFirstToday=lastDay!==today;
+      if(!isGuest) localStorage.setItem('faster_last_day',today);
+      const msg=isGuest
+        ? 'Welcome, Guest! View-only mode 👁️'
+        : isFirstToday
+          ? tod+', '+first+'! Great to see you today 🌟'
+          : 'Welcome back, '+first+'! 👋';
+      _toast(msg,'ok');
     }
   }
 
   /* ── Direct login (username + password) ────────────────────────────── */
   window.showDirectLogin=function(){
-    document.getElementById('ml-user').value='';
+    const lastUser=localStorage.getItem('faster_last_user')||'';
+    document.getElementById('ml-user').value=lastUser;
     document.getElementById('ml-pass').value='';
     document.getElementById('ml-err').textContent='';
     document.getElementById('ml-overlay').classList.add('open');
-    setTimeout(()=>document.getElementById('ml-user').focus(),120);
+    setTimeout(()=>document.getElementById(lastUser?'ml-pass':'ml-user').focus(),120);
   };
   window.closeDirectLogin=function(){
     document.getElementById('ml-overlay').classList.remove('open');
@@ -1030,6 +1082,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       if(role==='admin') sessionStorage.setItem('fa','1');
       if(user.photoURL) sessionStorage.setItem('faster_photo_v1',user.photoURL);
       else sessionStorage.removeItem('faster_photo_v1');
+      localStorage.setItem('faster_last_user', username);
       document.getElementById('ml-overlay').classList.remove('open');
       afterLogin();
     }catch(e){ errEl.textContent='Connection error — try again'; console.error(e); }
@@ -1143,7 +1196,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(greet) greet.textContent=tod+', '+name.split(' ')[0]+'!';
     const dateEl=document.getElementById('ws-date');
     if(dateEl) dateEl.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    if(typeof window._startWsTagline==='function') window._startWsTagline();
+    if(typeof window._startWsTagline==='function') window._startWsTagline(name.split(' ')[0]);
   }
 
   /* ── Profile photo upload ────────────────────────────────────────────── */
@@ -1312,6 +1365,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function showWorkspace(){
     const shell=document.getElementById('workspace-shell');
     if(shell) shell.style.display='block';
+    const qa=document.getElementById('quick-actions');
+    if(qa) qa.style.display='';
     /* Copy logo from login screen into nav */
     const loginLogo=document.querySelector('#login-screen .wau-header img');
     const navLogo=document.getElementById('nav-logo');
@@ -1677,14 +1732,27 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     const empty=document.getElementById('af-empty');
     if(!afEvents.length){if(empty)empty.style.display='';return;}
     if(empty)empty.style.display='none';
-    list.innerHTML=afEvents.slice(0,20).map(ev=>
-      '<a class="af-item" href="'+(ev.href||'#')+'" style="text-decoration:none;color:inherit">'+
-        '<div class="af-item-icon">'+ev.icon+'</div>'+
-        '<div class="af-item-body">'+
-          '<div class="af-item-msg"><strong>'+ev.module+':</strong> '+escHtml(ev.label)+'</div>'+
-          '<div class="af-item-meta">'+timeAgo(ev.time)+'</div>'+
-        '</div>'+
-      '</a>'
+    const t0=new Date(); t0.setHours(0,0,0,0);
+    const t1=new Date(t0); t1.setDate(t1.getDate()-1);
+    const groups=[{label:'Today',items:[]},{label:'Yesterday',items:[]},{label:'Earlier',items:[]}];
+    afEvents.slice(0,25).forEach(ev=>{
+      const d=ev.time?new Date(ev.time):null;
+      const day=d&&!isNaN(d)?new Date(d.setHours(0,0,0,0)):null;
+      if(!day||+day===+t0) groups[0].items.push(ev);
+      else if(+day===+t1) groups[1].items.push(ev);
+      else groups[2].items.push(ev);
+    });
+    list.innerHTML=groups.filter(g=>g.items.length).map(g=>
+      '<div class="af-date-hdr">'+g.label+'</div>'+
+      g.items.map(ev=>
+        '<a class="af-item" href="'+(ev.href||'#')+'" style="text-decoration:none;color:inherit">'+
+          '<div class="af-item-icon">'+ev.icon+'</div>'+
+          '<div class="af-item-body">'+
+            '<div class="af-item-msg"><strong>'+ev.module+':</strong> '+escHtml(ev.label)+'</div>'+
+            '<div class="af-item-meta">'+timeAgo(ev.time)+'</div>'+
+          '</div>'+
+        '</a>'
+      ).join('')
     ).join('');
   }
 
@@ -1883,7 +1951,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     db.ref('faster_safety/reports').on('value',snap=>{
       const count=Object.keys(snap.val()||{}).length;
       const el=document.getElementById('stat-safety');
-      if(el) el.textContent=count.toLocaleString();
+      if(el) animateStat(el,count);
     });
 
     /* Kickstarter docs count */
@@ -1910,7 +1978,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         if(statId){
           const count=Object.values(val).filter(v=>typeof v==='object').length;
           const el=document.getElementById(statId);
-          if(el) el.textContent=count.toLocaleString();
+          if(el) animateStat(el,count);
         }
         /* Update activity feed */
         afEvents=afEvents.filter(e=>e.module!==src.module);
@@ -1974,16 +2042,20 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   ];
 
   const WS_TAGS = [
-    "Have a great session, innovator!",
+    "Have a great session, {name}!",
     "Science is best done together.",
     "Precision. Passion. Progress.",
-    "You are making a difference.",
-    "Welcome to the FASTER family.",
+    "You're making a difference, {name}.",
+    "Let's do great things today.",
     "Keeping everyone safe, every day.",
     "Innovation starts here.",
     "Where curiosity meets discovery.",
     "Pushing the boundaries of photonics.",
-    "Part of something extraordinary."
+    "Part of something extraordinary.",
+    "The lab runs better with you here.",
+    "Good science is a team sport.",
+    "Every experiment counts, {name}.",
+    "You bring the passion. We handle the rest."
   ];
 
   function rotateTags(spanId, tags, inClass, outClass, hold) {
@@ -2020,8 +2092,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   var _loginRotator = rotateTags('ls-tagline-text', LOGIN_TAGS, 'ls-in', 'ls-out', 3400);
 
   // Expose a function to start workspace taglines after login
-  window._startWsTagline = function() {
-    rotateTags('ws-tagline-text', WS_TAGS, 'ws-in', 'ws-out', 3800);
+  window._startWsTagline = function(firstName) {
+    const name = firstName || 'innovator';
+    const tags = WS_TAGS.map(function(t){ return t.replace(/\{name\}/g, name); });
+    rotateTags('ws-tagline-text', tags, 'ws-in', 'ws-out', 3800);
   };
 })();
 </script>
