@@ -200,6 +200,28 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .admin-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px}
 .admin-panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .admin-panel-header h3{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+/* Monthly report panel */
+.rp-recipients{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.rp-tag{display:inline-flex;align-items:center;gap:5px;background:var(--s2);
+  border:1px solid var(--b1);border-radius:20px;padding:3px 10px;font-size:12px;
+  font-family:var(--mono);color:var(--t2)}
+.rp-tag button{background:none;border:none;cursor:pointer;color:var(--t3);
+  font-size:13px;line-height:1;padding:0;margin-left:2px}
+.rp-tag button:hover{color:var(--red)}
+.rp-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.rp-input{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:7px 12px;color:var(--t1);font-size:13px;font-family:var(--mono)}
+.rp-input:focus{outline:none;border-color:var(--ac)}
+.rp-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:6px;margin-top:14px}
+.rp-status{font-size:12px;font-family:var(--mono);color:var(--t3);margin-top:10px;
+  min-height:18px}
+.rp-status.ok{color:var(--green)}
+.rp-status.err{color:var(--red)}
+.rp-status.info{color:var(--ac)}
+.rp-monthly-reminder{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);
+  border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;
+  align-items:center;gap:12px;flex-wrap:wrap}
 /* Notification bell */
 #notif-wrap{position:relative}
 #notif-btn{background:var(--s2);border:1px solid var(--b1);border-radius:8px;width:34px;height:34px;
@@ -443,6 +465,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
 </style>
 <link rel="stylesheet" href="shared.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -832,6 +856,49 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
               <span class="login-err" id="add-member-err" style="font-size:12px;min-height:auto"></span>
             </div>
           </div>
+        </div>
+      </div>
+      <!-- Monthly data export -->
+      <div class="admin-panel collapsed" id="report-panel">
+        <div class="admin-panel-header collapsible" onclick="togglePanel('report-panel')">
+          <h3>📧 Monthly Data Export <span class="panel-chevron">▾</span></h3>
+          <span style="font-size:11px;color:var(--accent);font-family:var(--mono)">Admin</span>
+        </div>
+        <div class="admin-panel-body">
+          <div id="report-monthly-reminder" style="display:none" class="rp-monthly-reminder">
+            <span style="font-size:18px">📬</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:#f59e0b">Monthly report is due!</div>
+              <div style="font-size:12px;color:var(--t3);margin-top:2px" id="report-due-msg"></div>
+            </div>
+            <button class="btn btn-sm" onclick="sendMonthlyReport()" style="background:#f59e0b;color:#000;border:none">Send Now</button>
+          </div>
+
+          <div class="rp-label">Recipients</div>
+          <div class="rp-recipients" id="rp-tags"></div>
+          <div class="rp-row">
+            <input class="rp-input" id="rp-email-input" type="email" placeholder="Add email address…" onkeydown="if(event.key==='Enter')addReportRecipient()">
+            <button class="btn btn-sm" onclick="addReportRecipient()">+ Add</button>
+          </div>
+
+          <div class="rp-label">EmailJS Configuration <a href="https://www.emailjs.com" target="_blank" style="font-size:10px;color:var(--ac);font-family:var(--mono);margin-left:6px;text-decoration:none">What is this? ↗</a></div>
+          <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:10px;line-height:1.6">
+            Sign up free at emailjs.com → Email Services → add Gmail → Email Templates → create template.<br>
+            Template must have variables: <code style="background:var(--s2);padding:1px 5px;border-radius:4px">to_email</code>, <code style="background:var(--s2);padding:1px 5px;border-radius:4px">month_label</code>, <code style="background:var(--s2);padding:1px 5px;border-radius:4px">message</code>.
+          </div>
+          <div class="rp-row"><input class="rp-input" id="rp-ejs-service" placeholder="Service ID  (e.g. service_xxxxxx)"></div>
+          <div class="rp-row"><input class="rp-input" id="rp-ejs-template" placeholder="Template ID  (e.g. template_xxxxxx)"></div>
+          <div class="rp-row">
+            <input class="rp-input" id="rp-ejs-pubkey" placeholder="Public Key  (e.g. xxxxxxxxxxxxxx)">
+            <button class="btn-o btn-sm" onclick="saveEmailJSConfig()">Save</button>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-sm" onclick="sendMonthlyReport()" id="rp-send-btn">📧 Send Email Report</button>
+            <button class="btn-o btn-sm" onclick="downloadReportZIP()">⬇ Download ZIP</button>
+            <span style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-left:4px">Last sent: <span id="rp-last-sent">Never</span></span>
+          </div>
+          <div class="rp-status" id="rp-status"></div>
         </div>
       </div>
     </div>
@@ -1230,7 +1297,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function showAdminPanel(){
     const p=document.getElementById('admin-members-panel');
     if(p) p.style.display='';
-    loadMembers(); loadPendingRequests(); loadPendingPlanning();
+    loadMembers(); loadPendingRequests(); loadPendingPlanning(); loadReportPanel();
   }
 
   function loadMembers(){
@@ -1574,6 +1641,174 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         '</div>'+
       '</a>'
     ).join('');
+  }
+
+  /* ══ Monthly report helpers ══════════════════════════════════════════════ */
+
+  /* Build a CSV string from an array of row-objects and a column list */
+  function toCSV(rows, cols){
+    if(!rows.length) return cols.join(',')+'\n(no data)\n';
+    const esc=v=>{ const s=String(v==null?'':v); return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s; };
+    return [cols.join(','), ...rows.map(r=>cols.map(c=>esc(r[c])).join(','))].join('\n');
+  }
+
+  /* Fetch all collections and return {orders,chemicals,assets,bookings,reports} */
+  async function fetchAllData(){
+    const [o,c,a,b,s]=await Promise.all([
+      db.ref('faster_orders').once('value'),
+      db.ref('faster_chemicals').once('value'),
+      db.ref('faster_assets_v5').once('value'),
+      db.ref('faster_planning').once('value'),
+      db.ref('faster_safety/reports').once('value')
+    ]);
+    return {
+      orders:    Object.values(o.val()||{}),
+      chemicals: Object.values(c.val()||{}),
+      assets:    Object.values(a.val()||{}),
+      bookings:  Object.values(b.val()||{}),
+      reports:   Object.values(s.val()||{})
+    };
+  }
+
+  /* Generate ZIP blob containing one CSV per module */
+  async function buildReportZIP(){
+    const d=await fetchAllData();
+    const zip=new JSZip();
+    zip.file('orders.csv',     toCSV(d.orders,   ['item','status','pr','po','requester','created','delivery','comments','addedBy']));
+    zip.file('chemicals.csv',  toCSV(d.chemicals, ['name','cas','status','location','owner','user','quantity','purity','expiryDate','addedAt']));
+    zip.file('assets.csv',     toCSV(d.assets,    ['name','category','status','location','owner','manufacturer','model','serialNumber','wavelength','addedAt']));
+    zip.file('bookings.csv',   toCSV(d.bookings,  ['title','facility','status','startDate','endDate','requestedBy','resolvedAt','resolvedBy']));
+    zip.file('safety_reports.csv', toCSV(d.reports,['title','severity','status','reporter','description','reportedAt','resolvedAt','resolvedBy']));
+    return zip.generateAsync({type:'base64'});
+  }
+
+  /* ── Download ZIP ─────────────────────────────────────────────────────── */
+  window.downloadReportZIP=async function(){
+    const st=document.getElementById('rp-status');
+    st.className='rp-status info'; st.textContent='Building ZIP…';
+    try{
+      const b64=await buildReportZIP();
+      const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+      const blob=new Blob([bytes],{type:'application/zip'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='faster_lab_report_'+new Date().toISOString().slice(0,7)+'.zip';
+      a.click();
+      st.className='rp-status ok'; st.textContent='ZIP downloaded ✓';
+    }catch(e){ st.className='rp-status err'; st.textContent='Error: '+e.message; }
+  };
+
+  /* ── Send via EmailJS ─────────────────────────────────────────────────── */
+  window.sendMonthlyReport=async function(){
+    const st=document.getElementById('rp-status');
+    if(!db){ st.className='rp-status err'; st.textContent='Not connected to Firebase'; return; }
+    /* Load config */
+    const cfgSnap=await db.ref('faster_config/emailjs').once('value');
+    const cfg=cfgSnap.val()||{};
+    if(!cfg.serviceId||!cfg.templateId||!cfg.publicKey){
+      st.className='rp-status err';
+      st.textContent='EmailJS not configured — fill in Service ID, Template ID and Public Key above then Save.';
+      document.getElementById('report-panel').classList.remove('collapsed');
+      return;
+    }
+    const recipSnap=await db.ref('faster_config/report_recipients').once('value');
+    const recips=recipSnap.val()||[];
+    if(!recips.length){
+      st.className='rp-status err'; st.textContent='No recipients added. Add at least one email above.';
+      return;
+    }
+    st.className='rp-status info'; st.textContent='Building data export…';
+    let b64;
+    try{ b64=await buildReportZIP(); }
+    catch(e){ st.className='rp-status err'; st.textContent='ZIP build failed: '+e.message; return; }
+
+    st.textContent='Sending email…';
+    const monthLabel=new Date().toLocaleString('default',{month:'long',year:'numeric'});
+    try{
+      emailjs.init(cfg.publicKey);
+      await emailjs.send(cfg.serviceId, cfg.templateId, {
+        to_email:    recips.join(', '),
+        month_label: monthLabel,
+        message:     'Monthly data export for FASTER Lab — '+monthLabel+'.\n\nFiles included:\n• orders.csv\n• chemicals.csv\n• assets.csv\n• bookings.csv\n• safety_reports.csv',
+        attachment_name: 'faster_lab_report_'+new Date().toISOString().slice(0,7)+'.zip',
+        attachment_data: b64
+      });
+      const now=new Date().toISOString();
+      await db.ref('faster_config/last_report_sent').set(now);
+      st.className='rp-status ok';
+      st.textContent='Report sent to '+recips.join(', ')+' ✓';
+      document.getElementById('rp-last-sent').textContent=new Date(now).toLocaleDateString();
+      document.getElementById('report-monthly-reminder').style.display='none';
+    }catch(e){
+      st.className='rp-status err';
+      st.textContent='Send failed: '+(e.text||e.message||JSON.stringify(e));
+    }
+  };
+
+  /* ── Recipient management ─────────────────────────────────────────────── */
+  function renderReportTags(recips){
+    const wrap=document.getElementById('rp-tags');
+    if(!wrap) return;
+    wrap.innerHTML=recips.length
+      ? recips.map((e,i)=>'<span class="rp-tag">'+escHtml(e)+'<button onclick="removeReportRecipient('+i+')" title="Remove">×</button></span>').join('')
+      : '<span style="font-size:12px;color:var(--t3)">No recipients yet</span>';
+  }
+  window.addReportRecipient=async function(){
+    const inp=document.getElementById('rp-email-input');
+    const val=(inp.value||'').trim();
+    if(!val||!val.includes('@')){ inp.style.borderColor='var(--red)'; setTimeout(()=>inp.style.borderColor='',1200); return; }
+    const snap=await db.ref('faster_config/report_recipients').once('value');
+    const recips=snap.val()||[];
+    if(recips.includes(val)){ inp.value=''; return; }
+    recips.push(val);
+    await db.ref('faster_config/report_recipients').set(recips);
+    inp.value='';
+    renderReportTags(recips);
+  };
+  window.removeReportRecipient=async function(idx){
+    const snap=await db.ref('faster_config/report_recipients').once('value');
+    const recips=snap.val()||[];
+    recips.splice(idx,1);
+    await db.ref('faster_config/report_recipients').set(recips);
+    renderReportTags(recips);
+  };
+
+  /* ── Save EmailJS config ──────────────────────────────────────────────── */
+  window.saveEmailJSConfig=async function(){
+    const sid=document.getElementById('rp-ejs-service').value.trim();
+    const tid=document.getElementById('rp-ejs-template').value.trim();
+    const pk=document.getElementById('rp-ejs-pubkey').value.trim();
+    if(!sid||!tid||!pk){ _toast('Fill in all three EmailJS fields','warn'); return; }
+    await db.ref('faster_config/emailjs').set({serviceId:sid,templateId:tid,publicKey:pk});
+    _toast('EmailJS config saved ✓','ok');
+  };
+
+  /* ── Load report panel data (called from showAdminPanel) ──────────────── */
+  function loadReportPanel(){
+    if(!db) return;
+    /* Recipients */
+    db.ref('faster_config/report_recipients').once('value').then(s=>renderReportTags(s.val()||[]));
+    /* EmailJS config */
+    db.ref('faster_config/emailjs').once('value').then(s=>{
+      const cfg=s.val()||{};
+      if(cfg.serviceId)  document.getElementById('rp-ejs-service').value=cfg.serviceId;
+      if(cfg.templateId) document.getElementById('rp-ejs-template').value=cfg.templateId;
+      if(cfg.publicKey)  document.getElementById('rp-ejs-pubkey').value=cfg.publicKey;
+    });
+    /* Last sent + monthly reminder */
+    db.ref('faster_config/last_report_sent').once('value').then(s=>{
+      const ts=s.val();
+      const el=document.getElementById('rp-last-sent');
+      if(!ts){ if(el) el.textContent='Never'; return; }
+      if(el) el.textContent=new Date(ts).toLocaleDateString();
+      const daysSince=Math.floor((Date.now()-new Date(ts).getTime())/86400000);
+      if(daysSince>=30){
+        const rem=document.getElementById('report-monthly-reminder');
+        const msg=document.getElementById('report-due-msg');
+        if(rem) rem.style.display='flex';
+        if(msg) msg.textContent='Last sent '+daysSince+' days ago — monthly report overdue.';
+      }
+    });
   }
 
   /* ── Firebase init ───────────────────────────────────────────────────── */

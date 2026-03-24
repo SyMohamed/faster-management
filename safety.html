@@ -397,7 +397,7 @@ body{font-size:1rem}
 <div class="view" id="view-members">
   <div class="sh">
     <div><h2>Lab Members</h2><div class="sh-sub" id="mem-sub"></div></div>
-    <button class="btn btn-sm" onclick="openAddMember()">+ Add Member</button>
+    <button class="btn btn-sm admin-only" onclick="openAddMember()">+ Add Member</button>
   </div>
   <div class="members-grid" id="members-grid"></div>
 </div>
@@ -909,7 +909,7 @@ function renderMembers() {
       avHtml = `<div class="member-av" style="background:${m.color||"#1f6feb"}">${initials(m.name)}</div>`;
     }
     return `<div class="member-card">
-      <button class="btn-o btn-sm member-edit-btn" onclick="openEditMember('${id}')">Edit</button>
+      ${IS_ADMIN || m.name === (window.FASTER_USER||'') ? `<button class="btn-o btn-sm member-edit-btn" onclick="openEditMember('${id}')">Edit</button>` : ""}
       ${avHtml}
       <div class="member-name">${esc(m.name)}</div>
       <div class="member-role">${esc(m.role||"")}</div>
@@ -1083,11 +1083,15 @@ function openAddMember() {
 function openEditMember(id) {
   editMemId = id;
   const m = MEMBERS[id]; if (!m) return;
+  if (!IS_ADMIN && m.name !== (window.FASTER_USER||'')) {
+    showToast("You can only edit your own profile","tr"); return;
+  }
   document.getElementById("m-mem-title").textContent = "Edit Member";
   document.getElementById("mem-name").value = m.name||"";
   document.getElementById("mem-role").value = m.role||"";
   document.getElementById("mem-email").value = m.email||"";
-  document.getElementById("mem-del-btn").style.display = "inline-flex";
+  /* Only admins can delete members */
+  document.getElementById("mem-del-btn").style.display = IS_ADMIN ? "inline-flex" : "none";
   memPhotoB64 = m.photo||"";
   selColor = m.color||"#1f6feb";
   if (memPhotoB64) {
@@ -1124,6 +1128,7 @@ function saveMember() {
 }
 
 function deleteMember() {
+  if (!IS_ADMIN) { showToast("Only admins can remove members","tr"); return; }
   if (!editMemId || !confirm("Remove this member?")) return;
   cm("m-member");
   refs.members.child(editMemId).remove().then(() => showToast("Member removed","tb"));
