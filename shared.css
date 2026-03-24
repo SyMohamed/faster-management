@@ -7,6 +7,11 @@
  * override any page-specific divergence.
  */
 
+/* ─── Global font-size floor (all pages) ─────────────────────────────────── */
+html { font-size: clamp(16px, 1.2vw + 4px, 22px); }
+body { font-size: clamp(18px, 1.6vw, 22px); font-family: 'DM Sans', sans-serif; }
+input, button, select, textarea { font-size: inherit; }
+
 /* ─── Unified design tokens ──────────────────────────────────────────────── */
 :root {
   /* Fonts — single consistent stack */
