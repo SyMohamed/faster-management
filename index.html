@@ -454,16 +454,22 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   }
 
   /* ── Auth state ──────────────────────────────────────────────────────── */
+  /* Called on page-load when session already exists — show workspace inline */
   function onAuthOk(){
     document.getElementById('login-screen').style.display='none';
     const name=sessionStorage.getItem(USER_KEY);
     if(name) updateUserBadge(name);
     showWorkspace();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
-    const dest=sessionStorage.getItem('faster_redirect');
-    if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
   }
   if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
+
+  /* Called after a fresh login — always redirect (no extra clicks needed) */
+  function afterLogin(){
+    const dest=sessionStorage.getItem('faster_redirect');
+    if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
+    else{ location.assign('index.html'); }
+  }
 
   /* ── Load member cards ───────────────────────────────────────────────── */
   function loadMemberCards(){
@@ -524,7 +530,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     sessionStorage.setItem(ROLE_KEY,role);
     if(role==='admin') sessionStorage.setItem('fa','1');
     document.getElementById('ml-overlay').classList.remove('open');
-    onAuthOk();
+    afterLogin();
   };
 
   /* ── Guest login (FASTER / FASTER) ──────────────────────────────────── */
@@ -547,7 +553,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     sessionStorage.setItem(UNAME_KEY,'guest');
     sessionStorage.setItem(ROLE_KEY,'viewer');
     document.getElementById('guest-overlay').classList.remove('open');
-    onAuthOk();
+    afterLogin();
   };
 
   /* ── Registration gate ───────────────────────────────────────────────── */
