@@ -315,7 +315,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 .bg-slide{
   position:absolute;inset:0;
   background-size:cover;background-position:center center;
-  filter:grayscale(100%) brightness(0.35) contrast(1.1) saturate(0);
+  filter:grayscale(100%) brightness(0.62) contrast(1.05) saturate(0);
   opacity:0;transition:opacity 2s ease;will-change:transform,opacity}
 .bg-slide.active{opacity:1}
 @keyframes kb1{from{transform:scale(1) translate(0%,0%)} to{transform:scale(1.09) translate(-1.5%,-1%)}}
@@ -359,11 +359,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
 /* Rotating tagline — login screen */
 #ls-tagline{
-  min-height:38px;display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;padding:0 24px;max-width:420px;width:100%}
+  min-height:52px;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:0 24px;max-width:480px;width:100%}
 #ls-tagline-text{
-  font-size:15px;font-family:var(--mono);color:var(--ac);text-align:center;
-  letter-spacing:.4px;white-space:nowrap;
+  font-size:22px;font-family:var(--mono);color:var(--ac);text-align:center;
+  letter-spacing:.5px;white-space:nowrap;font-weight:500;
   position:absolute;
   opacity:0;transform:translateY(12px);
   transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1)}
