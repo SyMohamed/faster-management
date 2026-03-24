@@ -760,7 +760,7 @@ function renderList() {
             <button class="btn btn-sm" style="background:var(--am);color:#000;font-size:10px;padding:3px 9px" onclick="event.stopPropagation();approveExtension('${b._id}')">Approve Ext.</button>
             <button class="btn-o btn-sm" style="color:var(--red);border-color:rgba(248,81,73,.3);font-size:10px;padding:3px 9px" onclick="event.stopPropagation();rejectExtension('${b._id}')">Reject Ext.</button>
           </div>` : ""}
-        ${IS_ADMIN ? `<button class="btn-o btn-sm" style="font-size:10px" onclick="event.stopPropagation();openEdit('${b._id}')">Edit</button>` : ""}
+        ${IS_ADMIN || b.requestedBy === (sessionStorage.getItem('faster_user_v1')||'') ? `<button class="btn-o btn-sm" style="font-size:10px" onclick="event.stopPropagation();openEdit('${b._id}')">Edit</button>` : ""}
       </div>
     </div>`;
   }).join("");
@@ -877,6 +877,9 @@ function openDet(id) {
     ${extHTML}
     ${extFormHTML}
     ${adminModifyHTML}`;
+  const me = sessionStorage.getItem('faster_user_v1') || '';
+  const canEdit = IS_ADMIN || b.requestedBy === me;
+  document.getElementById("det-edit").style.display = canEdit ? '' : 'none';
   document.getElementById("det-edit").onclick = () => { cm("m-det"); openEdit(id); };
   document.getElementById("det-del").onclick = () => { editId = id; delBook(); };
   document.getElementById("m-det").classList.add("on");
@@ -914,6 +917,8 @@ function openBook(dateStr, fac) {
 function openEdit(id) {
   editId = id;
   const b = DB[id]; if (!b) return;
+  const me = sessionStorage.getItem('faster_user_v1') || '';
+  if (!IS_ADMIN && b.requestedBy !== me) { toast("You can only edit your own bookings","tr"); return; }
   document.getElementById("m-title").textContent = "Edit Booking";
   document.getElementById("m-del").style.display = "inline-flex";
   clearForm();
