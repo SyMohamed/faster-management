@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FASTER Lab — Digital Workspace</title>
+<script>/* apply theme before first paint */(function(){if(localStorage.getItem('faster_theme')==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.removeAttribute('data-theme');})();</script>
 <style>
 /* shared.css loaded below overrides font/accent; keep page-specific tokens here */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -199,12 +200,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .admin-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px}
 .admin-panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .admin-panel-header h3{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
-/* Member status */
-.status-picker{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;border-top:1px solid var(--b1)}
-.status-opt{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:4px 8px;
-  font-size:12px;cursor:pointer;transition:all .12s;white-space:nowrap}
-.status-opt:hover,.status-opt.active{border-color:var(--ac);background:rgba(0,204,245,.1)}
-#ws-status-tag{font-size:12px;color:var(--t3);margin-left:6px;font-family:var(--mono)}
 /* Notification bell */
 #notif-wrap{position:relative}
 #notif-btn{background:var(--s2);border:1px solid var(--b1);border-radius:8px;width:34px;height:34px;
@@ -606,6 +601,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <button onclick="openGS()" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:5px 12px;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--t2)'" onmouseout="this.style.borderColor='var(--b1)';this.style.color='var(--t3)'">
       🔍 <span>Search</span><span style="opacity:.5;font-size:10px">⌘K</span>
     </button>
+    <button id="faster-theme-btn" onclick="FASTER_toggleTheme()" title="Switch to light mode">☀️</button>
     <div id="notif-wrap">
       <div id="notif-btn" onclick="toggleNotif()" title="Notifications">🔔</div>
       <span id="notif-count">0</span>
@@ -622,16 +618,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       <div class="user-menu" id="user-menu">
         <button class="user-menu-item" onclick="openPwChange()">🔑 Change Password</button>
         <button class="user-menu-item" onclick="triggerPhotoUpload()" id="photo-menu-btn">📷 Change Profile Photo</button>
-        <div class="user-menu-sep"></div>
-        <div style="padding:6px 12px 2px;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Status</div>
-        <div class="status-picker" id="status-picker">
-          <span class="status-opt" data-s="">— Clear</span>
-          <span class="status-opt" data-s="🔬 In lab">🔬 In lab</span>
-          <span class="status-opt" data-s="🏠 WFH">🏠 WFH</span>
-          <span class="status-opt" data-s="📅 In meeting">📅 In meeting</span>
-          <span class="status-opt" data-s="🚫 Away">🚫 Away</span>
-          <span class="status-opt" data-s="✈️ Travelling">✈️ Travelling</span>
-        </div>
         <div class="user-menu-sep"></div>
         <button class="user-menu-item" style="color:var(--red)" onclick="signOut()">⏏ Sign Out</button>
       </div>
@@ -658,10 +644,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <img id="ws-profile-img" src="" alt="" style="width:100%;height:100%;object-fit:cover">
       </div>
       <div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
-          <span id="ws-status-tag"></span>
-        </div>
+        <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
         <div id="ws-date" style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:3px"></div>
         <div id="ws-tagline"><span id="ws-tagline-text"></span></div>
       </div>
@@ -913,7 +896,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     }
     showWorkspace();
     _startNotifListeners();
-    _loadStatus();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
   }
   if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
@@ -1111,35 +1093,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
   window.togglePanel=function(id){ document.getElementById(id).classList.toggle('collapsed'); };
 
-  /* ── Member status emoji ─────────────────────────────────────────────── */
-  function _applyStatus(s){
-    const tag=document.getElementById('ws-status-tag');
-    if(tag) tag.textContent=s||'';
-    /* highlight active option */
-    document.querySelectorAll('.status-opt').forEach(function(el){
-      el.classList.toggle('active', el.dataset.s===s);
-    });
-  }
-  function _loadStatus(){
-    const uname=sessionStorage.getItem(UNAME_KEY);
-    if(!uname||uname==='guest'||!db) return;
-    db.ref('faster_users/'+uname+'/status').once('value').then(function(s){
-      _applyStatus(s.val()||'');
-    });
-  }
-  document.querySelectorAll('.status-opt').forEach(function(el){
-    el.addEventListener('click',function(){
-      const s=el.dataset.s||'';
-      const uname=sessionStorage.getItem(UNAME_KEY);
-      if(!uname||uname==='guest'){ _toast('Status not available for guests','warn'); return; }
-      if(!db) return;
-      db.ref('faster_users/'+uname+'/status').set(s).then(function(){
-        _applyStatus(s);
-        document.getElementById('user-menu').classList.remove('open');
-        _toast(s?'Status set: '+s:'Status cleared','ok');
-      });
-    });
-  });
   window.toggleActivityFeed=function(){ document.getElementById('activity-feed-panel').classList.toggle('collapsed'); };
 
   /* ── Notification bell ───────────────────────────────────────────────── */
@@ -1173,24 +1126,27 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   }
   function _startNotifListeners(){
     if(!db) return;
-    /* Pending registrations */
-    db.ref('faster_pending').on('value',function(snap){
-      _notifs=_notifs.filter(n=>n.key!=='reg');
-      const entries=Object.values(snap.val()||{}).filter(r=>r.status==='pending');
-      if(entries.length) _notifs.push({key:'reg',icon:'👤',title:entries.length+' registration request'+(entries.length>1?'s':''),sub:'New member'+(entries.length>1?'s':'')+' awaiting approval',href:'#'});
-      _renderNotifs();
-    });
-    /* Pending booking approvals */
-    db.ref('faster_planning').on('value',function(snap){
-      _notifs=_notifs.filter(n=>n.key!=='book'&&n.key!=='ext');
-      const all=Object.values(snap.val()||{}).filter(b=>b&&typeof b==='object');
-      const books=all.filter(b=>b.status==='Pending Approval');
-      const exts=all.filter(b=>b.extensionRequest&&b.extensionRequest.status==='pending');
-      if(books.length) _notifs.push({key:'book',icon:'📅',title:books.length+' booking'+(books.length>1?'s':'')+' pending approval',sub:'Facility reservations awaiting review',href:'planning.html'});
-      if(exts.length) _notifs.push({key:'ext',icon:'⏱',title:exts.length+' extension request'+(exts.length>1?'s':''),sub:'Booking time extensions awaiting approval',href:'planning.html'});
-      _renderNotifs();
-    });
-    /* Open safety reports */
+    const isAdmin=sessionStorage.getItem(ROLE_KEY)==='admin';
+    /* Admin-only: pending registrations */
+    if(isAdmin){
+      db.ref('faster_pending').on('value',function(snap){
+        _notifs=_notifs.filter(n=>n.key!=='reg');
+        const entries=Object.values(snap.val()||{}).filter(r=>r.status==='pending');
+        if(entries.length) _notifs.push({key:'reg',icon:'👤',title:entries.length+' registration request'+(entries.length>1?'s':''),sub:'New member'+(entries.length>1?'s':'')+' awaiting approval',href:'#'});
+        _renderNotifs();
+      });
+      /* Admin-only: pending booking approvals and extension requests */
+      db.ref('faster_planning').on('value',function(snap){
+        _notifs=_notifs.filter(n=>n.key!=='book'&&n.key!=='ext');
+        const all=Object.values(snap.val()||{}).filter(b=>b&&typeof b==='object');
+        const books=all.filter(b=>b.status==='Pending Approval');
+        const exts=all.filter(b=>b.extensionRequest&&b.extensionRequest.status==='pending');
+        if(books.length) _notifs.push({key:'book',icon:'📅',title:books.length+' booking'+(books.length>1?'s':'')+' pending approval',sub:'Facility reservations awaiting review',href:'planning.html'});
+        if(exts.length) _notifs.push({key:'ext',icon:'⏱',title:exts.length+' extension request'+(exts.length>1?'s':''),sub:'Booking extensions awaiting your approval',href:'planning.html'});
+        _renderNotifs();
+      });
+    }
+    /* Everyone: open safety reports */
     db.ref('faster_safety/reports').on('value',function(snap){
       _notifs=_notifs.filter(n=>n.key!=='safety');
       const open=Object.values(snap.val()||{}).filter(r=>r&&r.status==='Open');
@@ -1394,6 +1350,15 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* helpers */
   function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  window.FASTER_toggleTheme=function(){
+    var isLight=document.documentElement.getAttribute('data-theme')==='light';
+    if(isLight){document.documentElement.removeAttribute('data-theme');localStorage.setItem('faster_theme','dark');}
+    else{document.documentElement.setAttribute('data-theme','light');localStorage.setItem('faster_theme','light');}
+    var btn=document.getElementById('faster-theme-btn');
+    if(btn){btn.textContent=isLight?'☀️':'🌙';btn.title=isLight?'Switch to light mode':'Switch to dark mode';}
+  };
+  /* Sync button icon to current theme on load */
+  (function(){var b=document.getElementById('faster-theme-btn');if(b&&document.documentElement.getAttribute('data-theme')==='light'){b.textContent='🌙';b.title='Switch to dark mode';}})();
   function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
 
   /* ── Booking approve / reject ─────────────────────────────────────────── */

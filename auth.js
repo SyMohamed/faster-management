@@ -9,7 +9,58 @@
  *   window.FASTER_ROLE      — "admin" | "member" | "viewer"
  *   window.FASTER_IS_ADMIN  — boolean
  *   window.FASTER_READONLY  — boolean (true for guest/viewer mode)
+ *
+ * Also handles dark/light theme preference (persisted in localStorage).
  */
+
+/* ── Apply saved theme IMMEDIATELY (before first paint) ───────────────────── */
+(function(){
+  if(localStorage.getItem('faster_theme')==='light')
+    document.documentElement.setAttribute('data-theme','light');
+  else
+    document.documentElement.removeAttribute('data-theme');
+})();
+
+/* ── Theme toggle logic + button injection ────────────────────────────────── */
+window.FASTER_toggleTheme = function(){
+  var isLight = document.documentElement.getAttribute('data-theme')==='light';
+  if(isLight){
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('faster_theme','dark');
+  } else {
+    document.documentElement.setAttribute('data-theme','light');
+    localStorage.setItem('faster_theme','light');
+  }
+  var btn = document.getElementById('faster-theme-btn');
+  if(btn) btn.title = isLight ? 'Switch to light mode' : 'Switch to dark mode';
+  if(btn) btn.textContent = isLight ? '☀️' : '🌙';
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+  /* Inject the toggle button into the page's top-right nav area */
+  var isLight = document.documentElement.getAttribute('data-theme')==='light';
+  var btn = document.createElement('button');
+  btn.id = 'faster-theme-btn';
+  btn.title = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+  btn.textContent = isLight ? '🌙' : '☀️';
+  btn.onclick = window.FASTER_toggleTheme;
+
+  /* Try to find the header's right-side action area on any sub-page nav */
+  var slot = document.querySelector('.nav-right, .nav-r, .header-right, .hdr-right, .nav-actions, [data-theme-slot]');
+  if(!slot){
+    /* Fallback: find the <nav> element and append to it */
+    var nav = document.querySelector('nav');
+    if(nav){
+      var wrap = document.createElement('div');
+      wrap.style.cssText='margin-left:auto;display:flex;align-items:center;gap:8px';
+      wrap.appendChild(btn);
+      nav.appendChild(wrap);
+      return;
+    }
+  }
+  if(slot) slot.insertBefore(btn, slot.firstChild);
+});
+
 (function () {
   var AUTH_KEY  = 'faster_auth_v1';
   var USER_KEY  = 'faster_user_v1';
