@@ -937,7 +937,7 @@ function clearForm() {
   });
   // Pre-fill researcher from session identity
   const me = sessionStorage.getItem('faster_user_v1') || '';
-  if(me && !b) document.getElementById('bk-researcher').value = me;
+  if(me && !editId) document.getElementById('bk-researcher').value = me;
   document.getElementById("bk-st").value = "Confirmed";
   document.getElementById("bk-pri").value = "Normal";
 }
