@@ -493,7 +493,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
       <button class="mx" onclick="cm('m-det')">✕</button></div>
     <div id="m-det-body"></div>
     <div class="mftr">
-      <button class="btn-del" id="det-del" style="margin-right:auto">Delete</button>
+      <button class="btn-del admin-only" id="det-del" style="margin-right:auto">Delete</button>
       <button class="btn-o btn-sm" onclick="cm('m-det')">Close</button>
       <button class="btn btn-sm" id="det-edit">✏️ Edit</button>
     </div>
@@ -1003,6 +1003,7 @@ function saveBook() {
 }
 
 function delBook() {
+  if (!IS_ADMIN) { toast("Only admins can delete bookings","tb"); return; }
   const id = editId;
   if (!id || !confirm("Delete this booking?")) return;
   cm("m-book"); cm("m-det");
