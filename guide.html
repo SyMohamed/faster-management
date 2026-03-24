@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FASTER Lab — Kickstarter Guide</title>
+<script>/* apply theme before first paint */(function(){if(localStorage.getItem("faster_theme")==="light")document.documentElement.setAttribute("data-theme","light");else document.documentElement.removeAttribute("data-theme");})();</script>
+<link rel="stylesheet" href="shared.css">
+<script src="auth.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080d;--s1:#0d1018;--s2:#131720;--s3:#181e2a;--s4:#1e2535;
+  --b1:#222d40;--b2:#2c3a52;--b3:#374660;
+  --t1:#e4edf8;--t2:#8099b8;--t3:#485e78;--t4:#253040;
+  --ac:#00ccf5;--acg:#33e0ff;
+  --gr:#0fda7a;--re:#ff3d5a;--am:#ffb020;--pu:#9b5fff;--bl:#3a87ff;--te:#00dec8;--or:#ff7525;
+  --pk:#ec4899;--cy:#06b6d4;--li:#84cc16;
+  --font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100vh;font-size:15px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+/* NAV */
+.nav{background:rgba(13,16,24,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);
+  padding:0 24px;display:flex;align-items:center;height:58px;position:sticky;top:0;z-index:200;gap:0}
+.brand{display:flex;align-items:center;gap:11px;margin-right:28px;cursor:pointer;flex-shrink:0}
+.brand img{width:36px;height:36px;border-radius:50%;object-fit:contain;background:#fff;padding:2px}
+.brand-t span{display:block;font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.3px}
+.brand-t small{font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.nav-tabs{display:flex;height:100%;overflow-x:auto;flex:1;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.ntab{display:flex;align-items:center;gap:6px;padding:0 14px;font-size:11.5px;font-weight:700;
+  color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;
+  background:none;border-left:none;border-right:none;border-top:none;
+  transition:all .18s;letter-spacing:.4px;text-transform:uppercase;font-family:var(--font)}
+.ntab:hover{color:var(--t1)}
+.ntab.on{color:var(--ac);border-bottom-color:var(--ac)}
+.nav-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0;padding-left:16px}
+
+/* BUTTONS */
+.btn{background:var(--ac);color:#000;border:none;padding:8px 18px;border-radius:8px;
+  font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;
+  align-items:center;gap:6px;transition:all .2s;white-space:nowrap;letter-spacing:.4px;text-transform:uppercase}
+.btn:hover{background:var(--acg);box-shadow:0 0 18px rgba(0,204,245,.25)}
+.btn-o{background:transparent;color:var(--t1);border:1px solid var(--b2);padding:7px 14px;
+  border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);
+  display:inline-flex;align-items:center;gap:5px;transition:all .18s;white-space:nowrap;
+  letter-spacing:.3px;text-transform:uppercase}
+.btn-o:hover{background:var(--s3);border-color:var(--b3)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-del{background:transparent;color:var(--re);border:1px solid rgba(255,61,90,.3);
+  padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--font);
+  text-transform:uppercase;font-weight:700;letter-spacing:.3px}
+.btn-del:hover{background:rgba(255,61,90,.08)}
+
+/* LIVE PILL */
+.livepill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 11px;
+  font-size:11px;font-family:var(--mono);border:1px solid;transition:all .3s}
+.lon{background:rgba(15,218,122,.08);border-color:rgba(15,218,122,.25);color:var(--gr)}
+.loff{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.25);color:var(--re)}
+.ldot{width:6px;height:6px;border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PAGE */
+.page{padding:24px;max-width:1500px;margin:0 auto}
+.view{display:none}
+.view.on{display:block}
+.sh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap}
+.sh h2{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.sh-sub{font-size:12px;color:var(--t3);margin-top:4px;font-family:var(--mono)}
+.shr{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-bottom:24px}
+.sc{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px;
+  transition:all .2s;position:relative;overflow:hidden}
+.sc:hover{border-color:var(--b2);transform:translateY(-2px)}
+.sc-glow{position:absolute;width:80px;height:80px;border-radius:50%;top:-20px;right:-20px;
+  opacity:.08;pointer-events:none}
+.sc-ico{font-size:20px;margin-bottom:8px}
+.sc-val{font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-1.5px;line-height:1}
+.sc-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-top:4px;font-family:var(--mono)}
+
+/* CATEGORY CARDS (for overview) */
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.catcard{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;display:block;color:inherit;text-decoration:none}
+.catcard:hover{transform:translateY(-3px);border-color:var(--cc);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.catcard::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 85% 10%,var(--cc) 0%,transparent 65%);opacity:0;transition:opacity .25s}
+.catcard:hover::before{opacity:.06}
+.cc-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--cc)}
+.cc-ico{font-size:26px;margin-bottom:11px;display:block}
+.cc-name{font-size:12px;font-weight:700;margin-bottom:4px;letter-spacing:.3px;text-transform:uppercase}
+.cc-n{font-size:30px;font-weight:800;font-family:var(--mono);color:var(--cc);letter-spacing:-1.5px;line-height:1}
+.cc-sub{font-size:11px;color:var(--t3);margin-top:4px}
+.cc-arr{position:absolute;bottom:14px;right:14px;color:var(--t4);font-size:15px;transition:all .2s}
+.catcard:hover .cc-arr{color:var(--cc);transform:translate(3px,-3px)}
+
+/* CONTROLS */
+.ctrl{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.sw{position:relative;flex:1;min-width:180px}
+.sw-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;font-size:15px}
+.si{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:9px 12px 9px 36px;color:var(--t1);font-family:var(--font);font-size:13px;
+  outline:none;transition:border-color .18s}
+.si:focus{border-color:var(--ac)}
+.si::placeholder{color:var(--t4)}
+.sel{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;
+  color:var(--t1);font-family:var(--font);font-size:12px;outline:none;cursor:pointer;transition:border-color .18s}
+.sel:focus{border-color:var(--ac)}
+.cnt{font-size:12px;color:var(--t3);font-family:var(--mono);white-space:nowrap;margin-left:auto}
+
+/* ══════════════════════════════════════════════════
+   GUIDE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════ */
+
+/* Welcome banner */
+.guide-welcome{background:var(--s1);border:1px solid var(--b1);border-radius:14px;
+  padding:28px;margin-bottom:24px;position:relative;overflow:hidden}
+.guide-welcome::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% -20%,rgba(0,204,245,.06),transparent 60%),
+    radial-gradient(ellipse at 80% 120%,rgba(155,95,255,.04),transparent 60%);pointer-events:none}
+.guide-welcome h3{font-size:18px;font-weight:800;margin-bottom:6px;position:relative}
+.guide-welcome p{font-size:13px;color:var(--t3);line-height:1.7;max-width:700px;position:relative}
+
+/* Quick-start steps */
+.qs-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:18px;position:relative}
+.qs-step{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px;
+  display:flex;gap:12px;align-items:flex-start;transition:all .18s}
+.qs-step:hover{border-color:var(--b2);transform:translateY(-1px)}
+.qs-num{width:28px;height:28px;border-radius:50%;background:rgba(0,204,245,.1);color:var(--ac);
+  font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--mono)}
+.qs-text{flex:1}
+.qs-text strong{font-size:12px;display:block;margin-bottom:3px}
+.qs-text span{font-size:11px;color:var(--t3);line-height:1.5}
+
+/* Document cards */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.doc-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;
+  padding:18px;transition:all .22s;position:relative;overflow:hidden}
+.doc-card:hover{border-color:var(--b2);transform:translateY(-2px);box-shadow:0 6px 28px rgba(0,0,0,.35)}
+.doc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--dc,var(--ac))}
+.doc-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.doc-icon{width:44px;height:44px;border-radius:10px;background:var(--s2);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.doc-meta{flex:1;min-width:0}
+.doc-title{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:3px;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.doc-cat-tag{font-size:10px;font-family:var(--mono);color:var(--t3);letter-spacing:.3px}
+.doc-desc{font-size:11px;color:var(--t3);line-height:1.6;margin-bottom:14px;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.doc-footer{display:flex;align-items:center;justify-content:space-between;
+  padding-top:12px;border-top:1px solid rgba(34,45,64,.6)}
+.doc-info{display:flex;align-items:center;gap:10px}
+.doc-info span{font-size:10px;color:var(--t4);font-family:var(--mono);display:flex;align-items:center;gap:4px}
+.doc-actions{display:flex;gap:6px;align-items:center}
+.doc-btn{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:5px 10px;
+  font-size:10px;font-weight:700;color:var(--t2);cursor:pointer;font-family:var(--font);
+  transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;
+  text-transform:uppercase;letter-spacing:.3px}
+.doc-btn:hover{border-color:var(--ac);color:var(--ac)}
+.doc-btn.primary{background:rgba(0,204,245,.1);border-color:rgba(0,204,245,.25);color:var(--ac)}
+.doc-btn.primary:hover{background:rgba(0,204,245,.18)}
+.doc-del{background:none;border:1px solid rgba(255,61,90,.2);border-radius:6px;padding:5px 8px;
+  font-size:10px;color:var(--re);cursor:pointer;transition:all .15s;font-family:var(--font)}
+.doc-del:hover{background:rgba(255,61,90,.08);border-color:rgba(255,61,90,.4)}
+
+/* Section headers inside category views */
+.section-banner{background:var(--s1);border:1px solid var(--b1);border-radius:12px;
+  padding:20px 22px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+.section-banner-icon{font-size:28px}
+.section-banner h3{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.section-banner p{font-size:12px;color:var(--t3);margin-top:3px;line-height:1.5}
+
+/* Sub-category pills */
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.pill{padding:4px 12px;border-radius:20px;border:1px solid var(--b1);background:var(--s1);
+  color:var(--t2);cursor:pointer;font-size:12px;font-weight:600;transition:all .18s;white-space:nowrap;user-select:none}
+.pill:hover{border-color:var(--b2)}
+.pill.on{border-color:var(--ac);color:var(--ac);background:rgba(0,204,245,.07)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 24px;color:var(--t3)}
+.empty-state .es-icon{font-size:36px;margin-bottom:14px;opacity:.5}
+.empty-state h4{font-size:15px;font-weight:700;color:var(--t2);margin-bottom:6px}
+.empty-state p{font-size:12px;line-height:1.6;max-width:360px;margin:0 auto}
+
+/* MODALS */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.84);z-index:500;
+  align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
+.mbg.on{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:28px;
+  width:580px;max-width:100%;box-shadow:0 32px 80px rgba(0,0,0,.7)}
+.mhdr{display:flex;align-items:center;gap:10px;margin-bottom:20px;
+  padding-bottom:16px;border-bottom:1px solid var(--b1)}
+.mhdr h2{font-size:16px;font-weight:800;flex:1;letter-spacing:-.3px}
+.mx{background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;
+  padding:4px;border-radius:5px;line-height:1;transition:all .15s}
+.mx:hover{color:var(--t1);background:var(--s3)}
+.mftr{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;
+  padding-top:16px;border-top:1px solid var(--b1);flex-wrap:wrap;align-items:center}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fg label{font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px}
+.fg input,.fg select,.fg textarea{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:9px 12px;color:var(--t1);font-family:var(--font);font-size:13px;outline:none;width:100%;
+  transition:border-color .18s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--ac)}
+.fg textarea{resize:vertical;min-height:70px;line-height:1.5}
+
+/* Upload dropzone */
+.dropzone{border:2px dashed var(--b2);border-radius:12px;padding:32px 24px;text-align:center;
+  cursor:pointer;transition:all .2s;background:var(--s2);position:relative}
+.dropzone:hover,.dropzone.drag{border-color:var(--ac);background:rgba(0,204,245,.03)}
+.dropzone .dz-icon{font-size:28px;margin-bottom:10px;opacity:.6}
+.dropzone .dz-text{font-size:13px;color:var(--t2);margin-bottom:4px}
+.dropzone .dz-sub{font-size:11px;color:var(--t4);font-family:var(--mono)}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz-file-name{margin-top:10px;font-size:12px;color:var(--ac);font-family:var(--mono);
+  display:none;align-items:center;gap:6px;justify-content:center}
+
+/* Add category modal */
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.fr2{grid-template-columns:1fr}}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);
+  color:var(--t3);margin-bottom:18px}
+.breadcrumb a{color:var(--ac);text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{text-decoration:underline}
+.breadcrumb .sep{opacity:.4}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:8px;font-size:12px;
+  font-weight:700;z-index:999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;
+  max-width:320px;letter-spacing:.2px}
+.toast.on{opacity:1;transform:translateY(0)}
+.tg{background:var(--gr);color:#000}
+.tb{background:var(--ac);color:#000}
+.tr{background:var(--re);color:#fff}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;z-index:9999;transition:opacity .45s ease}
+#loader.fade{opacity:0;pointer-events:none}
+.loader-ring{width:40px;height:40px;border:3px solid var(--b2);border-top-color:var(--ac);
+  border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-img{width:60px;height:60px;border-radius:50%;object-fit:contain;background:#fff;padding:3px}
+.loader-msg{font-size:12px;color:var(--t3);font-family:var(--mono);letter-spacing:.4px}
+
+/* Responsive */
+@media(max-width:768px){
+  .page{padding:16px}
+  .doc-grid{grid-template-columns:1fr}
+  .catgrid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .qs-steps{grid-template-columns:1fr}
+  .guide-welcome{padding:20px}
+  .nav{padding:0 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <img class="loader-img" src="logo.png" alt="FASTER" onerror="this.style.display='none'">
+  <div class="loader-ring"></div>
+  <div class="loader-msg">Loading Kickstarter Guide…</div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="brand" href="index.html">
+    <img src="logo.png" alt="FASTER" onerror="this.style.display='none'">
+    <div class="brand-t"><span>FASTER Lab</span><small>Kickstarter Guide</small></div>
+  </a>
+  <div class="nav-tabs">
+    <button class="ntab on" data-v="overview"     onclick="gv('overview')">📖 Overview</button>
+    <button class="ntab"    data-v="getting_started" onclick="gv('getting_started')">🚀 Getting Started</button>
+    <button class="ntab"    data-v="shock_tubes"   onclick="gv('shock_tubes')">💥 Shock Tubes</button>
+    <button class="ntab"    data-v="rcm"           onclick="gv('rcm')">⚙️ RCM</button>
+    <button class="ntab"    data-v="lasers"        onclick="gv('lasers')">🔴 Lasers</button>
+    <button class="ntab"    data-v="hpst"          onclick="gv('hpst')">🔩 HPST</button>
+    <button class="ntab"    data-v="diagnostics"   onclick="gv('diagnostics')">📡 Diagnostics</button>
+    <button class="ntab"    data-v="software"      onclick="gv('software')">💻 Software & DAQ</button>
+    <button class="ntab"    data-v="safety_guides" onclick="gv('safety_guides')">🛡️ Safety</button>
+  </div>
+  <div class="nav-r">
+    <div class="livepill loff" id="pill"><div class="ldot" id="ldot" style="background:var(--re)"></div><span id="ltxt">Connecting…</span></div>
+    <button class="btn btn-sm admin-only" style="display:none" onclick="openUpload()">+ Upload Manual</button>
+    <button class="btn-o btn-sm" onclick="IS_ADMIN?logoutAdmin():promptAdmin(()=>location.reload())">Admin</button>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════════
+     OVERVIEW
+     ══════════════════════════════════════════════ -->
+<div class="view on" id="view-overview">
+  <div class="sh">
+    <div>
+      <h2>Kickstarter Guide</h2>
+      <div class="sh-sub" id="ov-date"></div>
+    </div>
+    <div class="shr">
+      <button class="btn-o btn-sm admin-only" style="display:none" onclick="openAddCategory()">+ Add Category</button>
+    </div>
+  </div>
+
+  <!-- Welcome banner -->
+  <div class="guide-welcome">
+    <h3>Welcome to the FASTER Lab 👋</h3>
+    <p>This is your one-stop guide to everything you need to know to get started at the FASTER Lab. Find operating manuals, SOPs, training materials, and quick-start guides for all lab facilities and equipment.</p>
+    <div class="qs-steps">
+      <div class="qs-step">
+        <div class="qs-num">1</div>
+        <div class="qs-text"><strong>Lab Orientation</strong><span>Complete safety training and get your lab access card</span></div>
+      </div>
+      <div class="qs-step">
+        <div class="qs-num">2</div>
+        <div class="qs-text"><strong>Read the SOPs</strong><span>Review standard operating procedures for your assigned facility</span></div>
+      </div>
+      <div class="qs-step">
+        <div class="qs-num">3</div>
+        <div class="qs-text"><strong>Shadow a Mentor</strong><span>Observe and learn hands-on from an experienced lab member</span></div>
+      </div>
+      <div class="qs-step">
+        <div class="qs-num">4</div>
+        <div class="qs-text"><strong>Independent Operation</strong><span>Once certified, you can run experiments and book facilities</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="ov-stats"></div>
+
+  <!-- Category cards -->
+  <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);margin-bottom:14px">Browse by Category — click to explore</div>
+  <div class="catgrid" id="ov-cats"></div>
+
+  <!-- Recent uploads -->
+  <div style="margin-top:8px">
+    <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);margin-bottom:14px">Recently Added</div>
+    <div class="doc-grid" id="ov-recent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     CATEGORY VIEWS (generated dynamically)
+     ══════════════════════════════════════════════ -->
+<div class="view" id="view-getting_started">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>Getting Started</span></div>
+  <div class="sh"><div><h2>Getting Started at FASTER</h2><div class="sh-sub">Orientation, onboarding, and general lab procedures</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('Getting Started')">+ Upload</button></div></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search guides…" oninput="filterDocs('getting_started',this.value)"></div>
+    <span class="cnt" id="cnt-getting_started"></span></div>
+  <div class="doc-grid" id="docs-getting_started"></div>
+</div>
+
+<div class="view" id="view-shock_tubes">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>Shock Tubes</span></div>
+  <div class="sh"><div><h2>Shock Tube Operations</h2><div class="sh-sub">LPST &amp; HPST operating manuals, SOPs, and troubleshooting guides</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('Shock Tubes')">+ Upload</button></div></div>
+  <div class="pills" id="pills-shock_tubes"></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search shock tube manuals…" oninput="filterDocs('shock_tubes',this.value)"></div>
+    <span class="cnt" id="cnt-shock_tubes"></span></div>
+  <div class="doc-grid" id="docs-shock_tubes"></div>
+</div>
+
+<div class="view" id="view-rcm">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>RCM</span></div>
+  <div class="sh"><div><h2>Rapid Compression Machine</h2><div class="sh-sub">RCM operation, maintenance, and data analysis procedures</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('RCM')">+ Upload</button></div></div>
+  <div class="pills" id="pills-rcm"></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search RCM guides…" oninput="filterDocs('rcm',this.value)"></div>
+    <span class="cnt" id="cnt-rcm"></span></div>
+  <div class="doc-grid" id="docs-rcm"></div>
+</div>
+
+<div class="view" id="view-lasers">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>Lasers</span></div>
+  <div class="sh"><div><h2>Laser Systems</h2><div class="sh-sub">QCLS, ICLs, DFB, OPO, and other laser operation manuals</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('Lasers')">+ Upload</button></div></div>
+  <div class="pills" id="pills-lasers"></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search laser manuals…" oninput="filterDocs('lasers',this.value)"></div>
+    <span class="cnt" id="cnt-lasers"></span></div>
+  <div class="doc-grid" id="docs-lasers"></div>
+</div>
+
+<div class="view" id="view-hpst">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>HPST</span></div>
+  <div class="sh"><div><h2>High-Pressure Shock Tube</h2><div class="sh-sub">HPST-specific operating procedures, maintenance &amp; calibration</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('HPST')">+ Upload</button></div></div>
+  <div class="pills" id="pills-hpst"></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search HPST guides…" oninput="filterDocs('hpst',this.value)"></div>
+    <span class="cnt" id="cnt-hpst"></span></div>
+  <div class="doc-grid" id="docs-hpst"></div>
+</div>
+
+<div class="view" id="view-diagnostics">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>Diagnostics</span></div>
+  <div class="sh"><div><h2>Diagnostics &amp; Measurement</h2><div class="sh-sub">Spectrometers, oscilloscopes, detectors, and measurement techniques</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('Diagnostics')">+ Upload</button></div></div>
+  <div class="pills" id="pills-diagnostics"></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search diagnostics…" oninput="filterDocs('diagnostics',this.value)"></div>
+    <span class="cnt" id="cnt-diagnostics"></span></div>
+  <div class="doc-grid" id="docs-diagnostics"></div>
+</div>
+
+<div class="view" id="view-software">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>Software & DAQ</span></div>
+  <div class="sh"><div><h2>Software &amp; Data Acquisition</h2><div class="sh-sub">LabVIEW, MATLAB, DAQ setup, data processing scripts</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('Software & DAQ')">+ Upload</button></div></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search software guides…" oninput="filterDocs('software',this.value)"></div>
+    <span class="cnt" id="cnt-software"></span></div>
+  <div class="doc-grid" id="docs-software"></div>
+</div>
+
+<div class="view" id="view-safety_guides">
+  <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>Safety</span></div>
+  <div class="sh"><div><h2>Safety Procedures &amp; Protocols</h2><div class="sh-sub">Lab safety, gas handling, laser safety, emergency procedures</div></div>
+    <div class="shr"><button class="btn btn-sm admin-only" style="display:none" onclick="openUpload('Safety')">+ Upload</button></div></div>
+  <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search safety docs…" oninput="filterDocs('safety_guides',this.value)"></div>
+    <span class="cnt" id="cnt-safety_guides"></span></div>
+  <div class="doc-grid" id="docs-safety_guides"></div>
+</div>
+
+</div><!-- .page -->
+
+<!-- ══ UPLOAD MODAL ══ -->
+<div class="mbg" id="m-upload">
+  <div class="modal">
+    <div class="mhdr"><h2 id="m-upload-title">Upload Manual</h2><button class="mx" onclick="cm('m-upload')">✕</button></div>
+    <div class="fg">
+      <label>Document Title</label>
+      <input id="up-title" placeholder="e.g. QCLS Alignment Procedure">
+    </div>
+    <div class="fr2">
+      <div class="fg">
+        <label>Category</label>
+        <select id="up-cat"></select>
+      </div>
+      <div class="fg">
+        <label>Sub-Category (optional)</label>
+        <input id="up-subcat" placeholder="e.g. QCL, ICL, LPST…">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Description</label>
+      <textarea id="up-desc" placeholder="Brief description of what this manual covers…"></textarea>
+    </div>
+    <div class="fr2">
+      <div class="fg">
+        <label>Author / Uploaded By</label>
+        <input id="up-author" placeholder="Your name">
+      </div>
+      <div class="fg">
+        <label>Version</label>
+        <input id="up-version" placeholder="e.g. v1.0" value="v1.0">
+      </div>
+    </div>
+    <div class="fg">
+      <label>PDF Document</label>
+      <div class="dropzone" id="dropzone">
+        <div class="dz-icon">📄</div>
+        <div class="dz-text">Drop PDF here or click to browse</div>
+        <div class="dz-sub">Max file size: 10 MB</div>
+        <input type="file" accept=".pdf" id="up-file" onchange="handleFile(this)">
+      </div>
+      <div class="dz-file-name" id="dz-fname">📎 <span id="dz-fname-text"></span></div>
+    </div>
+    <div class="fg">
+      <label>Or paste an external link (Google Drive, Dropbox, etc.)</label>
+      <input id="up-link" placeholder="https://drive.google.com/…">
+    </div>
+    <div class="mftr">
+      <span id="up-status" style="font-size:12px;font-family:var(--mono);color:var(--t3);flex:1"></span>
+      <button class="btn-o" onclick="cm('m-upload')">Cancel</button>
+      <button class="btn" onclick="saveDocument()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT DOCUMENT MODAL ══ -->
+<div class="mbg" id="m-edit-doc">
+  <div class="modal">
+    <div class="mhdr"><h2>Edit Document</h2><button class="mx" onclick="cm('m-edit-doc')">✕</button></div>
+    <div class="fg">
+      <label>Document Title</label>
+      <input id="ed-title">
+    </div>
+    <div class="fr2">
+      <div class="fg">
+        <label>Category</label>
+        <select id="ed-cat"></select>
+      </div>
+      <div class="fg">
+        <label>Sub-Category</label>
+        <input id="ed-subcat">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Description</label>
+      <textarea id="ed-desc"></textarea>
+    </div>
+    <div class="fr2">
+      <div class="fg">
+        <label>Author</label>
+        <input id="ed-author">
+      </div>
+      <div class="fg">
+        <label>Version</label>
+        <input id="ed-version">
+      </div>
+    </div>
+    <div class="fg">
+      <label>External Link (optional)</label>
+      <input id="ed-link">
+    </div>
+    <div class="mftr">
+      <button class="btn-del" id="ed-del-btn" onclick="deleteDoc()">Delete</button>
+      <span style="flex:1"></span>
+      <button class="btn-o" onclick="cm('m-edit-doc')">Cancel</button>
+      <button class="btn" onclick="updateDoc()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADD CATEGORY MODAL ══ -->
+<div class="mbg" id="m-add-cat">
+  <div class="modal" style="width:440px">
+    <div class="mhdr"><h2>Add New Category</h2><button class="mx" onclick="cm('m-add-cat')">✕</button></div>
+    <div class="fg">
+      <label>Category Name</label>
+      <input id="ac-name" placeholder="e.g. Flow Reactors">
+    </div>
+    <div class="fg">
+      <label>Icon (emoji)</label>
+      <input id="ac-icon" placeholder="e.g. 🧪" value="📘" style="font-size:20px;width:80px">
+    </div>
+    <div class="fg">
+      <label>Accent Color (hex)</label>
+      <input id="ac-color" placeholder="#00ccf5" value="#00ccf5">
+    </div>
+    <div class="fg">
+      <label>Description</label>
+      <input id="ac-desc" placeholder="Short description of this category">
+    </div>
+    <div class="mftr">
+      <button class="btn-o" onclick="cm('m-add-cat')">Cancel</button>
+      <button class="btn" onclick="addCategory()">Add Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CATEGORY DEFINITIONS
+// ═══════════════════════════════════════════════════
+const DEFAULT_CATEGORIES = {
+  'Getting Started': {
+    icon: '🚀', color: '#00ccf5', tabId: 'getting_started',
+    desc: 'Orientation, onboarding & general lab procedures',
+    subs: ['Onboarding', 'Lab Access', 'General SOPs']
+  },
+  'Shock Tubes': {
+    icon: '💥', color: '#ff7525', tabId: 'shock_tubes',
+    desc: 'LPST & HPST operating manuals & SOPs',
+    subs: ['LPST', 'HPST', 'Diaphragms', 'Gas Handling', 'Maintenance']
+  },
+  'RCM': {
+    icon: '⚙️', color: '#0fda7a', tabId: 'rcm',
+    desc: 'Rapid Compression Machine operations',
+    subs: ['Operation', 'Maintenance', 'Data Analysis', 'Piston Assembly']
+  },
+  'Lasers': {
+    icon: '🔴', color: '#ff3d5a', tabId: 'lasers',
+    desc: 'QCLS, ICLs, DFB, OPO & other laser systems',
+    subs: ['QCL', 'ICL', 'DFB', 'OPO', 'Alignment', 'Safety']
+  },
+  'HPST': {
+    icon: '🔩', color: '#9b5fff', tabId: 'hpst',
+    desc: 'High-Pressure Shock Tube specific guides',
+    subs: ['Operation', 'Pressure Systems', 'Calibration', 'Maintenance']
+  },
+  'Diagnostics': {
+    icon: '📡', color: '#3a87ff', tabId: 'diagnostics',
+    desc: 'Spectrometers, oscilloscopes & measurement',
+    subs: ['Spectrometers', 'Oscilloscopes', 'Detectors', 'Optical Setup']
+  },
+  'Software & DAQ': {
+    icon: '💻', color: '#00dec8', tabId: 'software',
+    desc: 'LabVIEW, MATLAB, DAQ setup & scripts',
+    subs: ['LabVIEW', 'MATLAB', 'Python', 'DAQ Hardware']
+  },
+  'Safety': {
+    icon: '🛡️', color: '#ffb020', tabId: 'safety_guides',
+    desc: 'Lab safety, gas handling & emergency procedures',
+    subs: ['Gas Safety', 'Laser Safety', 'Chemical Safety', 'Emergency']
+  }
+};
+
+let CATEGORIES = {};  // merged from defaults + Firebase custom ones
+let DOCS = {};        // all documents
+let dbRef, catRef, storageRef;
+let editDocId = null;
+
+// ═══════════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════════
+const FB_CFG = {
+  apiKey:            "AIzaSyAyt35wSrf1fUnu_Z_kgARwpCjCS1M0b5Q",
+  authDomain:        "orders-1a6e6.firebaseapp.com",
+  databaseURL:       "https://orders-1a6e6-default-rtdb.firebaseio.com",
+  projectId:         "orders-1a6e6",
+  storageBucket:     "orders-1a6e6.firebasestorage.app",
+  messagingSenderId: "928841720860",
+  appId:             "1:928841720860:web:c1a25a69a0f2ccb616abd9"
+};
+const DB_DOCS = "faster_guide_docs";
+const DB_CATS = "faster_guide_categories";
+
+function boot() {
+  try {
+    const app = firebase.initializeApp(FB_CFG, 'guide');
+    const db = firebase.database(app);
+    dbRef = db.ref(DB_DOCS);
+    catRef = db.ref(DB_CATS);
+
+    // Try to init storage (may not be available)
+    try { storageRef = firebase.storage(app).ref('guide_manuals'); } catch(e) { storageRef = null; }
+
+    // Listen to categories
+    catRef.on('value', snap => {
+      const custom = snap.val() || {};
+      CATEGORIES = { ...DEFAULT_CATEGORIES };
+      Object.entries(custom).forEach(([k, v]) => {
+        if (v && !v._deleted) CATEGORIES[k] = { ...v, _fbKey: k };
+      });
+      renderOverview();
+      populateCatSelects();
+    });
+
+    // Listen to documents
+    dbRef.on('value', snap => {
+      DOCS = {};
+      const raw = snap.val() || {};
+      Object.entries(raw).forEach(([k, v]) => {
+        if (v && !v._deleted) { v._id = k; DOCS[k] = v; }
+      });
+      renderOverview();
+      renderCurrentView();
+      goLive();
+    });
+
+    goLive();
+  } catch(e) {
+    console.warn('Firebase init failed:', e);
+    CATEGORIES = { ...DEFAULT_CATEGORIES };
+    renderOverview();
+    populateCatSelects();
+    setTimeout(() => { document.getElementById('loader').classList.add('fade'); }, 500);
+  }
+}
+
+function goLive() {
+  const pill = document.getElementById('pill');
+  const ldot = document.getElementById('ldot');
+  const ltxt = document.getElementById('ltxt');
+  pill.className = 'livepill lon';
+  ldot.style.background = 'var(--gr)';
+  ltxt.textContent = 'Live';
+  document.getElementById('loader').classList.add('fade');
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+let currentView = 'overview';
+
+function gv(id) {
+  currentView = id;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t => {
+    t.classList.toggle('on', t.dataset.v === id);
+  });
+  const viewEl = document.getElementById('view-' + id);
+  if (viewEl) viewEl.classList.add('on');
+  renderCurrentView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderCurrentView() {
+  if (currentView === 'overview') return;
+  // Find category for this tab
+  const catName = Object.keys(CATEGORIES).find(k => CATEGORIES[k].tabId === currentView);
+  if (!catName) return;
+  renderCategoryDocs(currentView, catName);
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER OVERVIEW
+// ═══════════════════════════════════════════════════
+function renderOverview() {
+  const cats = Object.entries(CATEGORIES);
+
+  // Stats
+  const totalDocs = Object.keys(DOCS).length;
+  const totalCats = cats.length;
+  const catCounts = {};
+  Object.values(DOCS).forEach(d => { catCounts[d.category] = (catCounts[d.category] || 0) + 1; });
+  const recentCount = Object.values(DOCS).filter(d => d._ts && Date.now() - d._ts < 7 * 86400000).length;
+
+  document.getElementById('ov-stats').innerHTML = `
+    <div class="sc"><div class="sc-glow" style="background:var(--ac)"></div>
+      <div class="sc-ico">📚</div><div class="sc-val">${totalDocs}</div><div class="sc-lbl">Total Manuals</div></div>
+    <div class="sc"><div class="sc-glow" style="background:var(--pu)"></div>
+      <div class="sc-ico">📂</div><div class="sc-val">${totalCats}</div><div class="sc-lbl">Categories</div></div>
+    <div class="sc"><div class="sc-glow" style="background:var(--gr)"></div>
+      <div class="sc-ico">🆕</div><div class="sc-val">${recentCount}</div><div class="sc-lbl">New this week</div></div>
+    <div class="sc"><div class="sc-glow" style="background:var(--or)"></div>
+      <div class="sc-ico">🔬</div><div class="sc-val">${Object.values(DOCS).filter(d=>d.category==='Lasers').length}</div><div class="sc-lbl">Laser Guides</div></div>
+  `;
+
+  // Category cards
+  let catHtml = '';
+  cats.forEach(([name, cfg]) => {
+    const count = catCounts[name] || 0;
+    const color = cfg.color || '#00ccf5';
+    catHtml += `
+      <div class="catcard" style="--cc:${color}" onclick="gv('${esc(cfg.tabId)}')">
+        <div class="cc-bar"></div>
+        <div class="cc-ico">${cfg.icon}</div>
+        <div class="cc-name">${esc(name)}</div>
+        <div class="cc-n">${count}</div>
+        <div class="cc-sub">${esc(cfg.desc || 'Manuals & guides')}</div>
+        <div class="cc-arr">↗</div>
+      </div>`;
+  });
+  document.getElementById('ov-cats').innerHTML = catHtml;
+
+  // Recent uploads (last 6)
+  const recent = Object.values(DOCS)
+    .sort((a, b) => (b._ts || 0) - (a._ts || 0))
+    .slice(0, 6);
+  document.getElementById('ov-recent').innerHTML = recent.length
+    ? recent.map(d => renderDocCard(d)).join('')
+    : '<div class="empty-state"><div class="es-icon">📭</div><h4>No documents yet</h4><p>Admin can upload manuals and guides using the + Upload Manual button.</p></div>';
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER CATEGORY DOCUMENTS
+// ═══════════════════════════════════════════════════
+function renderCategoryDocs(tabId, catName) {
+  const cfg = CATEGORIES[catName] || {};
+  const docs = Object.values(DOCS).filter(d => d.category === catName);
+  const container = document.getElementById('docs-' + tabId);
+  const cntEl = document.getElementById('cnt-' + tabId);
+  if (cntEl) cntEl.textContent = docs.length + ' document' + (docs.length !== 1 ? 's' : '');
+
+  // Build sub-category pills
+  const pillsEl = document.getElementById('pills-' + tabId);
+  if (pillsEl && cfg.subs && cfg.subs.length) {
+    const allSubs = new Set(cfg.subs || []);
+    docs.forEach(d => { if (d.subCategory) allSubs.add(d.subCategory); });
+    let ph = '<span class="pill on" onclick="pillFilter(this,\'' + tabId + '\',\'\')">All</span>';
+    Array.from(allSubs).sort().forEach(s => {
+      ph += `<span class="pill" onclick="pillFilter(this,'${tabId}','${esc(s)}')">${esc(s)}</span>`;
+    });
+    pillsEl.innerHTML = ph;
+  }
+
+  if (!docs.length) {
+    container.innerHTML = '<div class="empty-state"><div class="es-icon">📭</div><h4>No documents yet</h4><p>Admin can add manuals for this category using the Upload button above.</p></div>';
+    return;
+  }
+
+  container.innerHTML = docs
+    .sort((a, b) => (b._ts || 0) - (a._ts || 0))
+    .map(d => renderDocCard(d))
+    .join('');
+}
+
+let activePill = {};
+function pillFilter(el, tabId, sub) {
+  activePill[tabId] = sub;
+  el.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  const catName = Object.keys(CATEGORIES).find(k => CATEGORIES[k].tabId === tabId);
+  let docs = Object.values(DOCS).filter(d => d.category === catName);
+  if (sub) docs = docs.filter(d => d.subCategory === sub);
+  const container = document.getElementById('docs-' + tabId);
+  const cntEl = document.getElementById('cnt-' + tabId);
+  if (cntEl) cntEl.textContent = docs.length + ' document' + (docs.length !== 1 ? 's' : '');
+  container.innerHTML = docs.length
+    ? docs.sort((a, b) => (b._ts || 0) - (a._ts || 0)).map(d => renderDocCard(d)).join('')
+    : '<div class="empty-state"><div class="es-icon">📭</div><h4>No documents found</h4><p>No manuals in this sub-category yet.</p></div>';
+}
+
+function filterDocs(tabId, query) {
+  const catName = Object.keys(CATEGORIES).find(k => CATEGORIES[k].tabId === tabId);
+  let docs = Object.values(DOCS).filter(d => d.category === catName);
+  const sub = activePill[tabId];
+  if (sub) docs = docs.filter(d => d.subCategory === sub);
+  if (query) {
+    const q = query.toLowerCase();
+    docs = docs.filter(d =>
+      (d.title || '').toLowerCase().includes(q) ||
+      (d.description || '').toLowerCase().includes(q) ||
+      (d.subCategory || '').toLowerCase().includes(q) ||
+      (d.author || '').toLowerCase().includes(q)
+    );
+  }
+  const container = document.getElementById('docs-' + tabId);
+  const cntEl = document.getElementById('cnt-' + tabId);
+  if (cntEl) cntEl.textContent = docs.length + ' document' + (docs.length !== 1 ? 's' : '');
+  container.innerHTML = docs.length
+    ? docs.sort((a, b) => (b._ts || 0) - (a._ts || 0)).map(d => renderDocCard(d)).join('')
+    : '<div class="empty-state"><div class="es-icon">🔍</div><h4>No results</h4><p>Try a different search term.</p></div>';
+}
+
+// ═══════════════════════════════════════════════════
+// DOCUMENT CARD RENDER
+// ═══════════════════════════════════════════════════
+function renderDocCard(d) {
+  const cfg = CATEGORIES[d.category] || {};
+  const color = cfg.color || '#00ccf5';
+  const icon = cfg.icon || '📄';
+  const dateStr = d._ts ? new Date(d._ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const hasFile = d.fileUrl || d.fileData;
+  const hasLink = d.externalLink;
+  const viewUrl = d.fileUrl || d.externalLink || null;
+
+  let actionHtml = '';
+  if (hasFile) {
+    actionHtml += `<a class="doc-btn primary" href="${esc(d.fileUrl || '#')}" target="_blank" ${d.fileData ? 'onclick="openBase64(event,\'' + d._id + '\')"' : ''}>📄 View PDF</a>`;
+  } else if (hasLink) {
+    actionHtml += `<a class="doc-btn primary" href="${esc(d.externalLink)}" target="_blank">🔗 Open Link</a>`;
+  }
+  if (IS_ADMIN) {
+    actionHtml += `<button class="doc-btn" onclick="openEditDoc('${d._id}')">✏️ Edit</button>`;
+  }
+
+  return `
+    <div class="doc-card" style="--dc:${color}" data-id="${d._id}">
+      <div class="doc-head">
+        <div class="doc-icon" style="color:${color}">${icon}</div>
+        <div class="doc-meta">
+          <div class="doc-title">${esc(d.title || 'Untitled')}</div>
+          <div class="doc-cat-tag">${esc(d.category || '')}${d.subCategory ? ' › ' + esc(d.subCategory) : ''}</div>
+        </div>
+      </div>
+      <div class="doc-desc">${esc(d.description || 'No description provided.')}</div>
+      <div class="doc-footer">
+        <div class="doc-info">
+          <span>📅 ${dateStr}</span>
+          ${d.author ? '<span>👤 ' + esc(d.author) + '</span>' : ''}
+          ${d.version ? '<span>🏷️ ' + esc(d.version) + '</span>' : ''}
+        </div>
+        <div class="doc-actions">${actionHtml}</div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// UPLOAD / SAVE DOCUMENT
+// ═══════════════════════════════════════════════════
+let pendingFile = null;
+
+function openUpload(cat) {
+  if (!IS_ADMIN) { showToast('Admin access required', 'tr'); return; }
+  pendingFile = null;
+  document.getElementById('up-title').value = '';
+  document.getElementById('up-subcat').value = '';
+  document.getElementById('up-desc').value = '';
+  document.getElementById('up-author').value = sessionStorage.getItem('faster_user_v1') || '';
+  document.getElementById('up-version').value = 'v1.0';
+  document.getElementById('up-link').value = '';
+  document.getElementById('up-file').value = '';
+  document.getElementById('dz-fname').style.display = 'none';
+  document.getElementById('up-status').textContent = '';
+  populateCatSelects();
+  if (cat) document.getElementById('up-cat').value = cat;
+  document.getElementById('m-upload-title').textContent = cat ? 'Upload Manual — ' + cat : 'Upload Manual';
+  document.getElementById('m-upload').classList.add('on');
+}
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large (max 10 MB)', 'tr'); return; }
+  pendingFile = file;
+  document.getElementById('dz-fname').style.display = 'flex';
+  document.getElementById('dz-fname-text').textContent = file.name;
+}
+
+// Dropzone drag events
+const dz = document.getElementById('dropzone');
+if (dz) {
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+      document.getElementById('up-file').files = e.dataTransfer.files;
+      handleFile(document.getElementById('up-file'));
+    }
+  });
+}
+
+function saveDocument() {
+  if (!IS_ADMIN) return;
+  const title = document.getElementById('up-title').value.trim();
+  const cat = document.getElementById('up-cat').value;
+  const subCat = document.getElementById('up-subcat').value.trim();
+  const desc = document.getElementById('up-desc').value.trim();
+  const author = document.getElementById('up-author').value.trim();
+  const version = document.getElementById('up-version').value.trim();
+  const link = document.getElementById('up-link').value.trim();
+
+  if (!title) { showToast('Title is required', 'tr'); return; }
+  if (!cat) { showToast('Select a category', 'tr'); return; }
+
+  const statusEl = document.getElementById('up-status');
+
+  const docData = {
+    title, category: cat, subCategory: subCat, description: desc,
+    author, version, externalLink: link, _ts: Date.now()
+  };
+
+  if (pendingFile) {
+    statusEl.textContent = 'Uploading file…';
+    // Try Firebase Storage first
+    if (storageRef) {
+      const fname = Date.now() + '_' + pendingFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const task = storageRef.child(fname).put(pendingFile);
+      task.on('state_changed',
+        snap => { statusEl.textContent = 'Uploading… ' + Math.round(snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
+        err => {
+          console.warn('Storage upload failed, falling back to base64:', err);
+          uploadAsBase64(docData, statusEl);
+        },
+        () => {
+          task.snapshot.ref.getDownloadURL().then(url => {
+            docData.fileUrl = url;
+            docData.fileName = pendingFile.name;
+            pushDoc(docData, statusEl);
+          });
+        }
+      );
+    } else {
+      uploadAsBase64(docData, statusEl);
+    }
+  } else {
+    pushDoc(docData, statusEl);
+  }
+}
+
+function uploadAsBase64(docData, statusEl) {
+  statusEl.textContent = 'Encoding file…';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    docData.fileData = e.target.result;
+    docData.fileName = pendingFile.name;
+    pushDoc(docData, statusEl);
+  };
+  reader.readAsDataURL(pendingFile);
+}
+
+function pushDoc(docData, statusEl) {
+  statusEl.textContent = 'Saving…';
+  dbRef.push(docData).then(() => {
+    cm('m-upload');
+    showToast('Manual uploaded successfully', 'tg');
+    pendingFile = null;
+  }).catch(err => {
+    statusEl.textContent = 'Error: ' + err.message;
+    showToast('Upload failed', 'tr');
+  });
+}
+
+// Open base64 PDF
+function openBase64(e, docId) {
+  e.preventDefault();
+  const d = DOCS[docId];
+  if (!d || !d.fileData) return;
+  const win = window.open();
+  win.document.write('<iframe width="100%" height="100%" src="' + d.fileData + '" style="border:none;position:fixed;inset:0"></iframe>');
+}
+
+// ═══════════════════════════════════════════════════
+// EDIT / DELETE DOCUMENT
+// ═══════════════════════════════════════════════════
+function openEditDoc(id) {
+  if (!IS_ADMIN) return;
+  editDocId = id;
+  const d = DOCS[id]; if (!d) return;
+  populateCatSelects();
+  document.getElementById('ed-title').value = d.title || '';
+  document.getElementById('ed-cat').value = d.category || '';
+  document.getElementById('ed-subcat').value = d.subCategory || '';
+  document.getElementById('ed-desc').value = d.description || '';
+  document.getElementById('ed-author').value = d.author || '';
+  document.getElementById('ed-version').value = d.version || '';
+  document.getElementById('ed-link').value = d.externalLink || '';
+  document.getElementById('m-edit-doc').classList.add('on');
+}
+
+function updateDoc() {
+  if (!IS_ADMIN || !editDocId) return;
+  const d = DOCS[editDocId] || {};
+  const updated = {
+    ...d,
+    title: document.getElementById('ed-title').value.trim(),
+    category: document.getElementById('ed-cat').value,
+    subCategory: document.getElementById('ed-subcat').value.trim(),
+    description: document.getElementById('ed-desc').value.trim(),
+    author: document.getElementById('ed-author').value.trim(),
+    version: document.getElementById('ed-version').value.trim(),
+    externalLink: document.getElementById('ed-link').value.trim(),
+    _ts: d._ts || Date.now()
+  };
+  dbRef.child(editDocId).set(updated).then(() => {
+    cm('m-edit-doc');
+    showToast('Document updated', 'tg');
+  });
+}
+
+function deleteDoc() {
+  if (!IS_ADMIN || !editDocId) return;
+  if (!confirm('Delete this document permanently?')) return;
+  dbRef.child(editDocId).set({ _deleted: true }).then(() => {
+    cm('m-edit-doc');
+    showToast('Document deleted', 'tb');
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// ADD CATEGORY
+// ═══════════════════════════════════════════════════
+function openAddCategory() {
+  if (!IS_ADMIN) return;
+  document.getElementById('ac-name').value = '';
+  document.getElementById('ac-icon').value = '📘';
+  document.getElementById('ac-color').value = '#00ccf5';
+  document.getElementById('ac-desc').value = '';
+  document.getElementById('m-add-cat').classList.add('on');
+}
+
+function addCategory() {
+  if (!IS_ADMIN) return;
+  const name = document.getElementById('ac-name').value.trim();
+  const icon = document.getElementById('ac-icon').value.trim() || '📘';
+  const color = document.getElementById('ac-color').value.trim() || '#00ccf5';
+  const desc = document.getElementById('ac-desc').value.trim();
+  if (!name) { showToast('Category name required', 'tr'); return; }
+  if (CATEGORIES[name]) { showToast('Category already exists', 'tr'); return; }
+
+  const tabId = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+  catRef.push({
+    icon, color, tabId, desc, subs: [], _ts: Date.now()
+  }).then(() => {
+    // Create a dynamic view for the new category
+    createDynamicView(name, { icon, color, tabId, desc, subs: [] });
+    cm('m-add-cat');
+    showToast('Category "' + name + '" added', 'tg');
+  });
+}
+
+function createDynamicView(name, cfg) {
+  // Add nav tab
+  const tabsEl = document.querySelector('.nav-tabs');
+  const btn = document.createElement('button');
+  btn.className = 'ntab';
+  btn.dataset.v = cfg.tabId;
+  btn.onclick = () => gv(cfg.tabId);
+  btn.textContent = cfg.icon + ' ' + name;
+  tabsEl.appendChild(btn);
+
+  // Add view div
+  const page = document.querySelector('.page');
+  const div = document.createElement('div');
+  div.className = 'view';
+  div.id = 'view-' + cfg.tabId;
+  div.innerHTML = `
+    <div class="breadcrumb"><a onclick="gv('overview')">Overview</a><span class="sep">›</span><span>${esc(name)}</span></div>
+    <div class="sh"><div><h2>${esc(name)}</h2><div class="sh-sub">${esc(cfg.desc || '')}</div></div>
+      <div class="shr"><button class="btn btn-sm admin-only" ${IS_ADMIN ? '' : 'style="display:none"'} onclick="openUpload('${esc(name)}')">+ Upload</button></div></div>
+    <div class="ctrl"><div class="sw"><span class="sw-ico">🔍</span><input class="si" placeholder="Search…" oninput="filterDocs('${cfg.tabId}',this.value)"></div>
+      <span class="cnt" id="cnt-${cfg.tabId}"></span></div>
+    <div class="doc-grid" id="docs-${cfg.tabId}"></div>`;
+  page.appendChild(div);
+}
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function populateCatSelects() {
+  const opts = Object.keys(CATEGORIES).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  ['up-cat', 'ed-cat'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+function cm(id) { document.getElementById(id).classList.remove('on'); }
+['m-upload', 'm-edit-doc', 'm-add-cat'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => { if (e.target.id === id) cm(id); });
+});
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function showToast(msg, cls) {
+  const el = document.getElementById('toast');
+  el.className = 'toast ' + (cls || 'tg');
+  el.textContent = msg;
+  el.classList.add('on');
+  setTimeout(() => el.classList.remove('on'), 3200);
+}
+
+// ═══════════════════════════════════════════════════
+// ADMIN AUTH
+// ═══════════════════════════════════════════════════
+let IS_ADMIN = false;
+
+function _sha256(s) {
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
+    .then(b => Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''));
+}
+function promptAdmin(cb) {
+  const pw = prompt('Enter admin password:');
+  if (!pw) return;
+  _sha256(pw).then(h => {
+    if (h === '469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466') {
+      IS_ADMIN = true;
+      sessionStorage.setItem('fg', '1');
+      _showAdminUI();
+      if (cb) cb();
+    } else alert('Incorrect password');
+  });
+}
+function checkAdminSession() {
+  if (sessionStorage.getItem('fg') === '1') { IS_ADMIN = true; _showAdminUI(); }
+}
+function _showAdminUI() {
+  document.querySelectorAll('.admin-only').forEach(el => el.style.removeProperty('display'));
+  // Re-render to show edit buttons
+  renderOverview();
+  renderCurrentView();
+  let b = document.getElementById('_ab');
+  if (!b) {
+    b = document.createElement('div'); b.id = '_ab';
+    b.style = 'position:fixed;bottom:16px;left:16px;background:rgba(0,180,216,.13);border:1px solid rgba(0,180,216,.3);color:#00b4d8;border-radius:20px;padding:5px 14px;z-index:9990;font-size:11px;font-family:var(--mono,"monospace");display:flex;align-items:center;gap:8px';
+    b.innerHTML = 'Admin mode&nbsp;<button onclick="logoutAdmin()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-family:inherit">Exit</button>';
+    document.body.appendChild(b);
+  }
+}
+function logoutAdmin() { IS_ADMIN = false; sessionStorage.removeItem('fg'); location.reload(); }
+
+// ═══════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════
+document.getElementById('ov-date').textContent =
+  new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+checkAdminSession();
+boot();
+</script>
+</body>
+</html>
