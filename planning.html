@@ -240,6 +240,38 @@ body{background:var(--bg);color:var(--t1);font-family:var(--font);min-height:100
 .tr{background:var(--re);color:#fff}
 .ta{background:var(--am);color:#000}
 
+/* ── EXTENSION REQUEST ── */
+.ext-banner{background:var(--am-bg);border:1px solid rgba(245,158,11,.3);border-radius:10px;
+  padding:12px 16px;margin-top:14px;font-size:12px;color:var(--am)}
+.ext-banner-hdr{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}
+.ext-banner-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-family:var(--mono);color:var(--t1)}
+.ext-banner-actions{display:flex;gap:6px;margin-top:10px}
+.ext-btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-family:var(--font);
+  font-size:12px;font-weight:700;transition:opacity .15s}
+.ext-btn:hover{opacity:.85}
+.ext-btn-req{background:var(--am);color:#000}
+.ext-btn-approve{background:var(--green,#0fda7a);color:#000}
+.ext-btn-reject{background:var(--re);color:#fff}
+.ext-btn-cancel{background:var(--s2);color:var(--t2);border:1px solid var(--b1)}
+.st-ext{background:var(--am-bg);color:var(--am)}
+.ext-form{margin-top:12px;display:flex;flex-direction:column;gap:10px;padding-top:10px;
+  border-top:1px solid rgba(245,158,11,.2)}
+.ext-form label{font-size:10.5px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px}
+.ext-form input,.ext-form textarea{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:9px 12px;color:var(--t1);font-family:var(--font);font-size:13px;outline:none;width:100%}
+.ext-form input:focus,.ext-form textarea:focus{border-color:var(--ac)}
+.ext-form textarea{resize:vertical;min-height:60px;line-height:1.5}
+
+/* Admin modify dates panel */
+.admin-modify-dates{margin-top:14px;background:rgba(0,204,245,.05);border:1px solid rgba(0,204,245,.2);
+  border-radius:10px;padding:12px 16px}
+.admin-modify-dates h4{font-size:11px;color:var(--ac);font-family:var(--mono);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.admin-modify-dates .fr{gap:10px}
+.admin-modify-dates input{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:8px 12px;color:var(--t1);font-family:var(--font);font-size:13px;outline:none;width:100%}
+.admin-modify-dates input:focus{border-color:var(--ac)}
+
 /* ── ADMIN ── */
 .admin-only { display: none !important; }
 .admin-badge-bar {
@@ -713,12 +745,18 @@ function renderList() {
       </div>
       <div class="bk-r">
         <span class="status-badge ${st.cls}">${st.l}</span>
+        ${b.extensionRequest&&b.extensionRequest.status==="pending"?`<span class="status-badge st-ext">⏳ Extension</span>`:""}
         ${b.priority==="Urgent"?`<span class="status-badge" style="background:var(--re-bg);color:var(--re)">Urgent</span>`:
           b.priority==="High"?`<span class="status-badge" style="background:var(--am-bg);color:var(--am)">High</span>`:""}
         ${IS_ADMIN && b.status==="Pending Approval" ? `
           <div style="display:flex;gap:4px;margin-top:4px">
             <button class="btn btn-sm" style="background:var(--green);font-size:10px;padding:3px 9px" onclick="event.stopPropagation();approveBook('${b._id}')">Approve</button>
             <button class="btn-o btn-sm" style="color:var(--red);border-color:rgba(248,81,73,.3);font-size:10px;padding:3px 9px" onclick="event.stopPropagation();rejectBook('${b._id}')">Reject</button>
+          </div>` : ""}
+        ${IS_ADMIN && b.extensionRequest&&b.extensionRequest.status==="pending" ? `
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <button class="btn btn-sm" style="background:var(--am);color:#000;font-size:10px;padding:3px 9px" onclick="event.stopPropagation();approveExtension('${b._id}')">Approve Ext.</button>
+            <button class="btn-o btn-sm" style="color:var(--red);border-color:rgba(248,81,73,.3);font-size:10px;padding:3px 9px" onclick="event.stopPropagation();rejectExtension('${b._id}')">Reject Ext.</button>
           </div>` : ""}
         ${IS_ADMIN ? `<button class="btn-o btn-sm" style="font-size:10px" onclick="event.stopPropagation();openEdit('${b._id}')">Edit</button>` : ""}
       </div>
@@ -737,12 +775,89 @@ function openDet(id) {
   const today = new Date().toISOString().slice(0,10);
   const days = b.startDate&&b.endDate ? Math.round((new Date(b.endDate)-new Date(b.startDate))/86400000)+1 : "?";
   const isActive = b.startDate<=today&&b.endDate>=today;
+  const isUpcoming = b.startDate>today;
+  const canExtend = (isActive||isUpcoming)&&(b.status==="Approved"||b.status==="Confirmed");
+  const ext = b.extensionRequest||null;
+
+  /* ── Extension request banner ─────────────────────────────── */
+  let extHTML = "";
+  if (ext && ext.status === "pending") {
+    const extDays = ext.newEndDate&&b.endDate ? Math.round((new Date(ext.newEndDate)-new Date(b.endDate))/86400000) : "?";
+    extHTML = `<div class="ext-banner">
+      <div class="ext-banner-hdr">⏳ Extension Requested</div>
+      <div class="ext-banner-row">
+        <span>Current end: <strong>${esc(fmtD(b.endDate))}</strong></span>
+        <span>→</span>
+        <span>Requested end: <strong>${esc(fmtD(ext.newEndDate))}</strong> (+${extDays} day${extDays!==1?"s":""})</span>
+      </div>
+      ${ext.reason?`<div style="margin-top:6px;color:var(--t2);font-size:12px"><em>"${esc(ext.reason)}"</em></div>`:""}
+      <div style="margin-top:4px;font-size:11px;color:var(--t3)">Requested by ${esc(ext.requestedBy||"—")} · ${ext.requestedAt?new Date(ext.requestedAt).toLocaleDateString():""}</div>
+      ${IS_ADMIN?`<div class="ext-banner-actions">
+        <button class="ext-btn ext-btn-approve" onclick="approveExtension('${id}')">✓ Approve Extension</button>
+        <button class="ext-btn ext-btn-reject" onclick="rejectExtension('${id}')">✕ Reject</button>
+      </div>`:`<div style="margin-top:8px;font-size:11px;color:var(--am)">Waiting for admin approval…</div>`}
+    </div>`;
+  } else if (ext && ext.status === "approved") {
+    extHTML = `<div class="ext-banner" style="background:rgba(15,218,122,.08);border-color:rgba(15,218,122,.3);color:var(--rcm)">
+      <div class="ext-banner-hdr" style="color:var(--rcm)">✓ Extension Approved</div>
+      <div style="font-size:12px;color:var(--t2)">End date was extended to ${esc(fmtD(b.endDate))}.</div>
+    </div>`;
+  } else if (ext && ext.status === "rejected") {
+    extHTML = `<div class="ext-banner" style="background:var(--re-bg);border-color:rgba(248,81,73,.3);color:var(--re)">
+      <div class="ext-banner-hdr" style="color:var(--re)">✕ Extension Rejected</div>
+      <div style="font-size:12px;color:var(--t2)">The requested extension to ${esc(fmtD(ext.newEndDate))} was not approved.</div>
+    </div>`;
+  }
+
+  /* ── Request extension form (for members with active/upcoming approved bookings) ─── */
+  let extFormHTML = "";
+  if (canExtend && !IS_ADMIN && (!ext || ext.status !== "pending")) {
+    extFormHTML = `<div style="margin-top:14px">
+      <button class="ext-btn ext-btn-req" id="ext-toggle-btn" onclick="document.getElementById('ext-form-wrap').style.display='block';this.style.display='none'">
+        ⏱ Request Time Extension
+      </button>
+      <div id="ext-form-wrap" style="display:none" class="ext-form">
+        <label>New End Date</label>
+        <input type="date" id="ext-new-end" min="${b.endDate}" value="">
+        <label>Reason (optional)</label>
+        <textarea id="ext-reason" placeholder="Why do you need more time?"></textarea>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="ext-btn ext-btn-req" onclick="submitExtension('${id}')">Submit Request</button>
+          <button class="ext-btn ext-btn-cancel" onclick="document.getElementById('ext-form-wrap').style.display='none';document.getElementById('ext-toggle-btn').style.display=''">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ── Admin: modify dates directly (works on any status including running) ─── */
+  let adminModifyHTML = "";
+  if (IS_ADMIN) {
+    adminModifyHTML = `<div class="admin-modify-dates">
+      <h4>🔧 Admin: Modify Dates</h4>
+      <div class="fr">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:10px;color:var(--t3);font-family:var(--mono)">START DATE</label>
+          <input type="date" id="admin-mod-start" value="${b.startDate||""}">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:10px;color:var(--t3);font-family:var(--mono)">END DATE</label>
+          <input type="date" id="admin-mod-end" value="${b.endDate||""}">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <button class="ext-btn" style="background:var(--ac);color:#000" onclick="adminModifyDates('${id}')">Save Date Changes</button>
+        <span id="admin-mod-msg" style="font-size:11px;font-family:var(--mono)"></span>
+      </div>
+    </div>`;
+  }
+
   document.getElementById("m-det-body").innerHTML = `
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
       ${facChip(fac)}
       <span class="status-badge ${st.cls}">${st.l}</span>
       ${isActive?`<span class="status-badge" style="background:var(--rcm-bg);color:var(--rcm)">● Running now</span>`:""}
       ${b.priority&&b.priority!=="Normal"?`<span class="status-badge" style="background:var(--am-bg);color:var(--am)">${b.priority}</span>`:""}
+      ${ext&&ext.status==="pending"?`<span class="status-badge st-ext">⏳ Extension Pending</span>`:""}
     </div>
     <div class="det-name">${esc(b.title||"Untitled")}</div>
     <div class="det-grid">
@@ -755,7 +870,10 @@ function openDet(id) {
       ${b.temp?`<div class="det-row"><div class="det-lbl">Temperature</div><div class="det-val">${esc(b.temp)}</div></div>`:""}
       ${b.diag?`<div class="det-row" style="grid-column:1/-1"><div class="det-lbl">Diagnostics / Equipment</div><div class="det-val">${esc(b.diag)}</div></div>`:""}
       ${b.desc?`<div class="det-row" style="grid-column:1/-1"><div class="det-lbl">Description / Notes</div><div class="det-val">${esc(b.desc)}</div></div>`:""}
-    </div>`;
+    </div>
+    ${extHTML}
+    ${extFormHTML}
+    ${adminModifyHTML}`;
   document.getElementById("det-edit").onclick = () => { cm("m-det"); openEdit(id); };
   document.getElementById("det-del").onclick = () => { editId = id; delBook(); };
   document.getElementById("m-det").classList.add("on");
@@ -906,15 +1024,90 @@ function toast(msg, cls="tg") {
 function approveBook(id) {
   if (!IS_ADMIN) return;
   dbRef.child(id).update({ status: 'Approved' })
-    .then(() => showToast('Booking approved!', 'tg'));
+    .then(() => toast('Booking approved!', 'tg'));
 }
 function rejectBook(id) {
   if (!IS_ADMIN) return;
   if (!confirm('Reject this booking request?')) return;
   dbRef.child(id).update({ status: 'Rejected' })
-    .then(() => showToast('Booking rejected', 'tb'));
+    .then(() => toast('Booking rejected', 'tb'));
 }
 
+// ════════════════════════════════════════════════
+// EXTENSION REQUESTS
+// ════════════════════════════════════════════════
+
+/* Member submits an extension request */
+function submitExtension(id) {
+  const b = DB[id]; if (!b) return;
+  const newEnd = document.getElementById("ext-new-end").value;
+  const reason = document.getElementById("ext-reason").value.trim();
+  if (!newEnd) { toast("Please select a new end date", "tr"); return; }
+  if (newEnd <= b.endDate) { toast("New end date must be after current end date (" + fmtD(b.endDate) + ")", "tr"); return; }
+  const me = sessionStorage.getItem('faster_user_v1') || 'Unknown';
+  dbRef.child(id).child("extensionRequest").set({
+    newEndDate: newEnd,
+    reason: reason,
+    requestedBy: me,
+    requestedAt: new Date().toISOString(),
+    status: "pending"
+  }).then(() => {
+    toast("Extension request submitted — pending admin approval", "tg");
+    cm("m-det");
+  });
+}
+
+/* Admin approves extension → updates the booking end date */
+function approveExtension(id) {
+  if (!IS_ADMIN) return;
+  const b = DB[id]; if (!b || !b.extensionRequest) return;
+  const newEnd = b.extensionRequest.newEndDate;
+  dbRef.child(id).update({
+    endDate: newEnd,
+    "extensionRequest/status": "approved",
+    "extensionRequest/resolvedAt": new Date().toISOString(),
+    "extensionRequest/resolvedBy": sessionStorage.getItem('faster_user_v1') || 'Admin'
+  }).then(() => {
+    toast("Extension approved — end date updated to " + fmtD(newEnd), "tg");
+    cm("m-det");
+  });
+}
+
+/* Admin rejects extension */
+function rejectExtension(id) {
+  if (!IS_ADMIN) return;
+  if (!confirm("Reject this extension request?")) return;
+  dbRef.child(id).update({
+    "extensionRequest/status": "rejected",
+    "extensionRequest/resolvedAt": new Date().toISOString(),
+    "extensionRequest/resolvedBy": sessionStorage.getItem('faster_user_v1') || 'Admin'
+  }).then(() => {
+    toast("Extension request rejected", "tb");
+    cm("m-det");
+  });
+}
+
+/* Admin directly modifies start/end dates on any booking (including running ones) */
+function adminModifyDates(id) {
+  if (!IS_ADMIN) return;
+  const b = DB[id]; if (!b) return;
+  const newStart = document.getElementById("admin-mod-start").value;
+  const newEnd = document.getElementById("admin-mod-end").value;
+  const msgEl = document.getElementById("admin-mod-msg");
+  if (!newStart || !newEnd) { msgEl.style.color="var(--re)"; msgEl.textContent="Both dates are required"; return; }
+  if (newStart > newEnd) { msgEl.style.color="var(--re)"; msgEl.textContent="Start must be before end"; return; }
+  if (newStart === b.startDate && newEnd === b.endDate) { msgEl.style.color="var(--am)"; msgEl.textContent="No changes made"; return; }
+  const changes = [];
+  if (newStart !== b.startDate) changes.push("start: " + fmtD(b.startDate) + " → " + fmtD(newStart));
+  if (newEnd !== b.endDate) changes.push("end: " + fmtD(b.endDate) + " → " + fmtD(newEnd));
+  dbRef.child(id).update({
+    startDate: newStart,
+    endDate: newEnd
+  }).then(() => {
+    toast("Dates updated: " + changes.join(", "), "tg");
+    cm("m-det");
+  });
+}
 
 // ════════════════════════════════════════════
 // ADMIN AUTH
@@ -987,9 +1180,15 @@ function openRequestForm(dateStr) {
 
 // Update pending count in admin bar
 function updatePendingBadge() {
-  const n = Object.values(DB).filter(b => b.status === 'Pending Approval').length;
+  const bookings = Object.values(DB);
+  const nPending = bookings.filter(b => b.status === 'Pending Approval').length;
+  const nExt = bookings.filter(b => b.extensionRequest && b.extensionRequest.status === 'pending').length;
   const el = document.getElementById('pending-notice');
-  if (el) el.textContent = n > 0 ? n + ' pending approval' + (n>1?'s':'') : '';
+  if (!el) return;
+  const parts = [];
+  if (nPending > 0) parts.push(nPending + ' pending approval' + (nPending>1?'s':''));
+  if (nExt > 0) parts.push(nExt + ' extension request' + (nExt>1?'s':''));
+  el.textContent = parts.join(' · ');
 }
 
 checkAdminSession();

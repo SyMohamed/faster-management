@@ -250,6 +250,44 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   padding:0 40px 60px;align-items:start}
 @media(max-width:900px){.tools-activity-wrap{grid-template-columns:1fr}}
 @media(max-width:640px){.tools-activity-wrap,.workspace-section{padding-left:20px;padding-right:20px}}
+
+/* ── stat cards ── */
+.stat-card{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b1);
+  border-radius:10px;padding:10px 16px;cursor:pointer;transition:all .18s;min-width:100px}
+.stat-card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.stat-icon{font-size:20px;line-height:1}
+.stat-val{font-size:20px;font-weight:800;color:var(--t1);font-family:var(--mono);line-height:1}
+.stat-lbl{font-size:11px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+
+/* ── search overlay (for index page) ── */
+#gs-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  z-index:9000;align-items:flex-start;justify-content:center;padding-top:10vh}
+#gs-overlay.open{display:flex}
+#gs-box{background:var(--s1);border:1px solid var(--b2);border-radius:14px;width:min(620px,92vw);
+  overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+#gs-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--b1)}
+.gs-icon{font-size:18px}
+#gs-input{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:16px;font-family:var(--font)}
+#gs-input::placeholder{color:var(--t3)}
+#gs-kbd{font-size:11px;font-family:var(--mono);color:var(--t3);background:var(--s2);border:1px solid var(--b1);
+  border-radius:4px;padding:2px 6px}
+#gs-results{max-height:380px;overflow-y:auto}
+#gs-loading{padding:24px;text-align:center;color:var(--t3);font-size:14px}
+.gs-section-title{padding:10px 18px 4px;font-size:11px;font-weight:700;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+.gs-item{display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;transition:background .1s}
+.gs-item:hover,.gs-item:focus{background:var(--s2);outline:none}
+.gs-item-icon{font-size:18px;flex-shrink:0}
+.gs-item-name{font-size:14px;color:var(--t1);font-weight:500}
+.gs-item-sub{font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.gs-item-module{margin-left:auto;font-size:11px;font-family:var(--mono);color:var(--t3);
+  background:var(--s2);border-radius:4px;padding:2px 7px;flex-shrink:0}
+
+@media(max-width:640px){
+  .stat-card{padding:8px 12px;min-width:80px}
+  .stat-val{font-size:17px}
+  [style*="padding:0 40px 18px"]{padding:0 20px 14px!important}
+}
 </style>
 <link rel="stylesheet" href="shared.css">
 </head>
@@ -362,12 +400,182 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   </div>
 </div>
 
+<!-- ── Global search overlay (⌘K / Ctrl+K) ─────────────────────────────── -->
+<div id="gs-overlay" onclick="if(event.target===this)closeGS()">
+  <div id="gs-box">
+    <div id="gs-input-wrap">
+      <span class="gs-icon">🔍</span>
+      <input id="gs-input" placeholder="Search orders, chemicals, assets…" autocomplete="off"
+             oninput="gsSearch(this.value)" onkeydown="gsKey(event)">
+      <span id="gs-kbd">Esc</span>
+    </div>
+    <div id="gs-results"><div id="gs-empty" style="display:none">No results</div></div>
+  </div>
+</div>
+
+<!-- ══ WORKSPACE SHELL (hidden until login) ═══════════════════════════════ -->
+<div id="workspace-shell" style="display:none">
+
+<!-- ── Nav ────────────────────────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="brand">
+    <img id="nav-logo" src="" alt="FASTER" style="width:40px;height:40px;border-radius:50%;background:#fff;object-fit:contain;padding:2px">
+    <div class="brand-t">
+      <span>FASTER Lab</span>
+      <small>Farooq's group · KAUST</small>
+    </div>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <button onclick="openGS()" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:5px 12px;color:var(--t3);font-family:var(--mono);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--t2)'" onmouseout="this.style.borderColor='var(--b1)';this.style.color='var(--t3)'">
+      🔍 <span>Search</span><span style="opacity:.5;font-size:10px">⌘K</span>
+    </button>
+    <div style="position:relative" id="user-badge-wrap">
+      <div class="user-badge" id="user-badge" onclick="toggleUserMenu()" title="Account menu" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);color:var(--muted);background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:3px 10px 3px 6px;cursor:pointer">
+        <div id="ub-dot-inner" style="width:22px;height:22px;border-radius:50%;background:var(--ac);color:#000;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">?</div>
+        <span id="ub-name-inner">…</span>
+      </div>
+      <div class="user-menu" id="user-menu">
+        <button class="user-menu-item" onclick="openPwChange()">🔑 Change Password</button>
+        <div class="user-menu-sep"></div>
+        <button class="user-menu-item" style="color:var(--red)" onclick="signOut()">⏏ Sign Out</button>
+      </div>
+    </div>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);font-family:var(--mono)">
+      <span class="nav-dot"></span>Live
+    </span>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-eye">Lab Tools</div>
+  <h1>FASTER Lab<br>Digital Workspace</h1>
+  <p>All lab management tools in one place — real-time, shared across the team.</p>
+</div>
+
+<!-- ── Greeting + Live Stats ──────────────────────────────────────────── -->
+<div style="padding:0 40px 18px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px">
+    <div>
+      <div id="ws-greeting" style="font-size:clamp(16px,1.5vw,21px);font-weight:700;color:var(--t1)">Welcome back</div>
+      <div id="ws-date" style="font-size:12px;color:var(--t3);font-family:var(--mono);margin-top:3px"></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="stat-card" onclick="location.href='orders.html'" title="View Orders">
+        <div class="stat-icon">📦</div>
+        <div><div class="stat-val" id="stat-orders">—</div><div class="stat-lbl">Orders</div></div>
+      </div>
+      <div class="stat-card" onclick="location.href='chemicals.html'" title="View Chemicals">
+        <div class="stat-icon">🧪</div>
+        <div><div class="stat-val" id="stat-chemicals">—</div><div class="stat-lbl">Chemicals</div></div>
+      </div>
+      <div class="stat-card" onclick="location.href='assets.html'" title="View Assets">
+        <div class="stat-icon">🔬</div>
+        <div><div class="stat-val" id="stat-assets">—</div><div class="stat-lbl">Assets</div></div>
+      </div>
+      <div class="stat-card" onclick="location.href='planning.html'" title="View Bookings">
+        <div class="stat-icon">📅</div>
+        <div><div class="stat-val" id="stat-bookings">—</div><div class="stat-lbl">Bookings</div></div>
+      </div>
+      <div class="stat-card" onclick="location.href='safety.html'" title="View Safety Hub">
+        <div class="stat-icon">🛡️</div>
+        <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Tools + activity feed side-by-side layout ────────────────────────── -->
-<div class="tools-activity-wrap" id="tools-activity-wrap" style="display:none">
+<div class="tools-activity-wrap" id="tools-activity-wrap">
   <div>
     <div class="workspace-section-title">Workspace tools</div>
     <div class="tools-grid" id="tools-grid-inner">
-      <!-- tool cards injected here by JS (moved from static HTML above) -->
+
+      <!-- ORDERS -->
+      <a href="orders.html" class="tc tool-card" style="--tc:#00ccf5">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">📦</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Orders Tracker</div>
+        <div class="tc-desc">Track all lab procurement from PR submission to delivery. Everyone sees live status updates instantly.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Add &amp; edit orders in real-time</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Status: Delivered · Delayed · PO · PR</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Filter by status, requester, PO/PR</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Export to CSV</div>
+        </div>
+      </a>
+
+      <!-- CHEMICALS -->
+      <a href="chemicals.html" class="tc tool-card" style="--tc:#0fda7a">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🧪</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Chemical Inventory</div>
+        <div class="tc-desc">Full chemical inventory across all storage locations — shelves, fridge and corrosive cabinet.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>232 chemicals pre-loaded from Excel</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Shelf 1, 2, 3 · Corrosive · Fridge</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Owner, user, CAS number, quantity</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Track ordered chemicals &amp; stock</div>
+        </div>
+      </a>
+
+      <!-- ASSETS -->
+      <a href="assets.html" class="tc tool-card" style="--tc:#9b5fff">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🔬</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Asset Registry</div>
+        <div class="tc-desc">Complete lab equipment registry — lasers, detectors, optics, oscilloscopes, pumps and IT.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>401 assets across 8 categories</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Laser wavelength spectrum map</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Classify by type, manufacturer, wavelength</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Track status, location, owner</div>
+        </div>
+      </a>
+
+      <!-- LAB PLANNING -->
+      <a href="planning.html" class="tc tool-card" style="--tc:#ff7525">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">📅</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Lab Facility Planning</div>
+        <div class="tc-desc">Book experiments and view facility availability for LPST, HPST and RCM — with a shared calendar.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>LPST · HPST · RCM facility calendars</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Book experiments with date ranges</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Experiment details &amp; researcher info</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Conflict detection &amp; live sync</div>
+        </div>
+      </a>
+
+      <!-- SAFETY HUB -->
+      <a href="safety.html" class="tc tool-card" style="--tc:#f85149">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🛡️</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Safety Hub</div>
+        <div class="tc-desc">Report lab safety issues, earn points, and compete for the monthly safety champion title.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Report issues · earn +1 pt</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Fix issues · earn +2 pts</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Monthly champion leaderboard</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Team members with profile photos</div>
+        </div>
+      </a>
+
     </div>
   </div>
   <div>
@@ -426,7 +634,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   </div>
 </div>
 
-<footer>FASTER Lab · KAUST · Farooq's group for Advanced Sensing Technology &amp; Energy Research</footer>
+  <footer>FASTER Lab · KAUST · Farooq's group for Advanced Sensing Technology &amp; Energy Research</footer>
+</div><!-- /workspace-shell -->
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -454,16 +663,22 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   }
 
   /* ── Auth state ──────────────────────────────────────────────────────── */
+  /* Called on page-load when session already exists — show workspace inline */
   function onAuthOk(){
     document.getElementById('login-screen').style.display='none';
     const name=sessionStorage.getItem(USER_KEY);
     if(name) updateUserBadge(name);
     showWorkspace();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
-    const dest=sessionStorage.getItem('faster_redirect');
-    if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
   }
   if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
+
+  /* Called after a fresh login — always redirect (no extra clicks needed) */
+  function afterLogin(){
+    const dest=sessionStorage.getItem('faster_redirect');
+    if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
+    else{ onAuthOk(); }
+  }
 
   /* ── Load member cards ───────────────────────────────────────────────── */
   function loadMemberCards(){
@@ -524,7 +739,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     sessionStorage.setItem(ROLE_KEY,role);
     if(role==='admin') sessionStorage.setItem('fa','1');
     document.getElementById('ml-overlay').classList.remove('open');
-    onAuthOk();
+    afterLogin();
   };
 
   /* ── Guest login (FASTER / FASTER) ──────────────────────────────────── */
@@ -547,7 +762,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     sessionStorage.setItem(UNAME_KEY,'guest');
     sessionStorage.setItem(ROLE_KEY,'viewer');
     document.getElementById('guest-overlay').classList.remove('open');
-    onAuthOk();
+    afterLogin();
   };
 
   /* ── Registration gate ───────────────────────────────────────────────── */
@@ -604,8 +819,17 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   /* ── User badge & menu ───────────────────────────────────────────────── */
   function updateUserBadge(name){
     const initials=name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
-    const badge=document.getElementById('user-badge');
-    if(badge){ badge.querySelector('.ub-dot').textContent=initials; badge.querySelector('.ub-name').textContent=name; }
+    const dot=document.getElementById('ub-dot-inner');
+    const nm=document.getElementById('ub-name-inner');
+    if(dot) dot.textContent=initials;
+    if(nm) nm.textContent=name;
+    /* Also update greeting */
+    const h=new Date().getHours();
+    const tod=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+    const greet=document.getElementById('ws-greeting');
+    if(greet) greet.textContent=tod+', '+name.split(' ')[0]+'!';
+    const dateEl=document.getElementById('ws-date');
+    if(dateEl) dateEl.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   }
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
   document.addEventListener('click',e=>{
@@ -649,14 +873,12 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* ── Workspace ───────────────────────────────────────────────────────── */
   function showWorkspace(){
-    const st=document.querySelector('.tools');
-    const dw=document.getElementById('tools-activity-wrap');
-    if(st&&dw){
-      const sg=st.querySelector('.tools-grid');
-      const dg=document.getElementById('tools-grid-inner');
-      if(sg&&dg) dg.innerHTML=sg.innerHTML;
-      st.style.display='none'; dw.style.display='';
-    }
+    const shell=document.getElementById('workspace-shell');
+    if(shell) shell.style.display='block';
+    /* Copy logo from login screen into nav */
+    const loginLogo=document.querySelector('#login-screen .wau-header img');
+    const navLogo=document.getElementById('nav-logo');
+    if(loginLogo&&navLogo) navLogo.src=loginLogo.src;
   }
 
   /* ── Admin panel ─────────────────────────────────────────────────────── */
@@ -883,9 +1105,26 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       }catch(e){console.warn('Seed skipped:',e);}
     })();
 
+    /* Stat counter map: Firebase path → stat element id */
+    const STAT_MAP={
+      'faster_orders':'stat-orders',
+      'faster_chemicals':'stat-chemicals',
+      'faster_assets_v5':'stat-assets',
+      'faster_planning':'stat-bookings',
+      'faster_safety':'stat-safety'
+    };
+
     AF_SOURCES.forEach(src=>{
       db.ref(src.path).on('value',snap=>{
         const val=snap.val()||{};
+        /* Update stat counter */
+        const statId=STAT_MAP[src.path];
+        if(statId){
+          const count=Object.values(val).filter(v=>typeof v==='object').length;
+          const el=document.getElementById(statId);
+          if(el) el.textContent=count.toLocaleString();
+        }
+        /* Update activity feed */
         afEvents=afEvents.filter(e=>e.module!==src.module);
         Object.values(val).forEach(item=>{
           if(typeof item!=='object')return;
