@@ -1149,6 +1149,9 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         db.ref('faster_users/'+username+'/photoURL').set(dataURL).then(function(){
           sessionStorage.setItem('faster_photo_v1',dataURL);
           updateUserBadge(sessionStorage.getItem(USER_KEY)||'', dataURL);
+          /* Mirror photo to safety profile */
+          const displayName=sessionStorage.getItem(USER_KEY)||'';
+          if(displayName) _syncSafetyMember(displayName, dataURL);
           _toast('Profile photo updated!','ok');
         }).catch(function(){ _toast('Failed to save photo','warn'); });
       };
@@ -1494,6 +1497,24 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     }catch(e){ _toast('Error rejecting extension','err'); console.error(e); }
   };
 
+  /* Sync a user into faster_safety/members (creates if not present, updates photo) */
+  async function _syncSafetyMember(name, photoURL){
+    if(!db||!name) return;
+    const snap=await db.ref('faster_safety/members').orderByChild('name').equalTo(name).once('value');
+    if(snap.exists()){
+      if(photoURL){
+        const key=Object.keys(snap.val())[0];
+        await db.ref('faster_safety/members/'+key+'/photo').set(photoURL);
+      }
+      return;
+    }
+    await db.ref('faster_safety/members').push({
+      name, photo:photoURL||'', role:'Member',
+      color:'#1f6feb', orgPts:0, adminBonus:0,
+      createdAt:new Date().toISOString()
+    });
+  }
+
   window.approveRequest=async function(rid,username,name,passwordHash){
     if(!db) return;
     try{
@@ -1501,6 +1522,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       if(snap.val()){ _toast('Username @'+username+' already exists. Ask them to use a different one.','warn'); return; }
       await db.ref('faster_users/'+username).set({name,passwordHash,role:'member',createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()});
       await db.ref('faster_pending/'+rid).remove();
+      await _syncSafetyMember(name,'');
       _toast(name+' approved and added!','ok');
     }catch(e){ console.error(e); _toast('Error approving request','err'); }
   };
@@ -1525,6 +1547,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       const snap=await db.ref('faster_users/'+username).once('value');
       if(snap.val()){ errEl.textContent='Username already taken'; return; }
       await db.ref('faster_users/'+username).set({name,passwordHash:await sha256(password),role:'member',createdAt:new Date().toISOString(),createdBy:sessionStorage.getItem(UNAME_KEY)||'admin'});
+      await _syncSafetyMember(name,'');
       nameEl.value=''; userEl.value=''; passEl.value='';
       errEl.style.color='var(--green)'; errEl.textContent='Member added!';
       setTimeout(()=>{ errEl.textContent=''; },2000);
