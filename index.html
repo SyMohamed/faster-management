@@ -468,7 +468,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function afterLogin(){
     const dest=sessionStorage.getItem('faster_redirect');
     if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
-    else{ location.assign('index.html'); }
+    else{ onAuthOk(); }
   }
 
   /* ── Load member cards ───────────────────────────────────────────────── */
