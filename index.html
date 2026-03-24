@@ -694,6 +694,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div class="stat-icon">🛡️</div>
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
       </div>
+      <div class="stat-card" onclick="location.href='guide.html'" title="View FASTER Kickstarter">
+        <div class="stat-icon">🚀</div>
+        <div><div class="stat-val" id="stat-guide">—</div><div class="stat-lbl">Docs</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -798,6 +802,23 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Fix issues · earn +2 pts</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Monthly champion leaderboard</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Team members with profile photos</div>
+        </div>
+      </a>
+
+      <!-- FASTER KICKSTARTER -->
+      <a href="guide.html" class="tc tool-card" style="--tc:#00b4d8">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">🚀</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">FASTER Kickstarter</div>
+        <div class="tc-desc">Everything you need to hit the ground running — equipment manuals, SOPs and lab procedures in one place.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Equipment manuals &amp; datasheets</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Standard Operating Procedures</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Quick-access links to key docs</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Admin-managed content</div>
         </div>
       </a>
 
@@ -1861,6 +1882,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     db.ref('faster_safety/reports').on('value',snap=>{
       const count=Object.keys(snap.val()||{}).length;
       const el=document.getElementById('stat-safety');
+      if(el) el.textContent=count.toLocaleString();
+    });
+
+    /* Kickstarter docs count */
+    db.ref('faster_guide').on('value',snap=>{
+      const val=snap.val()||{};
+      const count=Object.keys(val.manuals||{}).length+Object.keys(val.sops||{}).length;
+      const el=document.getElementById('stat-guide');
       if(el) el.textContent=count.toLocaleString();
     });
 
