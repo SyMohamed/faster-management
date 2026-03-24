@@ -103,7 +103,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:24px;padding:24px;overflow-y:auto}
-.wau-header{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.wau-header{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative;z-index:2}
 .wau-header img{width:64px;height:64px;border-radius:50%;object-fit:contain;background:#fff;padding:3px}
 .wau-header h2{font-size:24px;font-weight:700;color:var(--t1);letter-spacing:-.3px}
 .wau-header p{font-size:15px;color:var(--t2);font-family:var(--mono)}
@@ -111,8 +111,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 /* Login action cards */
 .login-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px;padding:0 16px}
 .login-card{display:flex;align-items:center;gap:16px;padding:18px 20px;
-  background:var(--s2);border:1.5px solid var(--b1);border-radius:14px;cursor:pointer;
-  transition:all .2s;user-select:none}
+  background:rgba(17,23,32,.92);border:1.5px solid var(--b2);border-radius:14px;cursor:pointer;
+  transition:all .2s;user-select:none;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
 .login-card:hover{border-color:var(--b2);background:var(--s3);transform:translateY(-2px);
   box-shadow:0 8px 28px rgba(0,0,0,.35)}
 .login-card.lc-primary{border-color:rgba(0,204,245,.25)}
@@ -315,7 +315,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 .bg-slide{
   position:absolute;inset:0;
   background-size:cover;background-position:center center;
-  filter:grayscale(100%) brightness(0.45) contrast(1.08) saturate(0);
+  filter:grayscale(100%) brightness(0.52) contrast(1.08) saturate(0);
   opacity:0;transition:opacity 2s ease;will-change:transform,opacity}
 .bg-slide.active{opacity:1}
 @keyframes kb1{from{transform:scale(1) translate(0%,0%)} to{transform:scale(1.09) translate(-1.5%,-1%)}}
