@@ -199,6 +199,18 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .admin-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px}
 .admin-panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .admin-panel-header h3{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+/* collapsible panels */
+.admin-panel-header.collapsible{cursor:pointer;user-select:none}
+.admin-panel-header.collapsible:hover{background:var(--surface2)}
+.panel-chevron{font-size:13px;color:var(--muted);transition:transform .2s;margin-left:4px}
+.admin-panel.collapsed .panel-chevron{transform:rotate(-90deg)}
+.admin-panel.collapsed .admin-panel-body{display:none}
+.admin-panel.collapsed .admin-panel-header{border-bottom:none}
+/* collapsible activity feed */
+.activity-feed-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 2px;border-radius:6px}
+.activity-feed-header:hover{background:var(--surface2)}
+.activity-feed.collapsed .af-list{display:none}
+.activity-feed.collapsed .panel-chevron{transform:rotate(-90deg)}
 .pending-badge{background:var(--red);color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:2px 8px;font-family:var(--mono)}
 .admin-panel-body{padding:14px 18px}
 .member-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
@@ -754,10 +766,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         </div>
       </div>
 
-      <!-- Active team members -->
-      <div class="admin-panel">
-        <div class="admin-panel-header">
-          <h3>Team Members</h3>
+      <!-- Active team members (collapsed by default) -->
+      <div class="admin-panel collapsed" id="members-panel">
+        <div class="admin-panel-header collapsible" onclick="togglePanel('members-panel')">
+          <h3>Team Members <span class="panel-chevron">▾</span></h3>
           <span style="font-size:11px;color:var(--accent);font-family:var(--mono)">Admin</span>
         </div>
         <div class="admin-panel-body">
@@ -777,9 +789,9 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         </div>
       </div>
     </div>
-    <div class="activity-feed">
-      <div class="activity-feed-header">
-        <h3>Latest changes</h3>
+    <div class="activity-feed collapsed" id="activity-feed-panel">
+      <div class="activity-feed-header" onclick="toggleActivityFeed()">
+        <h3 style="font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px">Latest changes <span class="panel-chevron">▾</span></h3>
         <span class="af-live"><span class="af-dot"></span>Live</span>
       </div>
       <div class="af-list" id="af-list">
@@ -1032,6 +1044,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     input.value='';
   };
   window.toggleUserMenu=function(){ document.getElementById('user-menu').classList.toggle('open'); };
+  window.togglePanel=function(id){ document.getElementById(id).classList.toggle('collapsed'); };
+  window.toggleActivityFeed=function(){ document.getElementById('activity-feed-panel').classList.toggle('collapsed'); };
   document.addEventListener('click',e=>{
     const wrap=document.getElementById('user-badge-wrap');
     if(wrap&&!wrap.contains(e.target)) document.getElementById('user-menu').classList.remove('open');
