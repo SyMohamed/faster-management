@@ -5,7 +5,7 @@ let package = Package(
     name: "FasterLab",
     platforms: [.iOS(.v17)],
     dependencies: [
-        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "11.0.0"),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.0.0"),
     ],
     targets: [
         .executableTarget(
