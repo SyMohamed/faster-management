@@ -704,6 +704,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
       </div>
 
+      <div class="stat-card" onclick="location.href='guide.html'" title="View FASTER Kickstarter">
+        <div class="stat-icon">🚀</div>
+        <div><div class="stat-val" id="stat-guide">—</div><div class="stat-lbl">Docs</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1952,6 +1956,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       const count=Object.keys(snap.val()||{}).length;
       const el=document.getElementById('stat-safety');
       if(el) animateStat(el,count);
+    });
+
+    /* Kickstarter docs count */
+    db.ref('faster_guide').on('value',snap=>{
+      const val=snap.val()||{};
+      const count=Object.keys(val.manuals||{}).length+Object.keys(val.sops||{}).length;
+      const el=document.getElementById('stat-guide');
+      if(el) el.textContent=count.toLocaleString();
     });
 
     /* Kickstarter docs count */
