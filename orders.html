@@ -968,7 +968,7 @@ initFirebase();
 // ─── ADMIN AUTH ───
 let IS_ADMIN=false;
 function _sha256(s){const e=new TextEncoder();return crypto.subtle.digest('SHA-256',e.encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));}
-function promptAdmin(cb){const pw=prompt('Enter admin password:');if(!pw)return;_sha256(pw).then(h=>{if(h==='469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466'){IS_ADMIN=true;sessionStorage.setItem('fa','1');_showAdminUI();if(cb)cb();}else alert('Incorrect password');});}
+function promptAdmin(cb){const un=prompt('Enter admin username:');if(!un)return;if(un!=='admin'){alert('Incorrect username');return;}const pw=prompt('Enter admin password:');if(!pw)return;_sha256(pw).then(h=>{if(h==='469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466'){IS_ADMIN=true;sessionStorage.setItem('fa','1');_showAdminUI();if(cb)cb();}else alert('Incorrect password');});}
 function checkAdminSession(){if(sessionStorage.getItem('fa')==='1'){IS_ADMIN=true;_showAdminUI();}}
 function _showAdminUI(){
   document.querySelectorAll('.admin-only').forEach(el=>el.style.removeProperty('display'));
