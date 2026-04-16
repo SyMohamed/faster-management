@@ -308,6 +308,39 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .role-badge.pm{background:var(--pm-bg);color:var(--pm)}
 .role-badge.admin{background:rgba(245,158,11,.15);color:var(--amber)}
 .role-badge.member{background:rgba(106,125,148,.15);color:var(--muted)}
+
+/* Greeting banner */
+.pm-greeting{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.pm-greeting-left{display:flex;align-items:center;gap:14px;min-width:0}
+.pm-greeting-avatar{width:42px;height:42px;border-radius:50%;background:var(--pm);color:#000;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;
+  font-family:var(--mono);flex-shrink:0;border:2px solid var(--pm)}
+.pm-greeting h3{font-size:16px;font-weight:700;margin:0}
+.pm-greeting .tagline{font-size:12px;color:var(--pm);font-family:var(--mono);margin-top:3px;
+  min-height:18px;overflow:hidden;position:relative}
+.pm-greeting .tagline span{transition:opacity .4s,transform .4s}
+.pm-greeting .tag-in{opacity:1;transform:translateY(0)}
+.pm-greeting .tag-out{opacity:0;transform:translateY(-8px)}
+.pm-greeting-right{font-size:12px;color:var(--muted);font-family:var(--mono);text-align:right}
+.pm-greeting-right .pm-date{font-size:11px;margin-top:2px}
+
+/* Progress bar on project tabs */
+.proj-tab .proj-progress{width:100%;height:3px;background:var(--b1);border-radius:2px;margin-top:6px;overflow:hidden}
+.proj-tab .proj-progress-fill{height:100%;border-radius:2px;background:var(--done);transition:width .3s}
+
+/* Card hover pulse for assigned members */
+.card.my-task{border-left:2px solid var(--pm)}
+.card.my-task::after{content:'You';position:absolute;top:6px;right:8px;font-size:8px;
+  font-family:var(--mono);color:var(--pm);background:var(--pm-bg);padding:1px 5px;border-radius:3px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+
+/* Keyboard shortcut hint */
+.kbd-hint{position:fixed;bottom:16px;right:16px;background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;padding:8px 12px;font-size:10px;color:var(--muted);font-family:var(--mono);
+  z-index:100;opacity:.6;transition:opacity .2s}
+.kbd-hint:hover{opacity:1}
+.kbd-hint kbd{background:var(--s3);border:1px solid var(--b2);padding:1px 5px;border-radius:3px;
+  font-size:9px;margin:0 2px}
 </style>
 </head>
 <body>
@@ -364,6 +397,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         Nominate lab members as project managers. PMs can create new projects, assign team members, and manage tasks on their projects. Admins always have PM privileges.
       </div>
       <div class="pm-grid" id="pm-grid"></div>
+    </div>
+  </div>
+
+  <!-- GREETING -->
+  <div class="pm-greeting" id="pm-greeting">
+    <div class="pm-greeting-left">
+      <div class="pm-greeting-avatar" id="pm-avatar"></div>
+      <div>
+        <h3 id="pm-greet-text">Welcome</h3>
+        <div class="tagline"><span id="pm-tagline" class="tag-in"></span></div>
+      </div>
+    </div>
+    <div class="pm-greeting-right">
+      <div id="pm-role-badge"></div>
+      <div class="pm-date" id="pm-date"></div>
     </div>
   </div>
 
@@ -553,6 +601,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="kbd-hint" id="kbd-hint"><kbd>N</kbd> New task · <kbd>P</kbd> New project · <kbd>?</kbd> Shortcuts</div>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -697,6 +746,7 @@ function boot(){
       if($('empty-state').style.display === 'block') $('emptyNewBtn').style.display = 'inline-flex';
     }
     renderAdminPMPanel();
+    renderGreeting();
     renderProjectTabs();
     if(ACTIVE_PROJECT_ID) renderProjectHeader();
     if(ACTIVE_PROJECT_ID) renderBoard();
@@ -813,15 +863,19 @@ function renderProjectTabs(){
   }
   wrap.style.display = 'block';
   tabs.innerHTML = list.map((p, idx) => {
-    const taskCount = p.tasks ? Object.keys(p.tasks).length : 0;
+    const tasks = p.tasks ? Object.values(p.tasks) : [];
+    const taskCount = tasks.length;
+    const doneCount = tasks.filter(t=>t.status==='done').length;
+    const pct = taskCount ? Math.round(doneCount/taskCount*100) : 0;
     const upBtn = idx > 0 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',-1)" title="Move left">◀</button>` : '';
     const downBtn = idx < list.length-1 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',1)" title="Move right">▶</button>` : '';
     return `<div class="proj-tab ${p.id===ACTIVE_PROJECT_ID?'on':''}" onclick="selectProject('${p.id}')">
       ${upBtn}
       <div class="dot"></div>
       <span>${escH(p.name||'Untitled')}</span>
-      <span class="count">${taskCount}</span>
+      <span class="count">${doneCount}/${taskCount}</span>
       ${downBtn}
+      <div class="proj-progress"><div class="proj-progress-fill" style="width:${pct}%"></div></div>
     </div>`;
   }).join('');
   if(ME_IS_PM()){
@@ -959,8 +1013,9 @@ function cardHTML(t, canEdit){
     reviewComment = `<div class="card-review${rejected?' rejected':''}"><b>${escH(reviewer)}:</b> ${escH(t.reviewComment)}</div>`;
   }
 
+  const myClass = isMyTask ? ' my-task' : '';
   return `
-    <div class="card pri-${priCls}" ${draggable} ${clickHandler} data-taskid="${t.id}">
+    <div class="card pri-${priCls}${myClass}" ${draggable} ${clickHandler} data-taskid="${t.id}">
       <div class="card-pri"></div>
       <div class="card-title">${escH(t.title||'Untitled task')}</div>
       ${t.desc ? `<div class="card-desc">${escH(t.desc)}</div>` : ''}
@@ -1585,25 +1640,96 @@ window.moveProject = async function(id, dir){
   renderProjectTabs();
 };
 
+// ════════════════════════════════════════════════
+// PERSONALIZED GREETING
+// ════════════════════════════════════════════════
+const PM_TAGLINES = [
+  "Let's ship something great today.",
+  "Your team is counting on you.",
+  "Small progress is still progress.",
+  "Focus on what moves the needle.",
+  "Every task done is a step forward.",
+  "Collaboration makes the dream work.",
+  "You're building something amazing.",
+  "Keep the momentum going!",
+  "Great things take great teamwork.",
+  "One task at a time, one win at a time."
+];
+
+function renderGreeting(){
+  const h = new Date().getHours();
+  const tod = h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const firstName = ME_NAME ? ME_NAME.split(' ')[0] : 'there';
+  $('pm-greet-text').textContent = `${tod}, ${firstName}!`;
+  $('pm-avatar').textContent = initials(ME_NAME || ME_UNAME || '?');
+  $('pm-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  let roleHtml = '';
+  if(IS_ADMIN) roleHtml = '<span class="role-badge admin">Admin</span>';
+  else if(isPM(ME_UNAME)) roleHtml = '<span class="role-badge pm">Project Manager</span>';
+  else roleHtml = '<span class="role-badge member">Member</span>';
+  $('pm-role-badge').innerHTML = roleHtml;
+
+  startTaglineRotation();
+}
+
+let _tagIdx = 0, _tagTimer = null;
+function startTaglineRotation(){
+  const el = $('pm-tagline');
+  if(!el) return;
+  if(_tagTimer) clearTimeout(_tagTimer);
+  _tagIdx = Math.floor(Math.random()*PM_TAGLINES.length);
+  el.textContent = PM_TAGLINES[_tagIdx];
+  el.className = 'tag-in';
+  function next(){
+    el.className = 'tag-out';
+    setTimeout(()=>{
+      _tagIdx = (_tagIdx+1) % PM_TAGLINES.length;
+      el.textContent = PM_TAGLINES[_tagIdx];
+      el.className = 'tag-in';
+      _tagTimer = setTimeout(next, 4000);
+    }, 400);
+  }
+  _tagTimer = setTimeout(next, 4000);
+}
+
+// ════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════
+document.addEventListener('keydown', function(e){
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if(e.key === 'n' || e.key === 'N'){
+    e.preventDefault();
+    if(ACTIVE_PROJECT_ID && !READONLY) openNewTask('todo');
+  }
+  if(e.key === 'p' || e.key === 'P'){
+    e.preventDefault();
+    if(ME_IS_PM() && !READONLY) openNewProject();
+  }
+  if(e.key === '?'){
+    const hint = $('kbd-hint');
+    hint.style.opacity = hint.style.opacity === '1' ? '0.6' : '1';
+  }
+  if(e.key === 'Escape'){
+    ['projModal','taskModal','reviewModal'].forEach(id => closeModal(id));
+  }
+});
+
 // Kick off
 try {
   boot();
-  console.log('[projects] boot() completed, db:', !!db, 'ME_UNAME:', ME_UNAME, 'IS_ADMIN:', IS_ADMIN);
+  renderGreeting();
 } catch(e){
   console.error('Boot error:', e);
   document.getElementById('ltxt').textContent = 'Error: ' + e.message;
 }
 
-// Fallback: if still showing "Connecting" after 5s, force-check
 setTimeout(function(){
   if(document.getElementById('ltxt').textContent === 'Connecting…'){
     db.ref('faster_users').once('value').then(function(snap){
-      var count = Object.keys(snap.val() || {}).length;
       setConnected(true);
-      console.log('[projects] Fallback loaded ' + count + ' users');
     }).catch(function(err){
       document.getElementById('ltxt').textContent = 'DB read error: ' + err.message;
-      console.error('[projects] Fallback error:', err);
     });
   }
 }, 5000);
