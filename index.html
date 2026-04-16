@@ -341,22 +341,9 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   border-radius:10px;padding:10px 16px;cursor:pointer;transition:all .18s;min-width:100px}
 .stat-card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .stat-icon{font-size:20px;line-height:1}
-.stat-val{font-size:20px;font-weight:800;color:var(--t1);font-family:var(--mono);line-height:1;transition:color .2s}
+.stat-val{font-size:20px;font-weight:800;color:var(--t1);font-family:var(--mono);line-height:1}
 .stat-lbl{font-size:11px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
-@keyframes stat-pop{0%{transform:scale(1.25);color:var(--ac)}100%{transform:scale(1);color:var(--t1)}}
-.stat-val.pop{animation:stat-pop .4s ease forwards}
 
-/* ── Quick actions strip ── */
-#quick-actions{display:none;padding:0 40px 20px;max-width:1180px;margin:0 auto;width:100%;box-sizing:border-box}
-.qa-wrap{display:flex;gap:8px;flex-wrap:wrap}
-.qa-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;
-  cursor:pointer;text-decoration:none;border:1px solid var(--b2);background:var(--s2);color:var(--t2);
-  transition:border-color .15s,color .15s,background .15s,transform .1s}
-.qa-btn:hover{background:var(--s3);color:var(--t1);transform:translateY(-1px)}
-.qa-btn.qa-primary{border-color:rgba(0,204,245,.4);color:var(--ac);background:rgba(0,204,245,.06)}
-.qa-btn.qa-primary:hover{background:rgba(0,204,245,.12);border-color:var(--ac)}
-.qa-btn.qa-danger{border-color:rgba(248,81,73,.4);color:#f85149;background:rgba(248,81,73,.06)}
-.qa-btn.qa-danger:hover{background:rgba(248,81,73,.12);border-color:#f85149}
 /* ── search overlay (for index page) ── */
 #gs-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
   z-index:9000;align-items:flex-start;justify-content:center;padding-top:10vh}
@@ -614,7 +601,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   <div id="gs-box">
     <div id="gs-input-wrap">
       <span class="gs-icon">🔍</span>
-      <input id="gs-input" placeholder="Search orders, chemicals, assets…" autocomplete="off"
+      <input id="gs-input" placeholder="Search orders, chemicals, assets, projects…" autocomplete="off"
              oninput="gsSearch(this.value)" onkeydown="gsKey(event)">
       <span id="gs-kbd">Esc</span>
     </div>
@@ -695,6 +682,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div class="stat-icon">🧪</div>
         <div><div class="stat-val" id="stat-chemicals">—</div><div class="stat-lbl">Chemicals</div></div>
       </div>
+      <div class="stat-card" onclick="location.href='assets.html'" title="View Assets">
+        <div class="stat-icon">🔬</div>
+        <div><div class="stat-val" id="stat-assets">—</div><div class="stat-lbl">Assets</div></div>
+      </div>
       <div class="stat-card" onclick="location.href='planning.html'" title="View Bookings">
         <div class="stat-icon">📅</div>
         <div><div class="stat-val" id="stat-bookings">—</div><div class="stat-lbl">Bookings</div></div>
@@ -703,24 +694,11 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div class="stat-icon">🛡️</div>
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
       </div>
-
-      <div class="stat-card" onclick="location.href='guide.html'" title="View FASTER Kickstarter">
-        <div class="stat-icon">🚀</div>
-        <div><div class="stat-val" id="stat-guide">—</div><div class="stat-lbl">Docs</div></div>
+      <div class="stat-card" onclick="location.href='projects.html'" title="View Project Management">
+        <div class="stat-icon">📋</div>
+        <div><div class="stat-val" id="stat-projects">—</div><div class="stat-lbl">Projects</div></div>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- ── Quick actions ─────────────────────────────────────────────────── -->
-<div id="quick-actions">
-  <div class="qa-wrap">
-    <a href="orders.html" class="qa-btn qa-primary">📦 New Order</a>
-    <a href="planning.html" class="qa-btn qa-primary">📅 Book Facility</a>
-    <a href="safety.html" class="qa-btn qa-danger">🛡️ Report Issue</a>
-    <a href="chemicals.html" class="qa-btn">🧪 Chemicals</a>
-    <a href="assets.html" class="qa-btn">🔬 Assets</a>
-    <a href="guide.html" class="qa-btn">🚀 Guide</a>
   </div>
 </div>
 
@@ -810,6 +788,23 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         </div>
       </a>
 
+      <!-- PROJECT MANAGEMENT -->
+      <a href="projects.html" class="tc tool-card" style="--tc:#14b8a6">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">📋</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Project Management</div>
+        <div class="tc-desc">Organize lab work into projects with Kanban boards. Admins nominate project managers; PMs build teams and assign tasks.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Kanban: To Do → In Progress → Review → Done</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Drag-and-drop task cards across columns</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Priority, assignee, due date on every task</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Real-time Firebase sync across the team</div>
+        </div>
+      </a>
+
       <!-- SAFETY HUB -->
       <a href="safety.html" class="tc tool-card" style="--tc:#f85149">
         <div class="tc-bar"></div>
@@ -824,23 +819,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Fix issues · earn +2 pts</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Monthly champion leaderboard</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Team members with profile photos</div>
-        </div>
-      </a>
-
-      <!-- FASTER KICKSTARTER -->
-      <a href="guide.html" class="tc tool-card" style="--tc:#00b4d8">
-        <div class="tc-bar"></div>
-        <div class="tc-top">
-          <div class="tc-icon">🚀</div>
-          <div class="tc-arr">↗</div>
-        </div>
-        <div class="tc-name">FASTER Kickstarter</div>
-        <div class="tc-desc">Everything you need to hit the ground running — equipment manuals, SOPs and lab procedures in one place.</div>
-        <div class="tc-feats">
-          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Equipment manuals &amp; datasheets</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Standard Operating Procedures</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Quick-access links to key docs</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#00b4d8"></div>Admin-managed content</div>
         </div>
       </a>
 
@@ -980,23 +958,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   let db = null;
   let _sel = null; /* { username, name, hash, color } */
 
-  /* ── Animated stat counter ───────────────────────────────────────────── */
-  function animateStat(el, target){
-    const prev=parseInt(el.dataset.val||'-1',10);
-    el.dataset.val=target;
-    if(prev===target) return;
-    const duration=700, startTime=performance.now();
-    const from=prev<0?0:prev;
-    function tick(now){
-      const p=Math.min((now-startTime)/duration,1);
-      const ease=1-Math.pow(1-p,3);
-      el.textContent=Math.round(from+(target-from)*ease).toLocaleString();
-      if(p<1) requestAnimationFrame(tick);
-      else{ el.textContent=target.toLocaleString(); el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),400); }
-    }
-    requestAnimationFrame(tick);
-  }
-
   function sha256(s){
     return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))
       .then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));
@@ -1025,40 +986,22 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     _startNotifListeners();
     if(sessionStorage.getItem(ROLE_KEY)==='admin') showAdminPanel();
   }
-  if(sessionStorage.getItem(AUTH_KEY)==='ok') window.addEventListener('DOMContentLoaded',onAuthOk);
+  if(sessionStorage.getItem(AUTH_KEY)==='ok') onAuthOk();
 
   /* Called after a fresh login — always redirect (no extra clicks needed) */
   function afterLogin(){
     const dest=sessionStorage.getItem('faster_redirect');
     if(dest){ sessionStorage.removeItem('faster_redirect'); location.assign(dest); }
-    else{
-      onAuthOk();
-      const name=sessionStorage.getItem(USER_KEY)||'';
-      const first=name.split(' ')[0]||name;
-      const h=new Date().getHours();
-      const tod=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-      const isGuest=(sessionStorage.getItem(ROLE_KEY)==='viewer');
-      const today=new Date().toDateString();
-      const lastDay=localStorage.getItem('faster_last_day');
-      const isFirstToday=lastDay!==today;
-      if(!isGuest) localStorage.setItem('faster_last_day',today);
-      const msg=isGuest
-        ? 'Welcome, Guest! View-only mode 👁️'
-        : isFirstToday
-          ? tod+', '+first+'! Great to see you today 🌟'
-          : 'Welcome back, '+first+'! 👋';
-      _toast(msg,'ok');
-    }
+    else{ onAuthOk(); }
   }
 
   /* ── Direct login (username + password) ────────────────────────────── */
   window.showDirectLogin=function(){
-    const lastUser=localStorage.getItem('faster_last_user')||'';
-    document.getElementById('ml-user').value=lastUser;
+    document.getElementById('ml-user').value='';
     document.getElementById('ml-pass').value='';
     document.getElementById('ml-err').textContent='';
     document.getElementById('ml-overlay').classList.add('open');
-    setTimeout(()=>document.getElementById(lastUser?'ml-pass':'ml-user').focus(),120);
+    setTimeout(()=>document.getElementById('ml-user').focus(),120);
   };
   window.closeDirectLogin=function(){
     document.getElementById('ml-overlay').classList.remove('open');
@@ -1086,7 +1029,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       if(role==='admin') sessionStorage.setItem('fa','1');
       if(user.photoURL) sessionStorage.setItem('faster_photo_v1',user.photoURL);
       else sessionStorage.removeItem('faster_photo_v1');
-      localStorage.setItem('faster_last_user', username);
       document.getElementById('ml-overlay').classList.remove('open');
       afterLogin();
     }catch(e){ errEl.textContent='Connection error — try again'; console.error(e); }
@@ -1200,7 +1142,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(greet) greet.textContent=tod+', '+name.split(' ')[0]+'!';
     const dateEl=document.getElementById('ws-date');
     if(dateEl) dateEl.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    if(typeof window._startWsTagline==='function') window._startWsTagline(name.split(' ')[0]);
+    if(typeof window._startWsTagline==='function') window._startWsTagline();
   }
 
   /* ── Profile photo upload ────────────────────────────────────────────── */
@@ -1228,9 +1170,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         db.ref('faster_users/'+username+'/photoURL').set(dataURL).then(function(){
           sessionStorage.setItem('faster_photo_v1',dataURL);
           updateUserBadge(sessionStorage.getItem(USER_KEY)||'', dataURL);
-          /* Mirror photo to safety profile */
-          const displayName=sessionStorage.getItem(USER_KEY)||'';
-          if(displayName) _syncSafetyMember(displayName, dataURL);
           _toast('Profile photo updated!','ok');
         }).catch(function(){ _toast('Failed to save photo','warn'); });
       };
@@ -1369,8 +1308,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function showWorkspace(){
     const shell=document.getElementById('workspace-shell');
     if(shell) shell.style.display='block';
-    const qa=document.getElementById('quick-actions');
-    if(qa) qa.style.display='';
     /* Copy logo from login screen into nav */
     const loginLogo=document.querySelector('#login-screen .wau-header img');
     const navLogo=document.getElementById('nav-logo');
@@ -1578,24 +1515,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     }catch(e){ _toast('Error rejecting extension','err'); console.error(e); }
   };
 
-  /* Sync a user into faster_safety/members (creates if not present, updates photo) */
-  async function _syncSafetyMember(name, photoURL){
-    if(!db||!name) return;
-    const snap=await db.ref('faster_safety/members').orderByChild('name').equalTo(name).once('value');
-    if(snap.exists()){
-      if(photoURL){
-        const key=Object.keys(snap.val())[0];
-        await db.ref('faster_safety/members/'+key+'/photo').set(photoURL);
-      }
-      return;
-    }
-    await db.ref('faster_safety/members').push({
-      name, photo:photoURL||'', role:'Member',
-      color:'#1f6feb', orgPts:0, adminBonus:0,
-      createdAt:new Date().toISOString()
-    });
-  }
-
   window.approveRequest=async function(rid,username,name,passwordHash){
     if(!db) return;
     try{
@@ -1603,7 +1522,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       if(snap.val()){ _toast('Username @'+username+' already exists. Ask them to use a different one.','warn'); return; }
       await db.ref('faster_users/'+username).set({name,passwordHash,role:'member',createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()});
       await db.ref('faster_pending/'+rid).remove();
-      await _syncSafetyMember(name,'');
       _toast(name+' approved and added!','ok');
     }catch(e){ console.error(e); _toast('Error approving request','err'); }
   };
@@ -1628,7 +1546,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       const snap=await db.ref('faster_users/'+username).once('value');
       if(snap.val()){ errEl.textContent='Username already taken'; return; }
       await db.ref('faster_users/'+username).set({name,passwordHash:await sha256(password),role:'member',createdAt:new Date().toISOString(),createdBy:sessionStorage.getItem(UNAME_KEY)||'admin'});
-      await _syncSafetyMember(name,'');
       nameEl.value=''; userEl.value=''; passEl.value='';
       errEl.style.color='var(--green)'; errEl.textContent='Member added!';
       setTimeout(()=>{ errEl.textContent=''; },2000);
@@ -1675,7 +1592,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       {path:'faster_chemicals',     module:'Chemicals',icon:'🧪',nameKey:'name',  href:'chemicals.html'},
       {path:'faster_assets_v5',     module:'Assets',   icon:'🔬',nameKey:'name',  href:'assets.html'},
       {path:'faster_planning',      module:'Planning', icon:'📅',nameKey:'title', href:'planning.html'},
-      {path:'faster_safety/reports',module:'Safety',   icon:'🛡️',nameKey:'title', href:'safety.html'}
+      {path:'faster_safety/reports',module:'Safety',   icon:'🛡️',nameKey:'title', href:'safety.html'},
+      {path:'faster_projects',      module:'Projects', icon:'📋',nameKey:'name',  href:'projects.html'}
     ];
     gsItems=[];let done=0;
     paths.forEach(p=>{
@@ -1722,7 +1640,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     {path:'faster_chemicals',     icon:'🧪',module:'Chemicals',labelKey:'name',  timeKey:'addedAt',   href:'chemicals.html'},
     {path:'faster_assets_v5',     icon:'🔬',module:'Assets',   labelKey:'name',  timeKey:'addedAt',   href:'assets.html'},
     {path:'faster_safety/reports',icon:'🛡️',module:'Safety',   labelKey:'title', timeKey:'reportedAt',href:'safety.html'},
-    {path:'faster_planning',      icon:'📅',module:'Planning', labelKey:'title', timeKey:'startDate', href:'planning.html'}
+    {path:'faster_planning',      icon:'📅',module:'Planning', labelKey:'title', timeKey:'startDate', href:'planning.html'},
+    {path:'faster_projects',      icon:'📋',module:'Projects', labelKey:'name',  timeKey:'createdAt', href:'projects.html'}
   ];
   let afEvents=[];
   function timeAgo(ts){
@@ -1736,27 +1655,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     const empty=document.getElementById('af-empty');
     if(!afEvents.length){if(empty)empty.style.display='';return;}
     if(empty)empty.style.display='none';
-    const t0=new Date(); t0.setHours(0,0,0,0);
-    const t1=new Date(t0); t1.setDate(t1.getDate()-1);
-    const groups=[{label:'Today',items:[]},{label:'Yesterday',items:[]},{label:'Earlier',items:[]}];
-    afEvents.slice(0,25).forEach(ev=>{
-      const d=ev.time?new Date(ev.time):null;
-      const day=d&&!isNaN(d)?new Date(d.setHours(0,0,0,0)):null;
-      if(!day||+day===+t0) groups[0].items.push(ev);
-      else if(+day===+t1) groups[1].items.push(ev);
-      else groups[2].items.push(ev);
-    });
-    list.innerHTML=groups.filter(g=>g.items.length).map(g=>
-      '<div class="af-date-hdr">'+g.label+'</div>'+
-      g.items.map(ev=>
-        '<a class="af-item" href="'+(ev.href||'#')+'" style="text-decoration:none;color:inherit">'+
-          '<div class="af-item-icon">'+ev.icon+'</div>'+
-          '<div class="af-item-body">'+
-            '<div class="af-item-msg"><strong>'+ev.module+':</strong> '+escHtml(ev.label)+'</div>'+
-            '<div class="af-item-meta">'+timeAgo(ev.time)+'</div>'+
-          '</div>'+
-        '</a>'
-      ).join('')
+    list.innerHTML=afEvents.slice(0,20).map(ev=>
+      '<a class="af-item" href="'+(ev.href||'#')+'" style="text-decoration:none;color:inherit">'+
+        '<div class="af-item-icon">'+ev.icon+'</div>'+
+        '<div class="af-item-body">'+
+          '<div class="af-item-msg"><strong>'+ev.module+':</strong> '+escHtml(ev.label)+'</div>'+
+          '<div class="af-item-meta">'+timeAgo(ev.time)+'</div>'+
+        '</div>'+
+      '</a>'
     ).join('');
   }
 
@@ -1955,22 +1861,6 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     db.ref('faster_safety/reports').on('value',snap=>{
       const count=Object.keys(snap.val()||{}).length;
       const el=document.getElementById('stat-safety');
-      if(el) animateStat(el,count);
-    });
-
-    /* Kickstarter docs count */
-    db.ref('faster_guide').on('value',snap=>{
-      const val=snap.val()||{};
-      const count=Object.keys(val.manuals||{}).length+Object.keys(val.sops||{}).length;
-      const el=document.getElementById('stat-guide');
-      if(el) el.textContent=count.toLocaleString();
-    });
-
-    /* Kickstarter docs count */
-    db.ref('faster_guide').on('value',snap=>{
-      const val=snap.val()||{};
-      const count=Object.keys(val.manuals||{}).length+Object.keys(val.sops||{}).length;
-      const el=document.getElementById('stat-guide');
       if(el) el.textContent=count.toLocaleString();
     });
 
@@ -1979,7 +1869,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       'faster_orders':'stat-orders',
       'faster_chemicals':'stat-chemicals',
       'faster_assets_v5':'stat-assets',
-      'faster_planning':'stat-bookings'
+      'faster_planning':'stat-bookings',
+      'faster_projects':'stat-projects'
     };
 
     AF_SOURCES.forEach(src=>{
@@ -1990,7 +1881,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         if(statId){
           const count=Object.values(val).filter(v=>typeof v==='object').length;
           const el=document.getElementById(statId);
-          if(el) animateStat(el,count);
+          if(el) el.textContent=count.toLocaleString();
         }
         /* Update activity feed */
         afEvents=afEvents.filter(e=>e.module!==src.module);
@@ -2054,20 +1945,16 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   ];
 
   const WS_TAGS = [
-    "Have a great session, {name}!",
+    "Have a great session, innovator!",
     "Science is best done together.",
     "Precision. Passion. Progress.",
-    "You're making a difference, {name}.",
-    "Let's do great things today.",
+    "You are making a difference.",
+    "Welcome to the FASTER family.",
     "Keeping everyone safe, every day.",
     "Innovation starts here.",
     "Where curiosity meets discovery.",
     "Pushing the boundaries of photonics.",
-    "Part of something extraordinary.",
-    "The lab runs better with you here.",
-    "Good science is a team sport.",
-    "Every experiment counts, {name}.",
-    "You bring the passion. We handle the rest."
+    "Part of something extraordinary."
   ];
 
   function rotateTags(spanId, tags, inClass, outClass, hold) {
@@ -2104,10 +1991,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   var _loginRotator = rotateTags('ls-tagline-text', LOGIN_TAGS, 'ls-in', 'ls-out', 3400);
 
   // Expose a function to start workspace taglines after login
-  window._startWsTagline = function(firstName) {
-    const name = firstName || 'innovator';
-    const tags = WS_TAGS.map(function(t){ return t.replace(/\{name\}/g, name); });
-    rotateTags('ws-tagline-text', tags, 'ws-in', 'ws-out', 3800);
+  window._startWsTagline = function() {
+    rotateTags('ws-tagline-text', WS_TAGS, 'ws-in', 'ws-out', 3800);
   };
 })();
 </script>

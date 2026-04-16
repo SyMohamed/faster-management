@@ -397,7 +397,7 @@ body{font-size:1rem}
 <div class="view" id="view-members">
   <div class="sh">
     <div><h2>Lab Members</h2><div class="sh-sub" id="mem-sub"></div></div>
-    <button class="btn btn-sm admin-only" onclick="openAddMember()">+ Add Member</button>
+    <button class="btn btn-sm" onclick="openAddMember()">+ Add Member</button>
   </div>
   <div class="members-grid" id="members-grid"></div>
 </div>
@@ -909,7 +909,7 @@ function renderMembers() {
       avHtml = `<div class="member-av" style="background:${m.color||"#1f6feb"}">${initials(m.name)}</div>`;
     }
     return `<div class="member-card">
-      ${IS_ADMIN || m.name === (window.FASTER_USER||'') ? `<button class="btn-o btn-sm member-edit-btn" onclick="openEditMember('${id}')">Edit</button>` : ""}
+      <button class="btn-o btn-sm member-edit-btn" onclick="openEditMember('${id}')">Edit</button>
       ${avHtml}
       <div class="member-name">${esc(m.name)}</div>
       <div class="member-role">${esc(m.role||"")}</div>
@@ -929,15 +929,10 @@ function openReport() {
   document.getElementById("rp-loc").value = "";
   document.getElementById("rp-desc").value = "";
   document.getElementById("rp-sev").value = "Medium";
-  /* Reporter: auto-select self for members, leave free for admins */
-  const reporterSel = document.getElementById("rp-reporter");
-  if (!IS_ADMIN) {
-    reporterSel.disabled = true;
-    /* value already pre-selected by populateMemberSelects */
-  } else {
-    reporterSel.disabled = false;
-    reporterSel.value = "";
-  }
+  document.getElementById("rp-reporter").value = "";
+  // Pre-select reporter from session identity
+  const me = sessionStorage.getItem('faster_user_v1') || '';
+  if(me){ const sel = document.getElementById("rp-reporter"); if(sel) { const opt = Array.from(sel.options).find(o=>o.text===me||o.value===me); if(opt) sel.value=opt.value; } }
   document.getElementById("rp-causedby").value = "";
   document.getElementById("rep-del-btn").style.display = "none";
   document.getElementById("rep-resolve-btn").style.display = "none";
@@ -957,7 +952,6 @@ function openEditReport(key) {
   document.getElementById("rp-desc").value = r.description||"";
   document.getElementById("rp-sev").value = r.severity||"Medium";
   populateMemberSelects();
-  document.getElementById("rp-reporter").disabled = !IS_ADMIN;
   document.getElementById("rp-reporter").value = r.reporter||"";
   document.getElementById("rp-causedby").value = r.causedBy||"";
   document.getElementById("rep-del-btn").style.display = "inline-flex";
@@ -976,21 +970,12 @@ function openEditReport(key) {
 }
 
 function populateMemberSelects() {
-  const allOpts = '<option value="">— Unknown —</option>' +
+  const opts = '<option value="">— Unknown —</option>' +
     Object.entries(MEMBERS).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join("");
-  /* Reporter: members can only select themselves; admins see everyone */
-  const me = sessionStorage.getItem('faster_user_v1') || '';
-  let reporterOpts;
-  if (IS_ADMIN) {
-    reporterOpts = '<option value="">— Select reporter —</option>' +
-      Object.entries(MEMBERS).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join("");
-  } else {
-    const myEntry = Object.entries(MEMBERS).find(([,m]) => m.name === me);
-    reporterOpts = '<option value="">— Select reporter —</option>' +
-      (myEntry ? `<option value="${myEntry[0]}" selected>${esc(myEntry[1].name)}</option>` : '');
-  }
-  document.getElementById("rp-reporter").innerHTML = reporterOpts;
-  document.getElementById("rp-causedby").innerHTML = allOpts;
+  document.getElementById("rp-reporter").innerHTML =
+    '<option value="">— Select reporter —</option>' +
+    Object.entries(MEMBERS).map(([id,m])=>`<option value="${id}">${esc(m.name)}</option>`).join("");
+  document.getElementById("rp-causedby").innerHTML = opts;
 }
 
 function saveReport() {
@@ -1098,15 +1083,11 @@ function openAddMember() {
 function openEditMember(id) {
   editMemId = id;
   const m = MEMBERS[id]; if (!m) return;
-  if (!IS_ADMIN && m.name !== (window.FASTER_USER||'')) {
-    showToast("You can only edit your own profile","tr"); return;
-  }
   document.getElementById("m-mem-title").textContent = "Edit Member";
   document.getElementById("mem-name").value = m.name||"";
   document.getElementById("mem-role").value = m.role||"";
   document.getElementById("mem-email").value = m.email||"";
-  /* Only admins can delete members */
-  document.getElementById("mem-del-btn").style.display = IS_ADMIN ? "inline-flex" : "none";
+  document.getElementById("mem-del-btn").style.display = "inline-flex";
   memPhotoB64 = m.photo||"";
   selColor = m.color||"#1f6feb";
   if (memPhotoB64) {
@@ -1143,7 +1124,6 @@ function saveMember() {
 }
 
 function deleteMember() {
-  if (!IS_ADMIN) { showToast("Only admins can remove members","tr"); return; }
   if (!editMemId || !confirm("Remove this member?")) return;
   cm("m-member");
   refs.members.child(editMemId).remove().then(() => showToast("Member removed","tb"));
@@ -1380,7 +1360,7 @@ document.getElementById("lb-date").textContent =
 checkAdminSession();
 boot();
 function _sha256(s){const e=new TextEncoder();return crypto.subtle.digest('SHA-256',e.encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));}
-function promptAdmin(cb){const pw=prompt('Enter admin password:');if(!pw)return;_sha256(pw).then(h=>{if(h==='469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466'){IS_ADMIN=true;sessionStorage.setItem('fa','1');_showAdminUI();if(cb)cb();}else alert('Incorrect password');});}
+function promptAdmin(cb){const un=prompt('Enter admin username:');if(!un)return;if(un!=='admin'){alert('Incorrect username');return;}const pw=prompt('Enter admin password:');if(!pw)return;_sha256(pw).then(h=>{if(h==='469eb6ba1f43308e6a07b3b2e9e5d2e44c3c75c35282d9ad59512ca50e986466'){IS_ADMIN=true;sessionStorage.setItem('fa','1');_showAdminUI();if(cb)cb();}else alert('Incorrect password');});}
 function checkAdminSession(){if(sessionStorage.getItem('fa')==='1'){IS_ADMIN=true;_showAdminUI();}}
 function _showAdminUI(){
   document.querySelectorAll('.admin-only').forEach(el=>el.style.removeProperty('display'));

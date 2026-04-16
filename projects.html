@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FASTER Lab — Project Management</title>
+<script>/* apply theme before first paint */(function(){if(localStorage.getItem("faster_theme")==="light")document.documentElement.setAttribute("data-theme","light");else document.documentElement.removeAttribute("data-theme");})();</script>
+<link rel="stylesheet" href="shared.css">
+<script src="auth.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --todo:#6a7d94;  --todo-bg:rgba(106,125,148,.1);  --todo-bd:rgba(106,125,148,.35);
+  --prog:#3b82f6;  --prog-bg:rgba(59,130,246,.1);   --prog-bd:rgba(59,130,246,.35);
+  --rev:#a855f7;   --rev-bg:rgba(168,85,247,.1);    --rev-bd:rgba(168,85,247,.35);
+  --done:#22c55e;  --done-bg:rgba(34,197,94,.1);    --done-bd:rgba(34,197,94,.35);
+  --pm:#14b8a6;    --pm-bg:rgba(20,184,166,.1);
+  --pri-low:#6a7d94;    --pri-med:#f59e0b;   --pri-hi:#ef4444;   --pri-crit:#a855f7;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+
+/* ── NAV ───────────────────────────────────────────────── */
+.nav{background:rgba(17,23,32,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);
+  padding:0 24px;display:flex;align-items:center;height:58px;position:sticky;top:0;z-index:200}
+[data-theme="light"] .nav{background:rgba(255,255,255,.97)}
+.brand{display:flex;align-items:center;gap:11px;margin-right:24px;cursor:pointer;flex-shrink:0;text-decoration:none}
+.brand-logo{width:36px;height:36px;border-radius:50%;background:var(--pm);color:#000;display:flex;
+  align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.brand-t span{display:block;font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.brand-t small{font-size:10px;color:var(--muted2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.nav-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-shrink:0;padding-left:16px}
+
+/* Live pill */
+.livepill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 11px;
+  font-size:11px;font-family:var(--mono);border:1px solid;transition:all .3s}
+.lon{background:var(--done-bg);border-color:var(--done-bd);color:var(--done)}
+.loff{background:var(--red-bg);border-color:rgba(239,68,68,.3);color:var(--red)}
+.ldot{width:6px;height:6px;border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* Buttons */
+.btn{background:var(--pm);color:#000;border:none;padding:8px 16px;border-radius:8px;
+  font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;
+  align-items:center;gap:6px;transition:all .2s;white-space:nowrap;letter-spacing:.4px;text-transform:uppercase}
+.btn:hover{filter:brightness(1.1);box-shadow:0 0 16px rgba(20,184,166,.25)}
+.btn-o{background:transparent;color:var(--text);border:1px solid var(--b2);padding:7px 14px;
+  border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);
+  display:inline-flex;align-items:center;gap:5px;transition:all .18s;white-space:nowrap;
+  letter-spacing:.3px;text-transform:uppercase}
+.btn-o:hover{background:var(--s3);border-color:var(--b3)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-del{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.3);
+  padding:5px 11px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--font);
+  text-transform:uppercase;font-weight:700;letter-spacing:.3px}
+.btn-del:hover{background:var(--red-bg)}
+
+/* Page layout */
+.page{max-width:1600px;margin:0 auto;padding:24px 32px 80px;width:100%}
+@media (max-width:900px){.page{padding:18px}}
+
+/* Stats strip */
+.stats-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:14px 16px;
+  display:flex;align-items:center;gap:12px;transition:border-color .15s}
+.stat:hover{border-color:var(--b2)}
+.stat-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.stat-val{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.stat-lbl{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+
+/* Admin panel — nominate PMs */
+.admin-panel{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);margin-bottom:22px;overflow:hidden}
+.admin-panel-hdr{padding:14px 18px;border-bottom:1px solid var(--b1);display:flex;
+  align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.admin-panel-hdr h3{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.admin-panel-hdr h3 .badge-pm{background:var(--pm);color:#000;font-size:9px;font-family:var(--mono);
+  padding:2px 7px;border-radius:4px;letter-spacing:.5px;font-weight:700}
+.admin-panel-body{padding:16px 18px;display:none}
+.admin-panel.open .admin-panel-body{display:block}
+.admin-panel-hdr .chev{color:var(--muted);font-size:12px;transition:transform .2s}
+.admin-panel.open .chev{transform:rotate(180deg)}
+.pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.pm-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);
+  border:1px solid var(--b1);border-radius:8px}
+.pm-avatar{width:30px;height:30px;border-radius:50%;background:var(--pm);color:#000;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.pm-info{flex:1;min-width:0}
+.pm-name{font-size:13px;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-uname{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.pm-toggle{position:relative;width:38px;height:20px;background:var(--s4);border-radius:20px;
+  cursor:pointer;transition:background .2s;flex-shrink:0;border:1px solid var(--b1)}
+.pm-toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;
+  border-radius:50%;background:var(--muted);transition:all .2s}
+.pm-toggle.on{background:var(--pm-bg);border-color:var(--pm)}
+.pm-toggle.on::after{left:20px;background:var(--pm)}
+
+/* Project tabs strip */
+.proj-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.proj-tabs::-webkit-scrollbar{display:none}
+.proj-tab{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;
+  cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:10px;
+  font-family:var(--font);color:var(--text);font-size:13px;font-weight:600;flex-shrink:0}
+.proj-tab:hover{border-color:var(--b2)}
+.proj-tab.on{background:var(--pm-bg);border-color:var(--pm);color:var(--pm)}
+.proj-tab .dot{width:8px;height:8px;border-radius:50%;background:var(--pm);flex-shrink:0}
+.proj-tab .count{font-size:10px;font-family:var(--mono);color:var(--muted);
+  background:var(--s3);padding:2px 6px;border-radius:10px}
+.proj-tab.on .count{background:rgba(20,184,166,.2);color:var(--pm)}
+.proj-tab.add{background:transparent;border-style:dashed;color:var(--muted)}
+.proj-tab.add:hover{color:var(--pm);border-color:var(--pm)}
+
+/* Project header card */
+.proj-hdr{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
+  padding:18px 22px;margin-bottom:18px}
+.proj-hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.proj-hdr-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:5px}
+.proj-hdr-desc{font-size:13px;color:var(--muted);max-width:720px;line-height:1.5}
+.proj-hdr-meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.proj-hdr-meta b{color:var(--text);font-weight:600}
+.proj-team{display:flex;align-items:center;margin-top:12px}
+.proj-team .tm{width:28px;height:28px;border-radius:50%;background:var(--pm);color:#000;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;
+  border:2px solid var(--s1);margin-left:-6px;font-family:var(--mono)}
+.proj-team .tm:first-child{margin-left:0}
+.proj-hdr-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+
+/* Kanban board */
+.board{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:14px;align-items:flex-start}
+@media (max-width:1200px){.board{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:700px){.board{grid-template-columns:1fr}}
+.col{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
+  min-height:200px;display:flex;flex-direction:column;transition:border-color .15s,background .15s}
+.col.drag-over{border-color:var(--pm);background:var(--pm-bg)}
+.col-hdr{padding:12px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.col-hdr-l{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.col-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.col[data-st="todo"] .col-dot{background:var(--todo)}
+.col[data-st="prog"] .col-dot{background:var(--prog)}
+.col[data-st="rev"]  .col-dot{background:var(--rev)}
+.col[data-st="done"] .col-dot{background:var(--done)}
+.col-title{font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.4px}
+.col-count{font-size:10px;font-family:var(--mono);color:var(--muted);
+  background:var(--s3);padding:2px 7px;border-radius:10px}
+.col-add{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;
+  width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.col-add:hover{background:var(--s3);color:var(--pm)}
+.col-body{padding:10px;display:flex;flex-direction:column;gap:8px;flex:1;min-height:80px}
+
+/* Task cards */
+.card{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:11px 12px;
+  cursor:grab;transition:all .15s;position:relative}
+.card:hover{border-color:var(--b2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.card:active{cursor:grabbing}
+.card.dragging{opacity:.4;transform:rotate(1deg)}
+.card-pri{position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:8px 0 0 8px}
+.card.pri-low  .card-pri{background:var(--pri-low)}
+.card.pri-med  .card-pri{background:var(--pri-med)}
+.card.pri-hi   .card-pri{background:var(--pri-hi)}
+.card.pri-crit .card-pri{background:var(--pri-crit)}
+.card-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:6px;padding-left:4px}
+.card-desc{font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:8px;padding-left:4px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-left:4px;flex-wrap:wrap}
+.card-foot-l{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pri-tag{font-size:9px;font-family:var(--mono);font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+  padding:2px 6px;border-radius:4px}
+.pri-tag.low{background:rgba(106,125,148,.15);color:var(--pri-low)}
+.pri-tag.med{background:rgba(245,158,11,.15);color:var(--pri-med)}
+.pri-tag.hi{background:rgba(239,68,68,.15);color:var(--pri-hi)}
+.pri-tag.crit{background:rgba(168,85,247,.15);color:var(--pri-crit)}
+.due-tag{font-size:10px;font-family:var(--mono);color:var(--muted);display:inline-flex;align-items:center;gap:3px}
+.due-tag.overdue{color:var(--red)}
+.due-tag.soon{color:var(--amber)}
+.card-assignee{width:22px;height:22px;border-radius:50%;background:var(--pm);color:#000;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9px;
+  font-family:var(--mono);flex-shrink:0}
+
+.empty-col{padding:24px 14px;text-align:center;color:var(--muted2);font-size:11px;
+  font-family:var(--mono);border:1px dashed var(--b1);border-radius:6px}
+
+/* Modals */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;
+  align-items:flex-start;justify-content:center;padding:50px 16px 32px;overflow-y:auto}
+.modal.open{display:flex}
+.modal-box{width:100%;max-width:560px;background:var(--s1);border:1px solid var(--b2);
+  border-radius:14px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.modal-hdr{padding:16px 22px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr h2{font-size:15px;font-weight:700;color:var(--text)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:18px 22px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--b1);display:flex;justify-content:flex-end;gap:8px;background:var(--s2)}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.4px;font-family:var(--mono);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--b1);
+  color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--pm)}
+.field textarea{resize:vertical;min-height:70px;font-family:var(--font)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:500px){.field-row{grid-template-columns:1fr}}
+
+.member-pick{display:flex;flex-wrap:wrap;gap:6px;max-height:180px;overflow-y:auto;
+  padding:10px;background:var(--s2);border:1px solid var(--b1);border-radius:7px}
+.mp-chip{display:inline-flex;align-items:center;gap:6px;background:var(--s3);border:1px solid var(--b1);
+  padding:5px 10px;border-radius:16px;font-size:12px;color:var(--text);cursor:pointer;transition:all .15s;font-family:var(--mono)}
+.mp-chip:hover{border-color:var(--b2)}
+.mp-chip.on{background:var(--pm-bg);border-color:var(--pm);color:var(--pm)}
+.mp-chip .mc-dot{width:18px;height:18px;border-radius:50%;background:var(--s4);color:var(--text);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9px}
+.mp-chip.on .mc-dot{background:var(--pm);color:#000}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--s3);border:1px solid var(--b2);color:var(--text);padding:11px 20px;border-radius:10px;
+  font-size:13px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .3s}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{border-color:var(--red);color:var(--red)}
+.toast.ok{border-color:var(--done);color:var(--done)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:70px 22px;color:var(--muted)}
+.empty-state .ic{font-size:42px;margin-bottom:14px;opacity:.5}
+.empty-state h3{font-size:16px;color:var(--text);font-weight:700;margin-bottom:6px}
+.empty-state p{font-size:13px;margin-bottom:18px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5}
+
+/* Role badges */
+.role-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-family:var(--mono);
+  font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px}
+.role-badge.pm{background:var(--pm-bg);color:var(--pm)}
+.role-badge.admin{background:rgba(245,158,11,.15);color:var(--amber)}
+.role-badge.member{background:rgba(106,125,148,.15);color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="breadcrumb" title="Back to workspace"><span class="bc-arrow">←</span> Workspace</a>
+  <a class="brand" href="index.html">
+    <div class="brand-logo">📋</div>
+    <div class="brand-t"><span>FASTER Lab</span><small>Project Management</small></div>
+  </a>
+  <div class="nav-r">
+    <div class="livepill loff" id="pill">
+      <div class="ldot" id="ldot" style="background:var(--red)"></div>
+      <span id="ltxt">Connecting…</span>
+    </div>
+    <button class="btn btn-sm" id="newProjBtn" onclick="openNewProject()" style="display:none">+ New Project</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- STATS -->
+  <div class="stats-strip" id="stats-strip">
+    <div class="stat">
+      <div class="stat-ic" style="background:var(--pm-bg);color:var(--pm)">📋</div>
+      <div><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Projects</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ic" style="background:var(--prog-bg);color:var(--prog)">🔄</div>
+      <div><div class="stat-val" id="s-active">—</div><div class="stat-lbl">Active tasks</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ic" style="background:var(--done-bg);color:var(--done)">✓</div>
+      <div><div class="stat-val" id="s-done">—</div><div class="stat-lbl">Completed</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ic" style="background:rgba(239,68,68,.15);color:var(--red)">⏰</div>
+      <div><div class="stat-val" id="s-overdue">—</div><div class="stat-lbl">Overdue</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ic" style="background:rgba(245,158,11,.15);color:var(--amber)">👤</div>
+      <div><div class="stat-val" id="s-mine">—</div><div class="stat-lbl">Assigned to me</div></div>
+    </div>
+  </div>
+
+  <!-- ADMIN: nominate PMs -->
+  <div class="admin-panel" id="admin-pm-panel" style="display:none">
+    <div class="admin-panel-hdr" onclick="togglePanel('admin-pm-panel')">
+      <h3>🔑 Project Managers <span class="badge-pm">Admin</span></h3>
+      <span class="chev">▼</span>
+    </div>
+    <div class="admin-panel-body">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+        Nominate lab members as project managers. PMs can create new projects, assign team members, and manage tasks on their projects. Admins always have PM privileges.
+      </div>
+      <div class="pm-grid" id="pm-grid"></div>
+    </div>
+  </div>
+
+  <!-- PROJECT TABS -->
+  <div id="proj-tabs-wrap" style="display:none">
+    <div class="proj-tabs" id="proj-tabs"></div>
+  </div>
+
+  <!-- CURRENT PROJECT HEADER + BOARD -->
+  <div id="project-view" style="display:none">
+    <div class="proj-hdr" id="proj-hdr"></div>
+    <div class="board" id="board">
+      <div class="col" data-st="todo"   ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'todo')">
+        <div class="col-hdr">
+          <div class="col-hdr-l"><div class="col-dot"></div><div class="col-title">To do</div><div class="col-count" id="c-todo">0</div></div>
+          <button class="col-add" onclick="openNewTask('todo')" title="Add task" id="add-todo">+</button>
+        </div>
+        <div class="col-body" id="col-todo"></div>
+      </div>
+      <div class="col" data-st="prog"   ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'prog')">
+        <div class="col-hdr">
+          <div class="col-hdr-l"><div class="col-dot"></div><div class="col-title">In progress</div><div class="col-count" id="c-prog">0</div></div>
+          <button class="col-add" onclick="openNewTask('prog')" title="Add task" id="add-prog">+</button>
+        </div>
+        <div class="col-body" id="col-prog"></div>
+      </div>
+      <div class="col" data-st="rev"    ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'rev')">
+        <div class="col-hdr">
+          <div class="col-hdr-l"><div class="col-dot"></div><div class="col-title">In review</div><div class="col-count" id="c-rev">0</div></div>
+          <button class="col-add" onclick="openNewTask('rev')" title="Add task" id="add-rev">+</button>
+        </div>
+        <div class="col-body" id="col-rev"></div>
+      </div>
+      <div class="col" data-st="done"   ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'done')">
+        <div class="col-hdr">
+          <div class="col-hdr-l"><div class="col-dot"></div><div class="col-title">Done</div><div class="col-count" id="c-done">0</div></div>
+          <button class="col-add" onclick="openNewTask('done')" title="Add task" id="add-done">+</button>
+        </div>
+        <div class="col-body" id="col-done"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div id="empty-state" class="empty-state" style="display:none">
+    <div class="ic">📋</div>
+    <h3>No projects yet</h3>
+    <p id="empty-msg">Projects you create or that you're assigned to will appear here.</p>
+    <button class="btn" id="emptyNewBtn" onclick="openNewProject()" style="display:none">+ Create first project</button>
+  </div>
+
+</div>
+
+<!-- ══════════ MODAL: NEW / EDIT PROJECT ══════════ -->
+<div class="modal" id="projModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2 id="projModalTitle">New project</h2>
+      <button class="modal-close" onclick="closeModal('projModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Project name</label>
+        <input id="pm-name" placeholder="e.g. GeoGLASS sensor development">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="pm-desc" placeholder="Short description of goals, scope, deliverables…"></textarea>
+      </div>
+      <div class="field">
+        <label>Team members</label>
+        <div class="member-pick" id="pm-members"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Start date</label>
+          <input id="pm-start" type="date">
+        </div>
+        <div class="field">
+          <label>Target end date</label>
+          <input id="pm-end" type="date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="pm-del-btn" onclick="deleteProject()" style="display:none">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn-o" onclick="closeModal('projModal')">Cancel</button>
+      <button class="btn" onclick="saveProject()">Save project</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: NEW / EDIT TASK ══════════ -->
+<div class="modal" id="taskModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2 id="taskModalTitle">New task</h2>
+      <button class="modal-close" onclick="closeModal('taskModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Task title</label>
+        <input id="tk-title" placeholder="e.g. Calibrate QCL at 1651 nm">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="tk-desc" placeholder="Details, acceptance criteria, links…"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Assignee</label>
+          <select id="tk-assignee"></select>
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select id="tk-pri">
+            <option value="low">Low</option>
+            <option value="med" selected>Medium</option>
+            <option value="hi">High</option>
+            <option value="crit">Critical</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Due date</label>
+          <input id="tk-due" type="date">
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="tk-st">
+            <option value="todo">To do</option>
+            <option value="prog">In progress</option>
+            <option value="rev">In review</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="tk-del-btn" onclick="deleteTask()" style="display:none">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn-o" onclick="closeModal('taskModal')">Cancel</button>
+      <button class="btn" onclick="saveTask()">Save task</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+// ════════════════════════════════════════════════
+// FIREBASE
+// ════════════════════════════════════════════════
+const FB_CFG = {
+  apiKey:"AIzaSyAyt35wSrf1fUnu_Z_kgARwpCjCS1M0b5Q",
+  authDomain:"orders-1a6e6.firebaseapp.com",
+  databaseURL:"https://orders-1a6e6-default-rtdb.firebaseio.com",
+  projectId:"orders-1a6e6",
+  storageBucket:"orders-1a6e6.firebasestorage.app",
+  messagingSenderId:"928841720860",
+  appId:"1:928841720860:web:c1a25a69a0f2ccb616abd9"
+};
+
+firebase.initializeApp(FB_CFG);
+const db = firebase.database();
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let PROJECTS = {};
+let USERS    = {};
+let ACTIVE_PROJECT_ID = null;
+let editingProjectId = null;
+let editingTaskId    = null;
+
+const ME_UNAME  = window.FASTER_UNAME  || '';
+const ME_NAME   = window.FASTER_USER   || '';
+const IS_ADMIN  = window.FASTER_IS_ADMIN || false;
+const READONLY  = window.FASTER_READONLY || false;
+
+// ════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+function escH(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function initials(name){
+  if(!name) return '?';
+  const p = name.trim().split(/\s+/);
+  return (p[0][0] + (p[1]?p[1][0]:'')).toUpperCase();
+}
+function toast(msg, kind){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (kind?' '+kind:'');
+  setTimeout(()=>{t.className='toast'+(kind?' '+kind:'');},2600);
+}
+function togglePanel(id){ $(id).classList.toggle('open'); }
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+
+function isPM(uname){
+  if(!uname) return false;
+  const u = USERS[uname];
+  if(!u) return false;
+  return u.role === 'admin' || u.isPM === true;
+}
+const ME_IS_PM = () => IS_ADMIN || isPM(ME_UNAME);
+
+function canEditProject(proj){
+  if(!proj) return false;
+  if(READONLY) return false;
+  if(IS_ADMIN) return true;
+  return proj.pmUname === ME_UNAME;
+}
+
+function dayDiff(isoDate){
+  if(!isoDate) return null;
+  const d = new Date(isoDate+'T00:00:00');
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+function fmtDue(iso){
+  if(!iso) return '';
+  const diff = dayDiff(iso);
+  if(diff === null) return iso;
+  if(diff < 0) return Math.abs(diff)+'d overdue';
+  if(diff === 0) return 'Today';
+  if(diff === 1) return 'Tomorrow';
+  if(diff <= 7) return 'In '+diff+'d';
+  return new Date(iso+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+function dueClass(iso){
+  if(!iso) return '';
+  const d = dayDiff(iso);
+  if(d === null) return '';
+  if(d < 0) return 'overdue';
+  if(d <= 3) return 'soon';
+  return '';
+}
+
+// ════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════
+function boot(){
+  if(IS_ADMIN){
+    $('admin-pm-panel').style.display = 'block';
+  }
+  if(ME_IS_PM()){
+    $('newProjBtn').style.display = 'inline-flex';
+    $('emptyNewBtn').style.display = 'inline-flex';
+  }
+
+  db.ref('.info/connected').on('value', snap => {
+    const on = snap.val() === true;
+    $('pill').className = 'livepill ' + (on ? 'lon' : 'loff');
+    $('ldot').style.background = on ? 'var(--done)' : 'var(--red)';
+    $('ltxt').textContent = on ? 'Live · synced' : 'Offline';
+  });
+
+  db.ref('faster_users').on('value', snap => {
+    const raw = snap.val() || {};
+    USERS = {};
+    Object.entries(raw).forEach(([uname, u]) => {
+      if(!u || typeof u !== 'object') return;
+      USERS[uname] = {
+        name:   u.name || uname,
+        role:   u.role || 'member',
+        isPM:   u.isPM === true,
+        photoURL: u.photoURL || ''
+      };
+    });
+    // Re-enable new-project button in case PM status just loaded
+    if(ME_IS_PM()){
+      $('newProjBtn').style.display = 'inline-flex';
+      if($('empty-state').style.display === 'block') $('emptyNewBtn').style.display = 'inline-flex';
+    }
+    renderAdminPMPanel();
+    renderProjectTabs();
+    if(ACTIVE_PROJECT_ID) renderProjectHeader();
+    if(ACTIVE_PROJECT_ID) renderBoard();
+  });
+
+  db.ref('faster_projects').on('value', snap => {
+    PROJECTS = snap.val() || {};
+    renderStats();
+    renderProjectTabs();
+    if(!ACTIVE_PROJECT_ID){
+      const visible = getVisibleProjects();
+      if(visible.length) selectProject(visible[0].id);
+      else showEmptyState();
+    } else if(!PROJECTS[ACTIVE_PROJECT_ID]){
+      ACTIVE_PROJECT_ID = null;
+      const visible = getVisibleProjects();
+      if(visible.length) selectProject(visible[0].id);
+      else showEmptyState();
+    } else {
+      renderProjectHeader();
+      renderBoard();
+    }
+  });
+}
+
+// ════════════════════════════════════════════════
+// ADMIN: PM NOMINATION PANEL
+// ════════════════════════════════════════════════
+function renderAdminPMPanel(){
+  if(!IS_ADMIN) return;
+  const grid = $('pm-grid');
+  const entries = Object.entries(USERS)
+    .filter(([u,v]) => v.role !== 'viewer')
+    .sort((a,b)=> (a[1].name||a[0]).localeCompare(b[1].name||b[0]));
+
+  if(!entries.length){
+    grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No members yet. Members added in the dashboard will appear here.</div>';
+    return;
+  }
+  grid.innerHTML = entries.map(([uname, u]) => {
+    const isA = u.role === 'admin';
+    const on = isA || u.isPM;
+    const disabledAttr = isA ? 'title="Admins are PMs by default" style="opacity:.6;cursor:not-allowed"' : '';
+    const clickAttr = isA ? '' : `onclick="togglePM('${escH(uname)}')"`;
+    return `
+      <div class="pm-row">
+        <div class="pm-avatar">${escH(initials(u.name))}</div>
+        <div class="pm-info">
+          <div class="pm-name">${escH(u.name)}</div>
+          <div class="pm-uname">
+            @${escH(uname)}
+            ${isA ? '<span class="role-badge admin" style="margin-left:6px">admin</span>' : ''}
+            ${u.isPM && !isA ? '<span class="role-badge pm" style="margin-left:6px">pm</span>' : ''}
+          </div>
+        </div>
+        <div class="pm-toggle ${on?'on':''}" ${disabledAttr} ${clickAttr}></div>
+      </div>`;
+  }).join('');
+}
+
+window.togglePM = async function(uname){
+  if(!IS_ADMIN) return;
+  const u = USERS[uname];
+  if(!u) return;
+  if(u.role === 'admin'){ toast("Admins are PMs by default",'err'); return; }
+  const newVal = !u.isPM;
+  try {
+    await db.ref('faster_users/'+uname+'/isPM').set(newVal);
+    toast(newVal ? u.name+' promoted to PM' : u.name+' is no longer a PM','ok');
+  } catch(e){
+    toast('Failed to update','err');
+  }
+};
+
+// ════════════════════════════════════════════════
+// PROJECT LIST / TABS
+// ════════════════════════════════════════════════
+function getVisibleProjects(){
+  const all = Object.entries(PROJECTS).map(([id, p]) => ({id, ...p}));
+  return all
+    .filter(p => {
+      if(IS_ADMIN) return true;
+      if(p.pmUname === ME_UNAME) return true;
+      if(Array.isArray(p.team) && p.team.includes(ME_UNAME)) return true;
+      return false;
+    })
+    .sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''));
+}
+
+function renderProjectTabs(){
+  const wrap  = $('proj-tabs-wrap');
+  const tabs  = $('proj-tabs');
+  const list  = getVisibleProjects();
+  if(!list.length){
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  tabs.innerHTML = list.map(p => {
+    const taskCount = p.tasks ? Object.keys(p.tasks).length : 0;
+    return `<div class="proj-tab ${p.id===ACTIVE_PROJECT_ID?'on':''}" onclick="selectProject('${p.id}')">
+      <div class="dot"></div>
+      <span>${escH(p.name||'Untitled')}</span>
+      <span class="count">${taskCount}</span>
+    </div>`;
+  }).join('');
+  if(ME_IS_PM()){
+    tabs.innerHTML += `<div class="proj-tab add" onclick="openNewProject()">+ New project</div>`;
+  }
+}
+
+window.selectProject = function(id){
+  if(!PROJECTS[id]) return;
+  ACTIVE_PROJECT_ID = id;
+  $('empty-state').style.display = 'none';
+  $('project-view').style.display = 'block';
+  renderProjectTabs();
+  renderProjectHeader();
+  renderBoard();
+};
+
+function showEmptyState(){
+  $('project-view').style.display = 'none';
+  $('empty-state').style.display = 'block';
+  if(ME_IS_PM()){
+    $('empty-msg').textContent = "You haven't created any projects yet. Start one to plan work with your team.";
+  } else if(READONLY){
+    $('empty-msg').textContent = "No projects to display. Sign in as a member to see projects you're assigned to.";
+    $('emptyNewBtn').style.display = 'none';
+  } else {
+    $('empty-msg').textContent = "Ask your admin or a project manager to add you to a project.";
+    $('emptyNewBtn').style.display = 'none';
+  }
+}
+
+// ════════════════════════════════════════════════
+// PROJECT HEADER
+// ════════════════════════════════════════════════
+function renderProjectHeader(){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p){ $('project-view').style.display='none'; return; }
+  const pmName = USERS[p.pmUname]?.name || p.pmUname || '—';
+  const team = Array.isArray(p.team) ? p.team : [];
+  const canEdit = canEditProject(p);
+  const dateRange = [p.startDate, p.endDate].filter(Boolean).join(' → ') || 'No dates set';
+
+  $('proj-hdr').innerHTML = `
+    <div class="proj-hdr-top">
+      <div style="flex:1;min-width:0">
+        <div class="proj-hdr-title">${escH(p.name||'Untitled project')}</div>
+        ${p.desc ? `<div class="proj-hdr-desc">${escH(p.desc)}</div>` : ''}
+        <div class="proj-hdr-meta">
+          <span><b>PM:</b> ${escH(pmName)}</span>
+          <span><b>Team:</b> ${team.length} member${team.length===1?'':'s'}</span>
+          <span><b>Timeline:</b> ${escH(dateRange)}</span>
+        </div>
+        <div class="proj-team">
+          ${team.map(u => {
+            const nm = USERS[u]?.name || u;
+            return `<div class="tm" title="${escH(nm)}">${escH(initials(nm))}</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="proj-hdr-actions">
+        ${canEdit ? `<button class="btn btn-sm" onclick="openNewTask('todo')">+ Add task</button>` : ''}
+        ${canEdit ? `<button class="btn-o btn-sm" onclick="openEditProject('${p.id}')">Edit project</button>` : ''}
+      </div>
+    </div>
+  `;
+
+  ['todo','prog','rev','done'].forEach(st => {
+    const b = $('add-'+st);
+    if(b) b.style.display = canEdit ? 'flex' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════════
+// KANBAN BOARD
+// ════════════════════════════════════════════════
+function renderBoard(){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  const tasks = p.tasks || {};
+  const cols = {todo:[], prog:[], rev:[], done:[]};
+  Object.entries(tasks).forEach(([tid, t]) => {
+    const st = cols[t.status] ? t.status : 'todo';
+    cols[st].push({id: tid, ...t});
+  });
+  const priOrder = {crit:0, hi:1, med:2, low:3};
+  Object.keys(cols).forEach(st => {
+    cols[st].sort((a,b)=>{
+      const pa = priOrder[a.priority]??2, pb = priOrder[b.priority]??2;
+      if(pa !== pb) return pa - pb;
+      const da = a.dueDate||'9999', db2 = b.dueDate||'9999';
+      return da.localeCompare(db2);
+    });
+  });
+
+  const canEdit = canEditProject(p);
+
+  ['todo','prog','rev','done'].forEach(st => {
+    const body = $('col-'+st);
+    $('c-'+st).textContent = cols[st].length;
+    if(!cols[st].length){
+      body.innerHTML = '<div class="empty-col">No tasks</div>';
+      return;
+    }
+    body.innerHTML = cols[st].map(t => cardHTML(t, canEdit)).join('');
+  });
+}
+
+function cardHTML(t, canEdit){
+  const assigneeName = USERS[t.assignee]?.name || t.assignee || '';
+  const dueC = dueClass(t.dueDate);
+  const dueTxt = fmtDue(t.dueDate);
+  const priLabel = {low:'Low',med:'Med',hi:'High',crit:'Crit'}[t.priority] || 'Med';
+  const priCls   = t.priority || 'med';
+  const draggable = canEdit ? `draggable="true" ondragstart="dragStart(event,'${t.id}')" ondragend="dragEnd(event)"` : '';
+  const clickHandler = canEdit ? `onclick="openEditTask('${t.id}')"` : '';
+  return `
+    <div class="card pri-${priCls}" ${draggable} ${clickHandler} data-taskid="${t.id}">
+      <div class="card-pri"></div>
+      <div class="card-title">${escH(t.title||'Untitled task')}</div>
+      ${t.desc ? `<div class="card-desc">${escH(t.desc)}</div>` : ''}
+      <div class="card-foot">
+        <div class="card-foot-l">
+          <span class="pri-tag ${priCls}">${priLabel}</span>
+          ${dueTxt ? `<span class="due-tag ${dueC}">📅 ${escH(dueTxt)}</span>` : ''}
+        </div>
+        ${assigneeName ? `<div class="card-assignee" title="${escH(assigneeName)}">${escH(initials(assigneeName))}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════
+// DRAG & DROP
+// ════════════════════════════════════════════════
+let draggingTaskId = null;
+window.dragStart = function(e, taskId){
+  draggingTaskId = taskId;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+};
+window.dragEnd = function(e){
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.col').forEach(c=>c.classList.remove('drag-over'));
+  draggingTaskId = null;
+};
+window.dragOver = function(e){
+  if(!draggingTaskId) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+};
+window.dragLeave = function(e){
+  if(e.currentTarget.contains(e.relatedTarget)) return;
+  e.currentTarget.classList.remove('drag-over');
+};
+window.drop = async function(e, newStatus){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!draggingTaskId) return;
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p || !p.tasks || !p.tasks[draggingTaskId]) return;
+  if(p.tasks[draggingTaskId].status === newStatus) return;
+  if(!canEditProject(p)){ toast('Only the PM or an admin can move tasks','err'); return; }
+  try {
+    await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${draggingTaskId}`).update({
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    });
+  } catch(err){
+    toast('Failed to move task','err');
+  }
+};
+
+// ════════════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════════════
+function renderStats(){
+  const visible = getVisibleProjects();
+  let totalActive = 0, totalDone = 0, overdue = 0, mine = 0;
+  visible.forEach(p => {
+    const tasks = p.tasks || {};
+    Object.values(tasks).forEach(t => {
+      if(t.status === 'done') totalDone++;
+      else totalActive++;
+      if(t.status !== 'done' && t.dueDate && dayDiff(t.dueDate) < 0) overdue++;
+      if(t.assignee === ME_UNAME && t.status !== 'done') mine++;
+    });
+  });
+  $('s-total').textContent   = visible.length;
+  $('s-active').textContent  = totalActive;
+  $('s-done').textContent    = totalDone;
+  $('s-overdue').textContent = overdue;
+  $('s-mine').textContent    = mine;
+}
+
+// ════════════════════════════════════════════════
+// PROJECT MODAL
+// ════════════════════════════════════════════════
+window.openNewProject = function(){
+  if(!ME_IS_PM()){ toast('Only PMs and admins can create projects','err'); return; }
+  editingProjectId = null;
+  $('projModalTitle').textContent = 'New project';
+  $('pm-name').value = '';
+  $('pm-desc').value = '';
+  $('pm-start').value = '';
+  $('pm-end').value = '';
+  $('pm-del-btn').style.display = 'none';
+  renderMemberPicker([ME_UNAME]);
+  openModal('projModal');
+  $('pm-name').focus();
+};
+
+window.openEditProject = function(id){
+  const p = PROJECTS[id];
+  if(!p) return;
+  if(!canEditProject(p)){ toast('Only the PM or an admin can edit this project','err'); return; }
+  editingProjectId = id;
+  $('projModalTitle').textContent = 'Edit project';
+  $('pm-name').value  = p.name || '';
+  $('pm-desc').value  = p.desc || '';
+  $('pm-start').value = p.startDate || '';
+  $('pm-end').value   = p.endDate || '';
+  $('pm-del-btn').style.display = (IS_ADMIN || p.pmUname === ME_UNAME) ? 'inline-flex' : 'none';
+  renderMemberPicker(p.team || []);
+  openModal('projModal');
+};
+
+function renderMemberPicker(selected){
+  const wrap = $('pm-members');
+  const entries = Object.entries(USERS)
+    .filter(([u,v]) => v.role !== 'viewer')
+    .sort((a,b)=> (a[1].name||a[0]).localeCompare(b[1].name||b[0]));
+  if(!entries.length){
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:4px">No members available.</div>';
+    return;
+  }
+  const sel = new Set(selected || []);
+  wrap.innerHTML = entries.map(([uname, u]) => {
+    const on = sel.has(uname);
+    return `<div class="mp-chip ${on?'on':''}" onclick="toggleMember(this)" data-uname="${escH(uname)}">
+      <div class="mc-dot">${escH(initials(u.name))}</div>
+      <span>${escH(u.name)}</span>
+    </div>`;
+  }).join('');
+}
+
+window.toggleMember = function(el){
+  el.classList.toggle('on');
+};
+
+function getPickedMembers(){
+  return Array.from(document.querySelectorAll('#pm-members .mp-chip.on')).map(el => el.dataset.uname);
+}
+
+window.saveProject = async function(){
+  const name = $('pm-name').value.trim();
+  if(!name){ toast('Project name is required','err'); return; }
+  const team = getPickedMembers();
+  const payload = {
+    name,
+    desc:      $('pm-desc').value.trim(),
+    team,
+    startDate: $('pm-start').value || '',
+    endDate:   $('pm-end').value || '',
+    updatedAt: new Date().toISOString()
+  };
+  try {
+    if(editingProjectId){
+      await db.ref('faster_projects/'+editingProjectId).update(payload);
+      toast('Project updated','ok');
+    } else {
+      const id = db.ref('faster_projects').push().key;
+      payload.pmUname   = ME_UNAME;
+      payload.createdAt = new Date().toISOString();
+      payload.createdBy = ME_UNAME;
+      payload.tasks     = {};
+      await db.ref('faster_projects/'+id).set(payload);
+      ACTIVE_PROJECT_ID = id;
+      toast('Project created','ok');
+    }
+    closeModal('projModal');
+  } catch(e){
+    console.error(e);
+    toast('Failed to save project','err');
+  }
+};
+
+window.deleteProject = async function(){
+  if(!editingProjectId) return;
+  const p = PROJECTS[editingProjectId];
+  if(!p) return;
+  if(!confirm(`Delete project "${p.name}" and all its tasks? This cannot be undone.`)) return;
+  try {
+    await db.ref('faster_projects/'+editingProjectId).remove();
+    closeModal('projModal');
+    ACTIVE_PROJECT_ID = null;
+    toast('Project deleted','ok');
+  } catch(e){
+    toast('Failed to delete','err');
+  }
+};
+
+// ════════════════════════════════════════════════
+// TASK MODAL
+// ════════════════════════════════════════════════
+window.openNewTask = function(status){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p){ toast('Select a project first','err'); return; }
+  if(!canEditProject(p)){ toast('Only the PM or an admin can add tasks','err'); return; }
+  editingTaskId = null;
+  $('taskModalTitle').textContent = 'New task';
+  $('tk-title').value = '';
+  $('tk-desc').value = '';
+  $('tk-due').value = '';
+  $('tk-pri').value = 'med';
+  $('tk-st').value = status || 'todo';
+  populateAssigneeSelect(p.team || [], ME_UNAME);
+  $('tk-del-btn').style.display = 'none';
+  openModal('taskModal');
+  $('tk-title').focus();
+};
+
+window.openEditTask = function(taskId){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  const t = (p.tasks || {})[taskId];
+  if(!t) return;
+  if(!canEditProject(p)){ toast('Only the PM or an admin can edit tasks','err'); return; }
+  editingTaskId = taskId;
+  $('taskModalTitle').textContent = 'Edit task';
+  $('tk-title').value = t.title || '';
+  $('tk-desc').value  = t.desc || '';
+  $('tk-due').value   = t.dueDate || '';
+  $('tk-pri').value   = t.priority || 'med';
+  $('tk-st').value    = t.status || 'todo';
+  populateAssigneeSelect(p.team || [], t.assignee || '');
+  $('tk-del-btn').style.display = 'inline-flex';
+  openModal('taskModal');
+};
+
+function populateAssigneeSelect(team, selected){
+  const sel = $('tk-assignee');
+  sel.innerHTML = '<option value="">— Unassigned —</option>' +
+    team.map(u => {
+      const nm = USERS[u]?.name || u;
+      const isSel = u === selected ? 'selected' : '';
+      return `<option value="${escH(u)}" ${isSel}>${escH(nm)}</option>`;
+    }).join('');
+}
+
+window.saveTask = async function(){
+  const title = $('tk-title').value.trim();
+  if(!title){ toast('Task title is required','err'); return; }
+  const payload = {
+    title,
+    desc:     $('tk-desc').value.trim(),
+    assignee: $('tk-assignee').value,
+    priority: $('tk-pri').value,
+    dueDate:  $('tk-due').value || '',
+    status:   $('tk-st').value,
+    updatedAt: new Date().toISOString()
+  };
+  try {
+    if(editingTaskId){
+      await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${editingTaskId}`).update(payload);
+      toast('Task updated','ok');
+    } else {
+      const id = db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks`).push().key;
+      payload.createdAt = new Date().toISOString();
+      payload.createdBy = ME_UNAME;
+      await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${id}`).set(payload);
+      toast('Task added','ok');
+    }
+    closeModal('taskModal');
+  } catch(e){
+    console.error(e);
+    toast('Failed to save task','err');
+  }
+};
+
+window.deleteTask = async function(){
+  if(!editingTaskId) return;
+  if(!confirm('Delete this task?')) return;
+  try {
+    await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${editingTaskId}`).remove();
+    closeModal('taskModal');
+    toast('Task deleted','ok');
+  } catch(e){
+    toast('Failed to delete','err');
+  }
+};
+
+// Kick off
+boot();
+</script>
+
+</body>
+</html>
