@@ -102,15 +102,15 @@ body{font-size:1rem}
 <div class="content">
 
   <!-- Hero -->
-  <div class="hero">
-    <h2>Welcome to FASTER Lab</h2>
+  <div class="hero" style="animation:scaleIn .5s ease">
+    <h2 class="gradient-text" style="display:inline">Welcome to FASTER Lab</h2>
     <p>Your centralized workspace for orders, chemicals, assets, facility planning, safety, and project management. This guide walks you through everything.</p>
   </div>
 
   <!-- Section 1: Getting Started -->
-  <div class="section">
+  <div class="section fade-in">
     <div class="section-title"><span class="num">1</span> Getting Started</div>
-    <div class="step-list">
+    <div class="step-list stagger">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
@@ -143,9 +143,9 @@ body{font-size:1rem}
   </div>
 
   <!-- Section 2: Workspace Tools -->
-  <div class="section">
+  <div class="section fade-in">
     <div class="section-title"><span class="num">2</span> Workspace Tools</div>
-    <div class="tool-row">
+    <div class="tool-row stagger">
       <div class="tool-item">
         <div class="tool-item-top">
           <div class="tool-item-icon">📦</div>
@@ -198,7 +198,7 @@ body{font-size:1rem}
   </div>
 
   <!-- Section 3: Roles -->
-  <div class="section">
+  <div class="section fade-in">
     <div class="section-title"><span class="num">3</span> Roles &amp; Permissions</div>
     <div class="role-grid">
       <div class="role-card">
@@ -241,9 +241,9 @@ body{font-size:1rem}
   </div>
 
   <!-- Section 4: Order Request Flow -->
-  <div class="section">
+  <div class="section fade-in">
     <div class="section-title"><span class="num">4</span> Order Request Flow</div>
-    <div class="step-list">
+    <div class="step-list stagger">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
@@ -269,7 +269,7 @@ body{font-size:1rem}
   </div>
 
   <!-- Section 5: Tips -->
-  <div class="section">
+  <div class="section fade-in">
     <div class="section-title"><span class="num">5</span> Tips &amp; Shortcuts</div>
     <div class="tip-box">
       <strong>Keyboard shortcut</strong>
@@ -290,7 +290,7 @@ body{font-size:1rem}
   </div>
 
   <!-- Section 6: FAQ -->
-  <div class="section">
+  <div class="section fade-in">
     <div class="section-title"><span class="num">6</span> FAQ &amp; Troubleshooting</div>
     <div class="faq">
       <div class="faq-item">
@@ -329,6 +329,24 @@ body{font-size:1rem}
   </div>
 
 </div>
+
+<script>
+document.querySelectorAll('.fade-in').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = 'opacity .5s ease, transform .5s ease';
+});
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+      obs.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.1});
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
 
 </body>
 </html>

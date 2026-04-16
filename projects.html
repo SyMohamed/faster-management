@@ -410,7 +410,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 <div class="page">
 
   <!-- STATS -->
-  <div class="stats-strip" id="stats-strip">
+  <div class="stats-strip stagger" id="stats-strip">
     <div class="stat">
       <div class="stat-ic" style="background:var(--pm-bg);color:var(--pm)">📋</div>
       <div><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Projects</div></div>
@@ -1147,11 +1147,26 @@ function renderStats(){
       if(t.assignee === ME_UNAME && t.status !== 'done') mine++;
     });
   });
-  $('s-total').textContent   = visible.length;
-  $('s-active').textContent  = totalActive;
-  $('s-done').textContent    = totalDone;
-  $('s-overdue').textContent = overdue;
-  $('s-mine').textContent    = mine;
+  animateCount('s-total', visible.length);
+  animateCount('s-active', totalActive);
+  animateCount('s-done', totalDone);
+  animateCount('s-overdue', overdue);
+  animateCount('s-mine', mine);
+}
+
+function animateCount(id, target){
+  const el = $(id);
+  if(!el) return;
+  const prev = parseInt(el.textContent) || 0;
+  if(prev === target){ el.textContent = target; return; }
+  let current = prev;
+  const diff = target - prev;
+  const step = diff > 0 ? Math.max(1, Math.ceil(diff/15)) : Math.min(-1, Math.floor(diff/15));
+  const timer = setInterval(() => {
+    current += step;
+    if((step > 0 && current >= target) || (step < 0 && current <= target)){ current = target; clearInterval(timer); }
+    el.textContent = current;
+  }, 30);
 }
 
 // ════════════════════════════════════════════════

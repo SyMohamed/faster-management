@@ -418,4 +418,227 @@ input, button, select, textarea { font-size: inherit; }
   color: var(--muted);
 }
 
-/* ─── (User selection modal removed — replaced by login screen) ──────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   DYNAMIC INTERACTIONS — global micro-animations & hover effects
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page entrance fade-in ─────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmerSlide {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes gentleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,204,245,.3); }
+  50% { box-shadow: 0 0 0 8px rgba(0,204,245,0); }
+}
+@keyframes ripple {
+  to { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Scroll-triggered animations ───────────────────────────────────────── */
+.fade-in        { opacity: 0; animation: fadeInUp .5s ease forwards; }
+.fade-in-delay1 { animation-delay: .1s; }
+.fade-in-delay2 { animation-delay: .2s; }
+.fade-in-delay3 { animation-delay: .3s; }
+.fade-in-delay4 { animation-delay: .4s; }
+
+/* ── Button hover effects (global) ─────────────────────────────────────── */
+button, .btn, .btn-ghost, .btn-o, [role="button"] {
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+}
+button:active, .btn:active, .btn-o:active { transform: scale(.97); }
+
+/* ── Card hover lift (global) ──────────────────────────────────────────── */
+.stat-card, .tool-card, .tc, .card, .req-card, .af-item,
+.pending-row, .member-row, .faq-item {
+  transition: all .22s cubic-bezier(.4,0,.2,1);
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+.tool-card:hover, .tc:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.3);
+}
+
+/* ── Table row hover slide ─────────────────────────────────────────────── */
+table tbody tr {
+  transition: background .15s, transform .15s;
+}
+table tbody tr:hover {
+  background: var(--surface2, var(--s2, rgba(255,255,255,.03)));
+}
+
+/* ── Badge pulse for urgent / delayed items ────────────────────────────── */
+.badge.s-delayed, .badge.s-cancelled,
+.pri-tag.crit, .due-tag.overdue {
+  animation: gentleBounce 2s ease-in-out infinite;
+}
+
+/* ── Link hover underline animation ────────────────────────────────────── */
+a:not(.tc):not(.tool-card):not(.breadcrumb):not(.brand) {
+  text-decoration: none;
+  background-image: linear-gradient(var(--ac, var(--accent, #00ccf5)), var(--ac, var(--accent, #00ccf5)));
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size .3s ease, color .2s;
+}
+a:not(.tc):not(.tool-card):not(.breadcrumb):not(.brand):hover {
+  background-size: 100% 1px;
+}
+
+/* ── Modal entrance ────────────────────────────────────────────────────── */
+.modal.open .modal-box, .modal-bg.open .modal {
+  animation: scaleIn .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Tooltip system (data-tip attribute) ───────────────────────────────── */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--s3, var(--surface3, #1e2736));
+  color: var(--text);
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+[data-tip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Smooth scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--b2, var(--border2, #2e3f54));
+  border-radius: 3px;
+  transition: background .15s;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--b3, var(--border2, #374660)); }
+
+/* ── Focus ring (accessibility + style) ────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--ac, var(--accent, #00ccf5));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Selection color ───────────────────────────────────────────────────── */
+::selection { background: rgba(0,204,245,.25); color: var(--text); }
+
+/* ── Number counter animation helper ───────────────────────────────────── */
+.count-animate {
+  display: inline-block;
+  animation: countUp .4s ease forwards;
+}
+
+/* ── Smooth page transitions ───────────────────────────────────────────── */
+body { animation: fadeIn .3s ease; }
+
+/* ── Glassmorphism utility ─────────────────────────────────────────────── */
+.glass {
+  background: rgba(17,23,32,.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+[data-theme="light"] .glass {
+  background: rgba(255,255,255,.8);
+}
+
+/* ── Gradient text utility ─────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--ac, #00ccf5), var(--teal, #14b8a6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Hover reveal children ─────────────────────────────────────────────── */
+.hover-reveal .reveal-child { opacity: 0; transition: opacity .2s; }
+.hover-reveal:hover .reveal-child { opacity: 1; }
+
+/* ── Progress bar utility ──────────────────────────────────────────────── */
+.progress-bar {
+  height: 4px;
+  background: var(--b1, var(--border, #232e3d));
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--ac, #00ccf5), var(--teal, #14b8a6));
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Stagger children animation ────────────────────────────────────────── */
+.stagger > * {
+  opacity: 0;
+  animation: fadeInUp .4s ease forwards;
+}
+.stagger > *:nth-child(1)  { animation-delay: 0s; }
+.stagger > *:nth-child(2)  { animation-delay: .05s; }
+.stagger > *:nth-child(3)  { animation-delay: .1s; }
+.stagger > *:nth-child(4)  { animation-delay: .15s; }
+.stagger > *:nth-child(5)  { animation-delay: .2s; }
+.stagger > *:nth-child(6)  { animation-delay: .25s; }
+.stagger > *:nth-child(7)  { animation-delay: .3s; }
+.stagger > *:nth-child(8)  { animation-delay: .35s; }
+.stagger > *:nth-child(9)  { animation-delay: .4s; }
+.stagger > *:nth-child(10) { animation-delay: .45s; }
+
+/* ── Status dot pulse ──────────────────────────────────────────────────── */
+.live-dot, .ldot, .af-dot, .nav-dot {
+  animation: pulse 2s infinite;
+}
+
+/* ── Shimmer loading bar ───────────────────────────────────────────────── */
+.shimmer-bar {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--ac, #00ccf5), transparent);
+  background-size: 200% 100%;
+  animation: shimmerSlide 1.5s ease-in-out infinite;
+  border-radius: 2px;
+}
+
+/* ── (User selection modal removed — replaced by login screen) ──────────── */

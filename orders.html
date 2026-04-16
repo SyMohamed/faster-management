@@ -296,7 +296,7 @@ body{font-size:1rem}
   </div>
 
   <!-- Stats -->
-  <div class="stats" id="stats-row">
+  <div class="stats stagger" id="stats-row">
     <div class="sk-stat skeleton"></div>
     <div class="sk-stat skeleton"></div>
     <div class="sk-stat skeleton"></div>
@@ -718,9 +718,20 @@ function renderStats() {
         <div class="stat-label">${d.label}</div>
         <div class="stat-dot" style="background:${d.color}"></div>
       </div>
-      <div class="stat-val" style="color:${d.color}">${counts[d.key] || 0}</div>
+      <div class="stat-val count-animate" style="color:${d.color}" data-count="${counts[d.key] || 0}">0</div>
       <div class="stat-sub">${d.sub}</div>
     </div>`).join('');
+  document.querySelectorAll('.stat-val[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count) || 0;
+    if(!target){ el.textContent = '0'; return; }
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 20));
+    const timer = setInterval(() => {
+      current += step;
+      if(current >= target){ current = target; clearInterval(timer); }
+      el.textContent = current;
+    }, 30);
+  });
 }
 
 // ── Charts ─────────────────────────────────────────────────────────────────

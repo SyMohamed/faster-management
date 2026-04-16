@@ -679,8 +679,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div id="ws-tagline"><span id="ws-tagline-text"></span></div>
       </div>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <div class="stat-card" onclick="location.href='projects.html'" title="View Project Management">
+    <div class="stagger" style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="stat-card" onclick="location.href='projects.html'" data-tip="Open Project Management">
         <div class="stat-icon">📋</div>
         <div><div class="stat-val" id="stat-projects">—</div><div class="stat-lbl">Projects</div></div>
       </div>
@@ -724,7 +724,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 <div class="tools-activity-wrap" id="tools-activity-wrap">
   <div>
     <div class="workspace-section-title">Workspace tools</div>
-    <div class="tools-grid" id="tools-grid-inner">
+    <div class="tools-grid stagger" id="tools-grid-inner">
 
       <!-- PROJECT MANAGEMENT -->
       <a href="projects.html" class="tc tool-card" style="--tc:#14b8a6">
