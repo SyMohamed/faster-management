@@ -77,12 +77,12 @@ body::before{content:'';position:fixed;inset:0;
 .tool-card:hover::before{opacity:.06}
 .tc-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--tc)}
 .tc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
-.tc-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;
-  justify-content:center;font-size:24px;background:var(--s2);border:1px solid var(--b1)}
+.tc-icon{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;font-size:28px;background:var(--s2);border:1px solid var(--b1)}
 .tc-arr{color:var(--t3);font-size:18px;transition:all .22s;margin-top:2px}
 .tool-card:hover .tc-arr{color:var(--tc);transform:translate(3px,-3px)}
-.tc-name{font-size:clamp(15px,1.2vw+4px,22px);font-weight:700;margin-bottom:0.4em;letter-spacing:-.2px}
-.tc-desc{font-size:clamp(12px,0.85vw+3px,16px);color:var(--t3);line-height:1.7;margin-bottom:1.1em}
+.tc-name{font-size:clamp(17px,1.4vw+4px,24px);font-weight:700;margin-bottom:0.3em;letter-spacing:-.3px}
+.tc-desc{font-size:clamp(12px,0.85vw+3px,15px);color:var(--t3);line-height:1.6;margin-bottom:1em}
 .tc-feats{display:flex;flex-direction:column;gap:clamp(5px,0.5vw,9px);border-top:1px solid var(--b1);padding-top:clamp(12px,1.2vw,20px)}
 .tc-feat{display:flex;align-items:center;gap:0.45em;font-size:clamp(11px,0.8vw+3px,15px);color:var(--t3)}
 .tc-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -270,6 +270,12 @@ footer{position:relative;z-index:1;border-top:1px solid var(--b1);padding:22px 4
 .member-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;
   padding:4px 9px;border-radius:6px;transition:all .15s}
 .member-del:hover{background:rgba(239,68,68,.12);color:var(--red)}
+.member-role-btn{background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:11px;
+  padding:3px 10px;border-radius:6px;transition:all .15s;font-family:var(--mono);white-space:nowrap}
+.member-role-btn.promote{color:#14b8a6;border-color:rgba(20,184,166,.3)}
+.member-role-btn.promote:hover{background:rgba(20,184,166,.12)}
+.member-role-btn.demote{color:var(--amber);border-color:rgba(245,158,11,.3)}
+.member-role-btn.demote:hover{background:rgba(245,158,11,.12)}
 /* Pending rows */
 .pending-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .pending-row:last-child{border-bottom:none}
@@ -728,12 +734,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Project Management</div>
-        <div class="tc-desc">Organize lab work into projects with Kanban boards. Admins nominate project managers; PMs build teams and assign tasks.</div>
+        <div class="tc-desc">Kanban boards for lab projects. Assign teams and track tasks.</div>
         <div class="tc-feats">
-          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Kanban: To Do &rarr; In Progress &rarr; Review &rarr; Done</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Drag-and-drop task cards across columns</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Priority, assignee, due date on every task</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Real-time Firebase sync across the team</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Drag-and-drop task boards</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Priority, assignee &amp; due dates</div>
         </div>
       </a>
 
@@ -745,11 +749,9 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Lab Facility Planning</div>
-        <div class="tc-desc">Book experiments and view facility availability for LPST, HPST and RCM — with a shared calendar.</div>
+        <div class="tc-desc">Book LPST, HPST and RCM facilities with a shared calendar.</div>
         <div class="tc-feats">
-          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>LPST · HPST · RCM facility calendars</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Book experiments with date ranges</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Experiment details &amp; researcher info</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Experiment booking &amp; scheduling</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Conflict detection &amp; live sync</div>
         </div>
       </a>
@@ -762,12 +764,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Orders Tracker</div>
-        <div class="tc-desc">Track all lab procurement from PR submission to delivery. Everyone sees live status updates instantly.</div>
+        <div class="tc-desc">Track procurement from PR submission to delivery in real-time.</div>
         <div class="tc-feats">
-          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Add &amp; edit orders in real-time</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Status: Delivered · Delayed · PO · PR</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Filter by status, requester, PO/PR</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Export to CSV</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>PR &rarr; PO &rarr; Delivered status flow</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#00ccf5"></div>Filter, search &amp; export to CSV</div>
         </div>
       </a>
 
@@ -779,12 +779,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Chemical Inventory</div>
-        <div class="tc-desc">Full chemical inventory across all storage locations — shelves, fridge and corrosive cabinet.</div>
+        <div class="tc-desc">Full inventory across shelves, fridge and corrosive cabinet.</div>
         <div class="tc-feats">
-          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>232 chemicals pre-loaded from Excel</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Shelf 1, 2, 3 · Corrosive · Fridge</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Owner, user, CAS number, quantity</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Track ordered chemicals &amp; stock</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>232 chemicals with CAS &amp; quantities</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#0fda7a"></div>Track stock &amp; ordered items</div>
         </div>
       </a>
 
@@ -796,12 +794,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Asset Registry</div>
-        <div class="tc-desc">Complete lab equipment registry — lasers, detectors, optics, oscilloscopes, pumps and IT.</div>
+        <div class="tc-desc">Lab equipment registry — lasers, detectors, optics and more.</div>
         <div class="tc-feats">
           <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>401 assets across 8 categories</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Laser wavelength spectrum map</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Classify by type, manufacturer, wavelength</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Track status, location, owner</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#9b5fff"></div>Status, location &amp; wavelength map</div>
         </div>
       </a>
 
@@ -813,12 +809,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Safety Hub</div>
-        <div class="tc-desc">Report lab safety issues, earn points, and compete for the monthly safety champion title.</div>
+        <div class="tc-desc">Report and fix safety issues. Compete for monthly champion.</div>
         <div class="tc-feats">
-          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Report issues · earn +1 pt</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Fix issues · earn +2 pts</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Monthly champion leaderboard</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Team members with profile photos</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Earn points for reports &amp; fixes</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f85149"></div>Monthly leaderboard</div>
         </div>
       </a>
 
@@ -830,12 +824,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-arr">↗</div>
         </div>
         <div class="tc-name">Quickstart Guide</div>
-        <div class="tc-desc">New to FASTER Lab workspace? Learn how every tool works and get started in minutes.</div>
+        <div class="tc-desc">New here? Learn how every tool works in minutes.</div>
         <div class="tc-feats">
           <div class="tc-feat"><div class="tc-dot" style="background:#f59e0b"></div>Step-by-step walkthrough</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#f59e0b"></div>Tool overviews &amp; tips</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#f59e0b"></div>Admin &amp; member roles explained</div>
-          <div class="tc-feat"><div class="tc-dot" style="background:#f59e0b"></div>FAQ &amp; troubleshooting</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#f59e0b"></div>Roles, tips &amp; FAQ</div>
         </div>
       </a>
 
@@ -1340,6 +1332,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   function loadMembers(){
     if(!db){ setTimeout(loadMembers,400); return; }
+    const myUname=sessionStorage.getItem(UNAME_KEY)||'';
+    const isSuperAdmin=myUname==='admin';
     db.ref('faster_users').on('value',snap=>{
       const users=snap.val()||{};
       const list=document.getElementById('members-list');
@@ -1348,14 +1342,42 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       if(!entries.length){ list.innerHTML='<div style="padding:10px 0;color:var(--muted);font-size:14px">No members yet.</div>'; return; }
       list.innerHTML=entries.map(([uname,u])=>{
         const ini=(u.name||uname).split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+        const isThisAdmin=u.role==='admin';
+        const isOriginal=uname==='admin';
+        let roleLabel=isThisAdmin?(isOriginal?' &middot; Super Admin':' &middot; Admin'):'';
+        let adminBtn='';
+        if(isSuperAdmin && uname!=='admin'){
+          if(isThisAdmin){
+            adminBtn='<button class="member-role-btn demote" data-u="'+uname+'" title="Remove admin rights">Demote</button>';
+          } else {
+            adminBtn='<button class="member-role-btn promote" data-u="'+uname+'" title="Grant admin rights">Make Admin</button>';
+          }
+        }
         return '<div class="member-row">'+
           '<div class="member-avatar">'+ini+'</div>'+
           '<div class="member-info"><div class="member-name">'+(u.name||uname)+'</div>'+
-          '<div class="member-user">@'+uname+(u.role==='admin'?' &middot; Admin':'')+'</div></div>'+
+          '<div class="member-user">@'+uname+roleLabel+'</div></div>'+
+          adminBtn+
           '<button class="member-del" data-u="'+uname+'" title="Remove">&#xd7;</button></div>';
       }).join('');
       list.querySelectorAll('.member-del').forEach(btn=>{ btn.onclick=()=>deleteMember(btn.dataset.u); });
+      list.querySelectorAll('.member-role-btn.promote').forEach(btn=>{
+        btn.onclick=()=>promoteToAdmin(btn.dataset.u);
+      });
+      list.querySelectorAll('.member-role-btn.demote').forEach(btn=>{
+        btn.onclick=()=>demoteFromAdmin(btn.dataset.u);
+      });
     });
+  }
+
+  function promoteToAdmin(uname){
+    if(!confirm('Make @'+uname+' an admin? They will have full admin rights except nominating other admins.')) return;
+    db.ref('faster_users/'+uname).update({role:'admin',promotedAdmin:true,promotedBy:sessionStorage.getItem(UNAME_KEY)||'admin',promotedAt:new Date().toISOString()});
+  }
+
+  function demoteFromAdmin(uname){
+    if(!confirm('Remove admin rights from @'+uname+'?')) return;
+    db.ref('faster_users/'+uname).update({role:'member',promotedAdmin:null,promotedBy:null,promotedAt:null});
   }
 
   /* ── Shared badge counter ─────────────────────────────────────────────── */
