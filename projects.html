@@ -227,33 +227,80 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   padding:18px 20px;margin-top:18px;overflow-x:auto}
 .gantt-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
   letter-spacing:.5px;font-family:var(--mono);margin-bottom:14px;display:flex;align-items:center;
-  justify-content:space-between}
+  justify-content:space-between;gap:10px}
+.gantt-title-actions{display:flex;gap:6px;align-items:center}
+.gantt-zoom{background:var(--s2);border:1px solid var(--b1);border-radius:5px;padding:2px 8px;
+  font-size:10px;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:all .12s}
+.gantt-zoom:hover{border-color:var(--pm);color:var(--pm)}
+.gantt-zoom.active{background:var(--pm-bg);border-color:var(--pm);color:var(--pm)}
 .gantt-wrap{min-width:600px;position:relative}
 .gantt-header{display:flex;border-bottom:1px solid var(--b1);padding-bottom:6px;margin-bottom:8px}
-.gantt-label-col{width:200px;flex-shrink:0;font-size:10px;color:var(--muted);font-family:var(--mono);
+.gantt-label-col{width:220px;flex-shrink:0;font-size:10px;color:var(--muted);font-family:var(--mono);
   text-transform:uppercase;letter-spacing:.3px}
 .gantt-timeline{flex:1;display:flex;position:relative}
 .gantt-month{flex:1;text-align:center;font-size:9px;font-family:var(--mono);color:var(--muted);
   letter-spacing:.3px;text-transform:uppercase;border-left:1px solid var(--b1);padding-left:4px}
-.gantt-row{display:flex;align-items:center;height:28px;margin-bottom:2px}
-.gantt-row-label{width:200px;flex-shrink:0;font-size:11px;color:var(--text);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;padding-right:10px;display:flex;align-items:center;gap:6px}
+.gantt-row{display:flex;align-items:center;height:32px;margin-bottom:2px;transition:background .12s;border-radius:4px}
+.gantt-row:hover{background:var(--s2)}
+.gantt-row-label{width:220px;flex-shrink:0;font-size:11px;color:var(--text);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;padding:0 10px 0 4px;display:flex;align-items:center;gap:6px}
 .gantt-row-label .g-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.gantt-row-bar{flex:1;position:relative;height:20px}
-.gantt-bar{position:absolute;height:16px;border-radius:4px;top:2px;min-width:4px;
-  transition:all .15s;cursor:default;display:flex;align-items:center;padding:0 5px}
-.gantt-bar span{font-size:8px;font-family:var(--mono);font-weight:700;color:#fff;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gantt-row-label .g-avatar{width:18px;height:18px;border-radius:50%;background:var(--pm);color:#000;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:7px;
+  font-family:var(--mono);flex-shrink:0}
+.gantt-row-bar{flex:1;position:relative;height:24px}
+.gantt-bar{position:absolute;height:20px;border-radius:5px;top:2px;min-width:6px;
+  cursor:pointer;display:flex;align-items:center;padding:0 6px;gap:4px;
+  transition:box-shadow .15s,transform .1s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.gantt-bar:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.35);z-index:5}
+.gantt-bar .bar-avatar{width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:7px;
+  font-family:var(--mono);flex-shrink:0;border:1px solid rgba(255,255,255,.3)}
+.gantt-bar .bar-text{font-size:9px;font-family:var(--mono);font-weight:600;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.gantt-bar .bar-pct{font-size:8px;font-family:var(--mono);color:rgba(255,255,255,.7);flex-shrink:0}
 .gantt-bar.st-todo{background:var(--todo);opacity:.5}
 .gantt-bar.st-prog{background:var(--prog)}
 .gantt-bar.st-rev{background:var(--rev)}
 .gantt-bar.st-done{background:var(--done)}
-.gantt-milestone{position:absolute;top:-2px;width:0;height:0;border-left:6px solid transparent;
-  border-right:6px solid transparent;border-bottom:10px solid var(--pm);z-index:2}
-.gantt-today{position:absolute;top:0;bottom:0;width:1px;background:var(--red);z-index:1;opacity:.6}
-.gantt-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+
+/* Gantt tooltip */
+.gantt-tip{position:fixed;z-index:9999;background:var(--s3);border:1px solid var(--b2);
+  border-radius:8px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.5);
+  pointer-events:none;max-width:260px;font-size:12px;color:var(--text);
+  transition:opacity .15s;opacity:0}
+.gantt-tip.show{opacity:1}
+.gantt-tip h5{font-size:13px;font-weight:700;margin-bottom:6px}
+.gantt-tip .tip-row{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);
+  padding:2px 0;font-family:var(--mono)}
+.gantt-tip .tip-row b{color:var(--text);font-weight:600}
+.gantt-tip .tip-status{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px;
+  font-family:var(--mono);font-weight:700;text-transform:uppercase}
+
+/* Milestones */
+.gantt-ms-row{display:flex;align-items:center;height:26px;margin-bottom:2px}
+.gantt-ms-label{width:220px;flex-shrink:0;font-size:11px;color:var(--pm);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px 0 4px;
+  display:flex;align-items:center;gap:6px}
+.gantt-ms-bar{flex:1;position:relative;height:20px}
+.gantt-diamond{position:absolute;top:2px;width:14px;height:14px;background:var(--pm);
+  transform:rotate(45deg);border-radius:2px;cursor:pointer;z-index:3;
+  transition:transform .15s,box-shadow .15s;box-shadow:0 2px 6px rgba(20,184,166,.4)}
+.gantt-diamond:hover{transform:rotate(45deg) scale(1.3);box-shadow:0 4px 12px rgba(20,184,166,.6)}
+.gantt-today{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:1;opacity:.7;
+  border-radius:1px}
+.gantt-today-label{position:absolute;top:-16px;font-size:8px;font-family:var(--mono);color:var(--red);
+  font-weight:700;white-space:nowrap;transform:translateX(-50%)}
+.gantt-legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
 .gantt-leg{display:flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);color:var(--muted)}
 .gantt-leg .swatch{width:10px;height:10px;border-radius:2px}
+
+/* Milestone inputs in project modal */
+.ms-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.ms-row input{flex:1}
+.ms-row input[type=date]{max-width:160px}
+.ms-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
+.ms-remove:hover{color:var(--red)}
 
 /* Modals */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;
@@ -457,7 +504,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div class="gantt-section" id="gantt-section">
       <div class="gantt-title">
         <span>Project Timeline</span>
-        <span id="gantt-range" style="font-weight:400;font-size:10px"></span>
+        <div class="gantt-title-actions">
+          <span id="gantt-range" style="font-weight:400;font-size:10px"></span>
+          <button class="gantt-zoom active" onclick="setGanttZoom('fit')" data-z="fit">Fit</button>
+          <button class="gantt-zoom" onclick="setGanttZoom('month')" data-z="month">Month</button>
+          <button class="gantt-zoom" onclick="setGanttZoom('quarter')" data-z="quarter">Quarter</button>
+        </div>
       </div>
       <div class="gantt-wrap" id="gantt-wrap"></div>
       <div class="gantt-legend">
@@ -465,10 +517,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <div class="gantt-leg"><div class="swatch" style="background:var(--prog)"></div>In progress</div>
         <div class="gantt-leg"><div class="swatch" style="background:var(--rev)"></div>In review</div>
         <div class="gantt-leg"><div class="swatch" style="background:var(--done)"></div>Done</div>
-        <div class="gantt-leg"><div class="swatch" style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid var(--pm);border-radius:0"></div>Milestone</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--pm);width:10px;height:10px;transform:rotate(45deg);border-radius:2px"></div>Milestone</div>
         <div class="gantt-leg"><div class="swatch" style="background:var(--red);width:2px;height:10px"></div>Today</div>
       </div>
     </div>
+    <div class="gantt-tip" id="gantt-tip"></div>
   </div>
 
   <!-- EMPTY STATE -->
@@ -510,6 +563,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
           <label>Target end date</label>
           <input id="pm-end" type="date">
         </div>
+      </div>
+      <div class="field">
+        <label>Milestones</label>
+        <div id="pm-milestones"></div>
+        <button class="btn-o btn-sm" type="button" onclick="addMilestoneRow()" style="margin-top:6px">+ Add milestone</button>
       </div>
     </div>
     <div class="modal-foot">
@@ -1109,6 +1167,7 @@ window.openNewProject = function(){
   $('pm-end').value = '';
   $('pm-del-btn').style.display = 'none';
   renderMemberPicker([ME_UNAME]);
+  renderMilestoneInputs([]);
   openModal('projModal');
   $('pm-name').focus();
 };
@@ -1123,6 +1182,7 @@ window.openEditProject = function(id){
   $('pm-desc').value  = p.desc || '';
   $('pm-start').value = p.startDate || '';
   $('pm-end').value   = p.endDate || '';
+  renderMilestoneInputs(p.milestones || []);
   $('pm-del-btn').style.display = (IS_ADMIN || p.pmUname === ME_UNAME) ? 'inline-flex' : 'none';
   renderMemberPicker(p.team || []);
   openModal('projModal');
@@ -1155,6 +1215,31 @@ function getPickedMembers(){
   return Array.from(document.querySelectorAll('#pm-members .mp-chip.on')).map(el => el.dataset.uname);
 }
 
+window.addMilestoneRow = function(name, date){
+  const wrap = $('pm-milestones');
+  const row = document.createElement('div');
+  row.className = 'ms-row';
+  row.innerHTML = `<input type="text" placeholder="Milestone name" value="${escH(name||'')}">
+    <input type="date" value="${date||''}">
+    <button class="ms-remove" onclick="this.parentElement.remove()" type="button">×</button>`;
+  wrap.appendChild(row);
+};
+
+function getMilestones(){
+  return Array.from(document.querySelectorAll('#pm-milestones .ms-row')).map(row => {
+    const inputs = row.querySelectorAll('input');
+    return {name: inputs[0].value.trim(), date: inputs[1].value};
+  }).filter(m => m.name || m.date);
+}
+
+function renderMilestoneInputs(milestones){
+  const wrap = $('pm-milestones');
+  wrap.innerHTML = '';
+  if(milestones && milestones.length){
+    milestones.forEach(m => addMilestoneRow(m.name, m.date));
+  }
+}
+
 window.saveProject = async function(){
   const name = $('pm-name').value.trim();
   if(!name){ toast('Project name is required','err'); return; }
@@ -1163,6 +1248,7 @@ window.saveProject = async function(){
     name,
     desc:      $('pm-desc').value.trim(),
     team,
+    milestones: getMilestones(),
     startDate: $('pm-start').value || '',
     endDate:   $('pm-end').value || '',
     updatedAt: new Date().toISOString()
@@ -1429,12 +1515,19 @@ window.confirmImport = async function(){
 // ════════════════════════════════════════════════
 // GANTT CHART
 // ════════════════════════════════════════════════
+let ganttZoom = 'fit';
+window.setGanttZoom = function(z){
+  ganttZoom = z;
+  document.querySelectorAll('.gantt-zoom').forEach(b=>b.classList.toggle('active',b.dataset.z===z));
+  renderGantt();
+};
+
 function renderGantt(){
   const p = PROJECTS[ACTIVE_PROJECT_ID];
   if(!p){ $('gantt-section').style.display='none'; return; }
   const tasks = p.tasks || {};
   const taskArr = Object.entries(tasks).map(([id,t])=>({id,...t}));
-  if(!taskArr.length){ $('gantt-section').style.display='none'; return; }
+  if(!taskArr.length && !(p.milestones && p.milestones.length)){ $('gantt-section').style.display='none'; return; }
   $('gantt-section').style.display='block';
 
   const today = new Date(); today.setHours(0,0,0,0);
@@ -1447,38 +1540,40 @@ function renderGantt(){
     if(t.createdAt){ const d=new Date(t.createdAt); if(!isNaN(d)){const dd=new Date(d);dd.setHours(0,0,0,0);if(dd<minDate)minDate=new Date(dd);}}
     if(t.dueDate){ const d=new Date(t.dueDate+'T00:00:00'); if(!isNaN(d)){if(d>maxDate)maxDate=new Date(d);if(d<minDate)minDate=new Date(d);}}
   });
+  const milestones = Array.isArray(p.milestones) ? p.milestones.filter(m=>m&&m.date) : [];
+  milestones.forEach(m => {
+    const d=new Date(m.date+'T00:00:00');
+    if(!isNaN(d)){if(d>maxDate)maxDate=new Date(d);if(d<minDate)minDate=new Date(d);}
+  });
 
   minDate.setDate(1);
   maxDate.setMonth(maxDate.getMonth()+1,0);
-  const pad = 7*86400000;
+  let pad = 7*86400000;
+  if(ganttZoom==='month') pad = 3*86400000;
+  if(ganttZoom==='quarter'){ maxDate.setMonth(maxDate.getMonth()+2,0); pad=14*86400000; }
   const rangeStart = new Date(minDate.getTime()-pad);
   const rangeEnd   = new Date(maxDate.getTime()+pad);
-  const totalDays  = Math.max(1, Math.round((rangeEnd-rangeStart)/86400000));
 
+  const wrapWidth = ganttZoom==='fit' ? 'min-width:600px' : ganttZoom==='month' ? 'min-width:1200px' : 'min-width:1800px';
   $('gantt-range').textContent = rangeStart.toLocaleDateString(undefined,{month:'short',year:'numeric'})+' — '+rangeEnd.toLocaleDateString(undefined,{month:'short',year:'numeric'});
 
   const months = [];
-  const cur = new Date(rangeStart);
-  cur.setDate(1);
-  while(cur <= rangeEnd){
-    months.push(new Date(cur));
-    cur.setMonth(cur.getMonth()+1);
-  }
+  const cur = new Date(rangeStart); cur.setDate(1);
+  while(cur <= rangeEnd){ months.push(new Date(cur)); cur.setMonth(cur.getMonth()+1); }
 
   function dayPos(d){
-    return Math.max(0,Math.min(100, ((d.getTime()-rangeStart.getTime())/(rangeEnd.getTime()-rangeStart.getTime()))*100));
+    return Math.max(0,Math.min(100,((d.getTime()-rangeStart.getTime())/(rangeEnd.getTime()-rangeStart.getTime()))*100));
   }
 
-  let html = `<div class="gantt-header"><div class="gantt-label-col">Task</div><div class="gantt-timeline">`;
+  let html = `<div class="gantt-header"><div class="gantt-label-col">Task / Milestone</div><div class="gantt-timeline">`;
   months.forEach(m => {
-    html += `<div class="gantt-month" style="left:${dayPos(m)}%">${m.toLocaleDateString(undefined,{month:'short',year:'2-digit'})}</div>`;
+    html += `<div class="gantt-month">${m.toLocaleDateString(undefined,{month:'short',year:'2-digit'})}</div>`;
   });
   html += `</div></div>`;
 
   const statusMap = {todo:'st-todo',prog:'st-prog',rev:'st-rev',done:'st-done'};
   const statusLabel = {todo:'To do',prog:'In progress',rev:'In review',done:'Done'};
-  const dotColor = {todo:'var(--todo)',prog:'var(--prog)',rev:'var(--rev)',done:'var(--done)'};
-
+  const statusColor = {todo:'var(--todo)',prog:'var(--prog)',rev:'var(--rev)',done:'var(--done)'};
   const priOrder = {crit:0,hi:1,med:2,low:3};
   const sorted = [...taskArr].sort((a,b)=>{
     const pa=priOrder[a.priority]??2, pb=priOrder[b.priority]??2;
@@ -1494,41 +1589,99 @@ function renderGantt(){
 
     const left = dayPos(startD);
     const right = dayPos(endD);
-    const width = Math.max(1, right - left);
+    const width = Math.max(2, right - left);
     const st = statusMap[t.status] || 'st-todo';
     const assigneeName = USERS[t.assignee]?.name || t.assignee || '';
+    const ini = assigneeName ? initials(assigneeName) : '';
 
     html += `<div class="gantt-row">
       <div class="gantt-row-label">
-        <div class="g-dot" style="background:${dotColor[t.status]||'var(--todo)'}"></div>
+        ${ini ? `<div class="g-avatar">${escH(ini)}</div>` : `<div class="g-dot" style="background:${statusColor[t.status]||'var(--todo)'}"></div>`}
         ${escH(t.title||'Untitled')}
       </div>
       <div class="gantt-row-bar">
-        <div class="gantt-bar ${st}" style="left:${left}%;width:${width}%" title="${escH(t.title||'')} — ${statusLabel[t.status]||''}${assigneeName?' · '+assigneeName:''}${t.dueDate?' · Due: '+t.dueDate:''}">
-          <span>${escH(t.title||'')}</span>
+        <div class="gantt-bar ${st}" style="left:${left}%;width:${width}%"
+             data-tid="${t.id}" data-title="${escH(t.title||'')}" data-status="${t.status||'todo'}"
+             data-assignee="${escH(assigneeName)}" data-due="${t.dueDate||''}"
+             data-pri="${t.priority||'med'}" data-start="${startD.toISOString().slice(0,10)}"
+             onclick="openEditTask('${t.id}')"
+             onmouseenter="showGanttTip(event,this)" onmouseleave="hideGanttTip()">
+          ${ini ? `<div class="bar-avatar">${escH(ini)}</div>` : ''}
+          <div class="bar-text">${escH(t.title||'')}</div>
         </div>
       </div>
     </div>`;
   });
 
-  const todayPos = dayPos(today);
-  if(todayPos > 0 && todayPos < 100){
-    html += `<div style="position:relative;height:0"><div class="gantt-today" style="left:calc(200px + ${todayPos}% * (100% - 200px) / 100);height:${sorted.length*30+40}px;top:-${sorted.length*30+40}px"></div></div>`;
-  }
+  // Milestones
+  milestones.forEach((m,i) => {
+    const mD = new Date(m.date+'T00:00:00');
+    if(isNaN(mD)) return;
+    const mPos = dayPos(mD);
+    html += `<div class="gantt-ms-row">
+      <div class="gantt-ms-label">◆ ${escH(m.name||'Milestone '+(i+1))}</div>
+      <div class="gantt-ms-bar">
+        <div class="gantt-diamond" style="left:calc(${mPos}% - 7px)"
+             title="${escH(m.name||'Milestone')}: ${m.date}"
+             onmouseenter="showGanttTip(event,this,true)" onmouseleave="hideGanttTip()"></div>
+      </div>
+    </div>`;
+  });
 
-  if(p.endDate){
-    const mileD = new Date(p.endDate+'T00:00:00');
-    if(!isNaN(mileD)){
-      const mPos = dayPos(mileD);
-      html += `<div style="position:relative;height:20px;margin-top:4px">
-        <div class="gantt-row-label" style="font-size:10px;color:var(--pm);font-weight:600">🏁 Target end</div>
-        <div class="gantt-row-bar"><div class="gantt-milestone" style="left:${mPos}%" title="Milestone: ${p.endDate}"></div></div>
+  // Project end milestone (if set and not already a custom milestone)
+  if(p.endDate && !milestones.some(m=>m.date===p.endDate)){
+    const mD = new Date(p.endDate+'T00:00:00');
+    if(!isNaN(mD)){
+      const mPos = dayPos(mD);
+      html += `<div class="gantt-ms-row">
+        <div class="gantt-ms-label">🏁 Project deadline</div>
+        <div class="gantt-ms-bar">
+          <div class="gantt-diamond" style="left:calc(${mPos}% - 7px)"
+               title="Project deadline: ${p.endDate}"
+               onmouseenter="showGanttTip(event,this,true)" onmouseleave="hideGanttTip()"></div>
+        </div>
       </div>`;
     }
   }
 
+  // Today line
+  const todayPos = dayPos(today);
+  const rowCount = sorted.length + milestones.length + (p.endDate?1:0);
+  if(todayPos > 0 && todayPos < 100){
+    const lineH = rowCount*34+50;
+    html += `<div style="position:absolute;top:30px;left:calc(220px + (100% - 220px) * ${todayPos/100});width:0;height:${lineH}px;z-index:1">
+      <div class="gantt-today" style="height:100%"></div>
+      <div class="gantt-today-label">Today</div>
+    </div>`;
+  }
+
+  $('gantt-wrap').style.cssText = wrapWidth;
   $('gantt-wrap').innerHTML = html;
 }
+
+// Gantt tooltip
+function showGanttTip(e, el, isMilestone){
+  const tip = $('gantt-tip');
+  if(isMilestone){
+    tip.innerHTML = `<h5>${escH(el.title||'Milestone')}</h5>`;
+  } else {
+    const d = el.dataset;
+    const priLabel = {low:'Low',med:'Medium',hi:'High',crit:'Critical'}[d.pri]||'Medium';
+    const stLabel = {todo:'To do',prog:'In progress',rev:'In review',done:'Done'}[d.status]||d.status;
+    const stBg = {todo:'var(--todo)',prog:'var(--prog)',rev:'var(--rev)',done:'var(--done)'}[d.status]||'var(--muted)';
+    tip.innerHTML = `<h5>${escH(d.title)}</h5>
+      <div class="tip-row"><span>Status</span><span class="tip-status" style="background:${stBg};color:#fff">${stLabel}</span></div>
+      ${d.assignee ? `<div class="tip-row"><span>Assignee</span><b>${escH(d.assignee)}</b></div>` : ''}
+      <div class="tip-row"><span>Start</span><b>${d.start||'—'}</b></div>
+      <div class="tip-row"><span>Due</span><b>${d.due||'No deadline'}</b></div>
+      <div class="tip-row"><span>Priority</span><b>${priLabel}</b></div>`;
+  }
+  const r = el.getBoundingClientRect();
+  tip.style.left = Math.min(r.left, window.innerWidth-280)+'px';
+  tip.style.top = (r.bottom+8)+'px';
+  tip.classList.add('show');
+}
+function hideGanttTip(){ $('gantt-tip').classList.remove('show'); }
 
 // ════════════════════════════════════════════════
 // TASK REVIEW WORKFLOW
