@@ -1983,18 +1983,56 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     "Part of something extraordinary."
   ];
 
-  const WS_TAGS = [
-    "Have a great session, innovator!",
+  const WS_TAGS_GENERIC = [
     "Science is best done together.",
     "Precision. Passion. Progress.",
-    "You are making a difference.",
     "Welcome to the FASTER family.",
-    "Keeping everyone safe, every day.",
     "Innovation starts here.",
     "Where curiosity meets discovery.",
     "Pushing the boundaries of photonics.",
     "Part of something extraordinary."
   ];
+
+  function getPersonalizedTags(){
+    var name = sessionStorage.getItem('faster_user_v1') || '';
+    var first = name ? name.split(' ')[0] : '';
+    var role = sessionStorage.getItem('faster_role_v1') || 'member';
+    var h = new Date().getHours();
+    var tags = [];
+
+    if(first){
+      tags.push(first + ", let's make today count.");
+      tags.push("Great to see you, " + first + "!");
+      tags.push(first + ", your work matters.");
+      if(h < 12){
+        tags.push("Fresh morning, fresh ideas, " + first + ".");
+        tags.push(first + ", coffee first, then science.");
+      } else if(h < 17){
+        tags.push("Keep the momentum going, " + first + ".");
+        tags.push(first + ", you're crushing it today.");
+      } else {
+        tags.push("Burning the midnight oil, " + first + "?");
+        tags.push(first + ", don't forget to rest too.");
+      }
+    }
+
+    if(role === 'admin'){
+      tags.push("The lab runs smoother because of you.");
+      tags.push("Your team looks up to you" + (first ? ", " + first : "") + ".");
+      tags.push("Admin mode: keeping everything on track.");
+    } else if(role === 'member'){
+      tags.push("Every experiment starts with a curious mind.");
+      tags.push("Your contributions drive the lab forward.");
+      tags.push("Collaboration is your superpower.");
+    }
+
+    tags = tags.concat(WS_TAGS_GENERIC);
+    for(var i = tags.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = tags[i]; tags[i] = tags[j]; tags[j] = tmp;
+    }
+    return tags;
+  }
 
   function rotateTags(spanId, tags, inClass, outClass, hold) {
     hold = hold || 3200;
@@ -2031,7 +2069,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   // Expose a function to start workspace taglines after login
   window._startWsTagline = function() {
-    rotateTags('ws-tagline-text', WS_TAGS, 'ws-in', 'ws-out', 3800);
+    rotateTags('ws-tagline-text', getPersonalizedTags(), 'ws-in', 'ws-out', 3800);
   };
 })();
 </script>

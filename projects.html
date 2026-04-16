@@ -1821,18 +1821,45 @@ window.moveProject = async function(id, dir){
 // ════════════════════════════════════════════════
 // PERSONALIZED GREETING
 // ════════════════════════════════════════════════
-const PM_TAGLINES = [
-  "Let's ship something great today.",
-  "Your team is counting on you.",
+const PM_TAGLINES_BASE = [
   "Small progress is still progress.",
   "Focus on what moves the needle.",
   "Every task done is a step forward.",
   "Collaboration makes the dream work.",
-  "You're building something amazing.",
-  "Keep the momentum going!",
   "Great things take great teamwork.",
   "One task at a time, one win at a time."
 ];
+
+function getProjectTaglines(){
+  const first = ME_NAME ? ME_NAME.split(' ')[0] : '';
+  const h = new Date().getHours();
+  const tags = [...PM_TAGLINES_BASE];
+
+  if(first){
+    tags.push(first + ", let's ship something great today.");
+    tags.push("Your team is counting on you, " + first + ".");
+    tags.push(first + ", you're building something amazing.");
+    tags.push("Keep the momentum going, " + first + "!");
+    if(h < 12) tags.push("Fresh start, " + first + " — what will you tackle first?");
+    else if(h < 17) tags.push("Afternoon push, " + first + " — finish strong.");
+    else tags.push("Late session, " + first + "? Your dedication inspires.");
+  }
+
+  if(IS_ADMIN){
+    tags.push("The whole lab benefits from your leadership.");
+  } else if(isPM(ME_UNAME)){
+    tags.push("Your projects are shaping the future of FASTER.");
+  } else {
+    tags.push("Every contribution counts — keep it up.");
+  }
+
+  for(let i = tags.length-1; i > 0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [tags[i], tags[j]] = [tags[j], tags[i]];
+  }
+  return tags;
+}
+const PM_TAGLINES = getProjectTaglines();
 
 function renderGreeting(){
   const h = new Date().getHours();
