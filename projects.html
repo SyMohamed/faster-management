@@ -551,8 +551,8 @@ function boot(){
     $('emptyNewBtn').style.display = 'inline-flex';
   }
 
-  db.ref('faster_projects/.write_test').set('ok').then(() => {
-    db.ref('faster_projects/.write_test').remove();
+  db.ref('faster_projects/_write_test').set('ok').then(() => {
+    db.ref('faster_projects/_write_test').remove();
   }).catch(() => {
     toast('Firebase rules block writes to faster_projects — update your Realtime Database rules to allow this path','err');
   });
