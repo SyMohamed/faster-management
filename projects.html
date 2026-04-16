@@ -456,7 +456,7 @@ const FB_CFG = {
   appId:"1:928841720860:web:c1a25a69a0f2ccb616abd9"
 };
 
-firebase.initializeApp(FB_CFG);
+if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
 const db = firebase.database();
 
 // ════════════════════════════════════════════════
@@ -1083,7 +1083,27 @@ window.deleteTask = async function(){
 };
 
 // Kick off
-boot();
+try {
+  boot();
+  console.log('[projects] boot() completed, db:', !!db, 'ME_UNAME:', ME_UNAME, 'IS_ADMIN:', IS_ADMIN);
+} catch(e){
+  console.error('Boot error:', e);
+  document.getElementById('ltxt').textContent = 'Error: ' + e.message;
+}
+
+// Fallback: if still showing "Connecting" after 5s, force-check
+setTimeout(function(){
+  if(document.getElementById('ltxt').textContent === 'Connecting…'){
+    db.ref('faster_users').once('value').then(function(snap){
+      var count = Object.keys(snap.val() || {}).length;
+      setConnected(true);
+      console.log('[projects] Fallback loaded ' + count + ' users');
+    }).catch(function(err){
+      document.getElementById('ltxt').textContent = 'DB read error: ' + err.message;
+      console.error('[projects] Fallback error:', err);
+    });
+  }
+}, 5000);
 </script>
 
 </body>
