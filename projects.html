@@ -489,6 +489,11 @@ function toast(msg, kind){
   t.className = 'toast show' + (kind?' '+kind:'');
   setTimeout(()=>{t.className='toast'+(kind?' '+kind:'');},2600);
 }
+function setConnected(on){
+  $('pill').className = 'livepill ' + (on ? 'lon' : 'loff');
+  $('ldot').style.background = on ? 'var(--done)' : 'var(--red)';
+  $('ltxt').textContent = on ? 'Live · synced' : 'Offline';
+}
 function togglePanel(id){ $(id).classList.toggle('open'); }
 function openModal(id){ $(id).classList.add('open'); }
 function closeModal(id){ $(id).classList.remove('open'); }
@@ -553,19 +558,17 @@ function boot(){
   });
 
   db.ref('.info/connected').on('value', snap => {
-    const on = snap.val() === true;
-    $('pill').className = 'livepill ' + (on ? 'lon' : 'loff');
-    $('ldot').style.background = on ? 'var(--done)' : 'var(--red)';
-    $('ltxt').textContent = on ? 'Live · synced' : 'Offline';
+    setConnected(snap.val() === true);
   });
 
   db.ref('faster_users').on('value', snap => {
+    setConnected(true);
     const raw = snap.val() || {};
     USERS = {};
     Object.entries(raw).forEach(([uname, u]) => {
       if(!u || typeof u !== 'object') return;
       USERS[uname] = {
-        name:   u.name || uname,
+        name:   u.name || u.display || uname,
         role:   u.role || 'member',
         isPM:   u.isPM === true,
         photoURL: u.photoURL || ''
@@ -580,6 +583,9 @@ function boot(){
     renderProjectTabs();
     if(ACTIVE_PROJECT_ID) renderProjectHeader();
     if(ACTIVE_PROJECT_ID) renderBoard();
+  }, err => {
+    console.error('Failed to read faster_users:', err);
+    toast('Cannot load team members — check Firebase rules for faster_users path','err');
   });
 
   db.ref('faster_projects').on('value', snap => {
@@ -599,6 +605,9 @@ function boot(){
       renderProjectHeader();
       renderBoard();
     }
+  }, err => {
+    console.error('Failed to read faster_projects:', err);
+    toast('Cannot load projects — check Firebase rules for faster_projects path','err');
   });
 }
 
