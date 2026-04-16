@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FASTER Lab — Quickstart Guide</title>
+<script>(function(){if(localStorage.getItem("faster_theme")==="light")document.documentElement.setAttribute("data-theme","light");else document.documentElement.removeAttribute("data-theme");})();</script>
+<link rel="stylesheet" href="shared.css">
+<script src="auth.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1e2530;--border:#2a3442;
+  --text:#e6edf3;--muted:#7d8fa3;
+  --accent:#14b8a6;--accent-bg:rgba(20,184,166,.1);--accent-border:rgba(20,184,166,.3);
+  --font:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --radius:8px;--radius-lg:12px;
+  --green:#2ea043;--red:#f85149;--blue:#58a6ff;--amber:#d29922;--purple:#8b5cf6;--teal:#14b8a6;--orange:#f97316;
+}
+[data-theme="light"]{--bg:#f0f4f8;--surface:#ffffff;--surface2:#e8edf2;--border:#d0d7de;--text:#0f172a;--muted:#57606a;--accent:#0d9488;--accent-bg:rgba(13,148,136,.08);--accent-border:rgba(13,148,136,.25)}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:15px}
+
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap}
+.header-left h1{font-size:16px;font-weight:600}
+.header-left .sub{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.breadcrumb{text-decoration:none;color:var(--muted);font-size:13px;font-family:var(--mono);transition:color .15s}
+.breadcrumb:hover{color:var(--text)}
+.bc-arrow{margin-right:4px}
+
+.content{padding:20px 24px;max-width:900px;margin:0 auto}
+
+.hero{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius-lg);padding:32px;margin-bottom:32px;text-align:center}
+.hero h2{font-size:22px;font-weight:600;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:14px;max-width:600px;margin:0 auto;line-height:1.7}
+
+.section{margin-bottom:32px}
+.section-title{font-size:13px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .num{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+.tool-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:16px}
+.tool-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;transition:border-color .15s;cursor:default}
+.tool-item:hover{border-color:var(--accent)}
+.tool-item-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.tool-item-icon{font-size:20px}
+.tool-item-name{font-size:14px;font-weight:600}
+.tool-item-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.tool-item a{color:var(--accent);text-decoration:none;font-size:12px;font-family:var(--mono)}
+.tool-item a:hover{text-decoration:underline}
+
+.step-list{display:flex;flex-direction:column;gap:12px}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;display:flex;gap:14px;align-items:flex-start}
+.step-num{background:var(--accent);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:2px}
+.step-body h4{font-size:14px;font-weight:600;margin-bottom:4px}
+.step-body p{font-size:13px;color:var(--muted);line-height:1.6}
+
+.role-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:700px){.role-grid{grid-template-columns:1fr}}
+.role-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;text-align:center}
+.role-card h4{font-size:14px;font-weight:600;margin-bottom:6px}
+.role-card .role-badge{display:inline-block;font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:10px;margin-bottom:10px}
+.role-card ul{text-align:left;list-style:none;padding:0}
+.role-card li{font-size:12px;color:var(--muted);padding:3px 0;line-height:1.5}
+.role-card li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.rb-admin{background:rgba(248,81,73,.12);color:var(--red)}
+.rb-member{background:rgba(88,166,255,.12);color:var(--blue)}
+.rb-viewer{background:rgba(210,153,34,.12);color:var(--amber)}
+.dot-admin::before{background:var(--red)}
+.dot-member::before{background:var(--blue)}
+.dot-viewer::before{background:var(--amber)}
+
+.faq{display:flex;flex-direction:column;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.faq-q{padding:14px 18px;font-size:14px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.faq-q:hover{background:var(--surface2)}
+.faq-q .arr{color:var(--muted);font-size:12px;transition:transform .2s}
+.faq-item.open .faq-q .arr{transform:rotate(90deg)}
+.faq-a{display:none;padding:0 18px 14px;font-size:13px;color:var(--muted);line-height:1.7}
+.faq-item.open .faq-a{display:block}
+
+.tip-box{background:rgba(20,184,166,.06);border:1px solid rgba(20,184,166,.15);border-radius:var(--radius-lg);padding:14px 18px;margin-top:12px;font-size:13px;color:var(--muted);line-height:1.7}
+.tip-box strong{color:var(--text);display:block;margin-bottom:4px}
+
+html{font-size:clamp(13px, 0.85vw + 5px, 18px)}
+body{font-size:1rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left" style="display:flex;align-items:center;gap:12px">
+    <div>
+      <a href="index.html" class="breadcrumb" title="Back to workspace"><span class="bc-arrow">&larr;</span> Workspace</a>
+      <h1>Quickstart Guide</h1>
+      <div class="sub">Everything you need to get started with FASTER Lab workspace</div>
+    </div>
+  </div>
+  <div class="header-right"></div>
+</div>
+
+<div class="content">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h2>Welcome to FASTER Lab</h2>
+    <p>Your centralized workspace for orders, chemicals, assets, facility planning, safety, and project management. This guide walks you through everything.</p>
+  </div>
+
+  <!-- Section 1: Getting Started -->
+  <div class="section">
+    <div class="section-title"><span class="num">1</span> Getting Started</div>
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Sign in to the workspace</h4>
+          <p>On the login page, enter your username and password. If you're a new member, click <strong>Request Access</strong> and fill out the form &mdash; an admin will approve your account.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Explore the dashboard</h4>
+          <p>After signing in you'll see the workspace dashboard with quick stats, tool cards, and recent activity. Click any tool card to jump in.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Use the global search</h4>
+          <p>Press <strong>Ctrl + K</strong> (or <strong>Cmd + K</strong> on Mac) from the dashboard to search across all tools &mdash; orders, chemicals, assets, bookings, and safety reports.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Switch themes</h4>
+          <p>Click the sun/moon icon in the top-right corner to toggle between dark and light mode. Your preference is saved automatically.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Workspace Tools -->
+  <div class="section">
+    <div class="section-title"><span class="num">2</span> Workspace Tools</div>
+    <div class="tool-row">
+      <div class="tool-item">
+        <div class="tool-item-top">
+          <div class="tool-item-icon">📦</div>
+          <div class="tool-item-name">Orders Tracker</div>
+        </div>
+        <div class="tool-item-desc">Track procurement from PR submission to delivery. Add orders, update statuses, and export to CSV. Statuses: <strong>PR Submitted → PO Created → Delivered</strong>. Delayed and cancelled orders are flagged.</div>
+        <br><a href="orders.html">Open Orders Tracker &rarr;</a>
+      </div>
+      <div class="tool-item">
+        <div class="tool-item-top">
+          <div class="tool-item-icon">🧪</div>
+          <div class="tool-item-name">Chemical Inventory</div>
+        </div>
+        <div class="tool-item-desc">Full chemical inventory with locations (Shelf 1-3, Fridge, Corrosive Cabinet). Search by name, CAS number, or owner. Track quantities and ordered status.</div>
+        <br><a href="chemicals.html">Open Chemical Inventory &rarr;</a>
+      </div>
+      <div class="tool-item">
+        <div class="tool-item-top">
+          <div class="tool-item-icon">🔬</div>
+          <div class="tool-item-name">Asset Registry</div>
+        </div>
+        <div class="tool-item-desc">Lab equipment registry with categories: lasers, detectors, optics, oscilloscopes, pumps, and IT. Track serial numbers, locations, and conditions.</div>
+        <br><a href="assets.html">Open Asset Registry &rarr;</a>
+      </div>
+      <div class="tool-item">
+        <div class="tool-item-top">
+          <div class="tool-item-icon">📅</div>
+          <div class="tool-item-name">Lab Facility Planning</div>
+        </div>
+        <div class="tool-item-desc">Reserve LPST, HPST, and RCM facilities. View the shared calendar, request bookings, and manage extensions. Admin approves all reservations.</div>
+        <br><a href="planning.html">Open Facility Planning &rarr;</a>
+      </div>
+      <div class="tool-item">
+        <div class="tool-item-top">
+          <div class="tool-item-icon">🛡️</div>
+          <div class="tool-item-name">Safety Hub</div>
+        </div>
+        <div class="tool-item-desc">Report and fix lab safety issues. Earn points (+1 for reporting, +2 for fixing) and compete for the monthly safety champion title on the leaderboard.</div>
+        <br><a href="safety.html">Open Safety Hub &rarr;</a>
+      </div>
+      <div class="tool-item">
+        <div class="tool-item-top">
+          <div class="tool-item-icon">📋</div>
+          <div class="tool-item-name">Project Management</div>
+        </div>
+        <div class="tool-item-desc">Create projects, assign teams from lab members, and manage tasks on Kanban boards. Admin nominates project managers who can create and run projects.</div>
+        <br><a href="projects.html">Open Project Management &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Roles -->
+  <div class="section">
+    <div class="section-title"><span class="num">3</span> Roles &amp; Permissions</div>
+    <div class="role-grid">
+      <div class="role-card">
+        <h4>Admin</h4>
+        <span class="role-badge rb-admin">Full access</span>
+        <ul>
+          <li class="dot-admin">Approve/reject new members</li>
+          <li class="dot-admin">Manage all orders, assets &amp; chemicals</li>
+          <li class="dot-admin">Approve facility bookings</li>
+          <li class="dot-admin">Nominate project managers</li>
+          <li class="dot-admin">Mark orders as delivered</li>
+          <li class="dot-admin">View pending requests panel</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <h4>Member</h4>
+        <span class="role-badge rb-member">Read &amp; write</span>
+        <ul>
+          <li class="dot-member">Add &amp; edit orders</li>
+          <li class="dot-member">Manage chemicals &amp; assets</li>
+          <li class="dot-member">Request facility bookings</li>
+          <li class="dot-member">Submit safety reports</li>
+          <li class="dot-member">Raise order requests</li>
+          <li class="dot-member">Work on project tasks</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <h4>Viewer (Guest)</h4>
+        <span class="role-badge rb-viewer">Read only</span>
+        <ul>
+          <li class="dot-viewer">Browse all data</li>
+          <li class="dot-viewer">Search across tools</li>
+          <li class="dot-viewer">View dashboards &amp; charts</li>
+          <li class="dot-viewer">Cannot add, edit, or delete</li>
+          <li class="dot-viewer">Orange banner shown at bottom</li>
+          <li class="dot-viewer">Sign in as member to write</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Order Request Flow -->
+  <div class="section">
+    <div class="section-title"><span class="num">4</span> Order Request Flow</div>
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Raise a request</h4>
+          <p>Go to <a href="orders.html" style="color:var(--accent)">Orders Tracker</a> and click <strong>+ Raise Request</strong>. Describe what you need and nominate a team member to handle the procurement.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Admin reviews</h4>
+          <p>The admin sees all pending requests in the <strong>Order Requests from Team</strong> panel with date, details, and nominee. They can approve or manage each request.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Track progress</h4>
+          <p>Your personal dashboard shows orders in three tabs: <strong>Requested</strong>, <strong>Approved</strong>, and <strong>Done</strong>. Click <strong>View All Orders</strong> for the full tracker.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Tips -->
+  <div class="section">
+    <div class="section-title"><span class="num">5</span> Tips &amp; Shortcuts</div>
+    <div class="tip-box">
+      <strong>Keyboard shortcut</strong>
+      Press <strong>Ctrl + K</strong> (or Cmd + K) on the dashboard to instantly search across all modules.
+    </div>
+    <div class="tip-box" style="margin-top:10px">
+      <strong>Real-time sync</strong>
+      All pages sync live with Firebase. When a teammate adds or edits anything, you see it instantly &mdash; no need to refresh.
+    </div>
+    <div class="tip-box" style="margin-top:10px">
+      <strong>CSV export</strong>
+      On the Orders page, click <strong>Export CSV</strong> to download all orders as a spreadsheet. Great for monthly reports.
+    </div>
+    <div class="tip-box" style="margin-top:10px">
+      <strong>Notifications</strong>
+      The bell icon on the dashboard shows pending approvals (admin), booking results (members), and open safety reports.
+    </div>
+  </div>
+
+  <!-- Section 6: FAQ -->
+  <div class="section">
+    <div class="section-title"><span class="num">6</span> FAQ &amp; Troubleshooting</div>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do I get access?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">Click <strong>New Member?</strong> on the login page and fill out the request form. An admin will review and approve your account. You'll be able to sign in once approved.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">I see "View-only mode" — what does that mean?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">You're signed in as a guest/viewer. This lets you browse all data but not make changes. Ask an admin to upgrade your account to <strong>member</strong> role, or sign in with a member account.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">The page shows "Offline" — is data lost?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">No data is lost. The app connects to Firebase in real-time. If you see "Offline", check your internet connection. Once reconnected, everything syncs automatically.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do I become a project manager?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">An admin nominates project managers from the <a href="projects.html" style="color:var(--accent)">Project Management</a> page. Once nominated, you can create projects, assign teams, and manage Kanban task boards.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do facility bookings work?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">Go to <a href="planning.html" style="color:var(--accent)">Lab Facility Planning</a>, select a facility (LPST, HPST, or RCM), pick your dates, and submit a booking request. An admin reviews and approves it. You'll be notified of the result.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I use this on my phone?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">Yes — all pages are fully responsive. Open the same URL in your mobile browser. You can also add it to your home screen for quick access.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do I report a safety issue?<span class="arr">&#9654;</span></div>
+        <div class="faq-a">Go to <a href="safety.html" style="color:var(--accent)">Safety Hub</a> and click <strong>Report Issue</strong>. Add a title, description, severity, and optional photo. You earn +1 point for reporting and +2 points for fixing an issue.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:32px 0;color:var(--muted);font-size:12px;font-family:var(--mono)">
+    FASTER Lab Workspace &mdash; Built for the team, by the team.
+  </div>
+
+</div>
+
+</body>
+</html>
