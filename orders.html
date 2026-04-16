@@ -42,6 +42,10 @@
   --accent:#1f6feb;--font:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
   --radius:8px;--radius-lg:12px;
 }
+[data-theme="light"]{
+  --bg:#f0f4f8;--surface:#ffffff;--surface2:#f5f8fb;--border:#cbd5e1;
+  --text:#0f172a;--muted:#475569;--accent:#0969da;
+}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;font-size:15px}
 
 /* ── Header ── */
@@ -732,7 +736,7 @@ function renderCharts() {
   if (donutChart) donutChart.destroy();
   donutChart = new Chart(document.getElementById('donut'), {
     type: 'doughnut',
-    data: {labels, datasets: [{data: vals, backgroundColor: colors, borderColor: '#161b22', borderWidth: 3, hoverOffset: 6}]},
+    data: {labels, datasets: [{data: vals, backgroundColor: colors, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#161b22', borderWidth: 3, hoverOffset: 6}]},
     options: {responsive: false, cutout: '68%', plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => `${c.label}: ${c.parsed}`}}}}
   });
   document.getElementById('legend').innerHTML = labels.map((l, i) => `
