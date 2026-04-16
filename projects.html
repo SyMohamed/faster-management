@@ -209,6 +209,52 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .review-info p{font-size:12px;color:var(--muted);line-height:1.5}
 .review-info .meta{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:6px}
 
+/* Excel upload */
+.upload-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:5px}
+.upload-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.upload-preview{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
+  padding:16px 20px;margin-bottom:16px}
+.upload-preview h4{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.upload-preview table{width:100%;border-collapse:collapse;font-size:12px}
+.upload-preview th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--b1);color:var(--muted);
+  font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-family:var(--mono)}
+.upload-preview td{padding:6px 8px;border-bottom:1px solid var(--b1)}
+.upload-preview tr:last-child td{border-bottom:none}
+.upload-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+
+/* Gantt chart */
+.gantt-section{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
+  padding:18px 20px;margin-top:18px;overflow-x:auto}
+.gantt-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;font-family:var(--mono);margin-bottom:14px;display:flex;align-items:center;
+  justify-content:space-between}
+.gantt-wrap{min-width:600px;position:relative}
+.gantt-header{display:flex;border-bottom:1px solid var(--b1);padding-bottom:6px;margin-bottom:8px}
+.gantt-label-col{width:200px;flex-shrink:0;font-size:10px;color:var(--muted);font-family:var(--mono);
+  text-transform:uppercase;letter-spacing:.3px}
+.gantt-timeline{flex:1;display:flex;position:relative}
+.gantt-month{flex:1;text-align:center;font-size:9px;font-family:var(--mono);color:var(--muted);
+  letter-spacing:.3px;text-transform:uppercase;border-left:1px solid var(--b1);padding-left:4px}
+.gantt-row{display:flex;align-items:center;height:28px;margin-bottom:2px}
+.gantt-row-label{width:200px;flex-shrink:0;font-size:11px;color:var(--text);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;padding-right:10px;display:flex;align-items:center;gap:6px}
+.gantt-row-label .g-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.gantt-row-bar{flex:1;position:relative;height:20px}
+.gantt-bar{position:absolute;height:16px;border-radius:4px;top:2px;min-width:4px;
+  transition:all .15s;cursor:default;display:flex;align-items:center;padding:0 5px}
+.gantt-bar span{font-size:8px;font-family:var(--mono);font-weight:700;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gantt-bar.st-todo{background:var(--todo);opacity:.5}
+.gantt-bar.st-prog{background:var(--prog)}
+.gantt-bar.st-rev{background:var(--rev)}
+.gantt-bar.st-done{background:var(--done)}
+.gantt-milestone{position:absolute;top:-2px;width:0;height:0;border-left:6px solid transparent;
+  border-right:6px solid transparent;border-bottom:10px solid var(--pm);z-index:2}
+.gantt-today{position:absolute;top:0;bottom:0;width:1px;background:var(--red);z-index:1;opacity:.6}
+.gantt-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.gantt-leg{display:flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);color:var(--muted)}
+.gantt-leg .swatch{width:10px;height:10px;border-radius:2px}
+
 /* Modals */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;
   align-items:flex-start;justify-content:center;padding:50px 16px 32px;overflow-y:auto}
@@ -329,6 +375,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <!-- CURRENT PROJECT HEADER + BOARD -->
   <div id="project-view" style="display:none">
     <div class="proj-hdr" id="proj-hdr"></div>
+    <div id="upload-preview" style="display:none"></div>
     <div class="board" id="board">
       <div class="col" data-st="todo"   ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'todo')">
         <div class="col-hdr">
@@ -357,6 +404,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
           <button class="col-add" onclick="openNewTask('done')" title="Add task" id="add-done">+</button>
         </div>
         <div class="col-body" id="col-done"></div>
+      </div>
+    </div>
+    <div class="gantt-section" id="gantt-section">
+      <div class="gantt-title">
+        <span>Project Timeline</span>
+        <span id="gantt-range" style="font-weight:400;font-size:10px"></span>
+      </div>
+      <div class="gantt-wrap" id="gantt-wrap"></div>
+      <div class="gantt-legend">
+        <div class="gantt-leg"><div class="swatch" style="background:var(--todo);opacity:.5"></div>To do</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--prog)"></div>In progress</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--rev)"></div>In review</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--done)"></div>Done</div>
+        <div class="gantt-leg"><div class="swatch" style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid var(--pm);border-radius:0"></div>Milestone</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--red);width:2px;height:10px"></div>Today</div>
       </div>
     </div>
   </div>
@@ -492,6 +554,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script>
@@ -820,6 +883,7 @@ function renderProjectHeader(){
       </div>
       <div class="proj-hdr-actions">
         ${canEdit ? `<button class="btn btn-sm" onclick="openNewTask('todo')">+ Add task</button>` : ''}
+        ${canEdit ? `<label class="btn-o btn-sm upload-btn">📎 Import Excel<input type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)"></label>` : ''}
         ${canEdit ? `<button class="btn-o btn-sm" onclick="openEditProject('${p.id}')">Edit project</button>` : ''}
       </div>
     </div>
@@ -864,6 +928,8 @@ function renderBoard(){
     }
     body.innerHTML = cols[st].map(t => cardHTML(t, canEdit)).join('');
   });
+
+  renderGantt();
 }
 
 function cardHTML(t, canEdit){
@@ -1175,6 +1241,239 @@ window.deleteTask = async function(){
     toast('Failed to delete','err');
   }
 };
+
+// ════════════════════════════════════════════════
+// EXCEL IMPORT
+// ════════════════════════════════════════════════
+let pendingImportRows = [];
+
+window.handleExcelUpload = function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      const wb = XLSX.read(ev.target.result, {type:'array', cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      if(!rows.length){ toast('No data found in file','err'); return; }
+      parseAndPreview(rows);
+    } catch(err){
+      toast('Failed to read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+function parseAndPreview(rows){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  const team = p && Array.isArray(p.team) ? p.team : [];
+  const nameMap = {};
+  team.forEach(u => {
+    const nm = (USERS[u]?.name || u).toLowerCase();
+    nameMap[nm] = u;
+    const parts = nm.split(/\s+/);
+    if(parts[0]) nameMap[parts[0]] = u;
+  });
+
+  pendingImportRows = rows.map(r => {
+    const keys = Object.keys(r);
+    const titleKey = keys.find(k => /task|title|name|item|description/i.test(k)) || keys[0];
+    const ownerKey = keys.find(k => /owner|assignee|assigned|member|who|person|responsible/i.test(k));
+    const dueKey   = keys.find(k => /due|date|deadline|end|target/i.test(k));
+    const priKey   = keys.find(k => /priority|pri|urgency/i.test(k));
+
+    let title = String(r[titleKey] || '').trim();
+    let ownerRaw = ownerKey ? String(r[ownerKey] || '').trim() : '';
+    let assignee = nameMap[ownerRaw.toLowerCase()] || '';
+    if(!assignee && ownerRaw){
+      const lc = ownerRaw.toLowerCase();
+      for(const [nm, u] of Object.entries(nameMap)){
+        if(nm.includes(lc) || lc.includes(nm)){ assignee = u; break; }
+      }
+    }
+
+    let dueDate = '';
+    if(dueKey && r[dueKey]){
+      const v = r[dueKey];
+      if(v instanceof Date && !isNaN(v)){
+        dueDate = v.toISOString().slice(0,10);
+      } else {
+        const d = new Date(v);
+        if(!isNaN(d)) dueDate = d.toISOString().slice(0,10);
+      }
+    }
+
+    let priority = 'med';
+    if(priKey && r[priKey]){
+      const pv = String(r[priKey]).toLowerCase();
+      if(/low/i.test(pv)) priority = 'low';
+      else if(/high|hi/i.test(pv)) priority = 'hi';
+      else if(/crit|urgent/i.test(pv)) priority = 'crit';
+    }
+
+    return {title, assignee, assigneeName: ownerRaw, dueDate, priority};
+  }).filter(r => r.title);
+
+  if(!pendingImportRows.length){ toast('No valid tasks found','err'); return; }
+
+  const preview = $('upload-preview');
+  preview.style.display = 'block';
+  preview.innerHTML = `
+    <h4>📎 Preview: ${pendingImportRows.length} tasks from file</h4>
+    <table>
+      <thead><tr><th>Task</th><th>Assignee</th><th>Due date</th><th>Priority</th></tr></thead>
+      <tbody>${pendingImportRows.map(r => `<tr>
+        <td>${escH(r.title)}</td>
+        <td>${r.assignee ? escH(USERS[r.assignee]?.name || r.assignee) : `<span style="color:var(--amber)">${escH(r.assigneeName||'—')}</span>`}</td>
+        <td>${escH(r.dueDate||'—')}</td>
+        <td>${escH({low:'Low',med:'Medium',hi:'High',crit:'Critical'}[r.priority]||'Medium')}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    <div class="upload-actions">
+      <button class="btn-o btn-sm" onclick="cancelImport()">Cancel</button>
+      <button class="btn btn-sm" onclick="confirmImport()">Import ${pendingImportRows.length} tasks</button>
+    </div>
+  `;
+  preview.scrollIntoView({behavior:'smooth'});
+}
+
+window.cancelImport = function(){
+  pendingImportRows = [];
+  $('upload-preview').style.display = 'none';
+};
+
+window.confirmImport = async function(){
+  if(!pendingImportRows.length) return;
+  const batch = {};
+  pendingImportRows.forEach(r => {
+    const id = db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks`).push().key;
+    batch[`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${id}`] = {
+      title: r.title,
+      assignee: r.assignee,
+      dueDate: r.dueDate,
+      priority: r.priority,
+      status: 'todo',
+      desc: '',
+      createdAt: new Date().toISOString(),
+      createdBy: ME_UNAME,
+      updatedAt: new Date().toISOString()
+    };
+  });
+  try {
+    await db.ref().update(batch);
+    toast(`${pendingImportRows.length} tasks imported`,'ok');
+    pendingImportRows = [];
+    $('upload-preview').style.display = 'none';
+  } catch(e){
+    toast('Import failed: '+(e.message||''),'err');
+  }
+};
+
+// ════════════════════════════════════════════════
+// GANTT CHART
+// ════════════════════════════════════════════════
+function renderGantt(){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p){ $('gantt-section').style.display='none'; return; }
+  const tasks = p.tasks || {};
+  const taskArr = Object.entries(tasks).map(([id,t])=>({id,...t}));
+  if(!taskArr.length){ $('gantt-section').style.display='none'; return; }
+  $('gantt-section').style.display='block';
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  let minDate = new Date(today), maxDate = new Date(today);
+
+  if(p.startDate){ const d=new Date(p.startDate+'T00:00:00'); if(!isNaN(d)&&d<minDate) minDate=new Date(d); }
+  if(p.endDate){ const d=new Date(p.endDate+'T00:00:00'); if(!isNaN(d)&&d>maxDate) maxDate=new Date(d); }
+
+  taskArr.forEach(t => {
+    if(t.createdAt){ const d=new Date(t.createdAt); if(!isNaN(d)){const dd=new Date(d);dd.setHours(0,0,0,0);if(dd<minDate)minDate=new Date(dd);}}
+    if(t.dueDate){ const d=new Date(t.dueDate+'T00:00:00'); if(!isNaN(d)){if(d>maxDate)maxDate=new Date(d);if(d<minDate)minDate=new Date(d);}}
+  });
+
+  minDate.setDate(1);
+  maxDate.setMonth(maxDate.getMonth()+1,0);
+  const pad = 7*86400000;
+  const rangeStart = new Date(minDate.getTime()-pad);
+  const rangeEnd   = new Date(maxDate.getTime()+pad);
+  const totalDays  = Math.max(1, Math.round((rangeEnd-rangeStart)/86400000));
+
+  $('gantt-range').textContent = rangeStart.toLocaleDateString(undefined,{month:'short',year:'numeric'})+' — '+rangeEnd.toLocaleDateString(undefined,{month:'short',year:'numeric'});
+
+  const months = [];
+  const cur = new Date(rangeStart);
+  cur.setDate(1);
+  while(cur <= rangeEnd){
+    months.push(new Date(cur));
+    cur.setMonth(cur.getMonth()+1);
+  }
+
+  function dayPos(d){
+    return Math.max(0,Math.min(100, ((d.getTime()-rangeStart.getTime())/(rangeEnd.getTime()-rangeStart.getTime()))*100));
+  }
+
+  let html = `<div class="gantt-header"><div class="gantt-label-col">Task</div><div class="gantt-timeline">`;
+  months.forEach(m => {
+    html += `<div class="gantt-month" style="left:${dayPos(m)}%">${m.toLocaleDateString(undefined,{month:'short',year:'2-digit'})}</div>`;
+  });
+  html += `</div></div>`;
+
+  const statusMap = {todo:'st-todo',prog:'st-prog',rev:'st-rev',done:'st-done'};
+  const statusLabel = {todo:'To do',prog:'In progress',rev:'In review',done:'Done'};
+  const dotColor = {todo:'var(--todo)',prog:'var(--prog)',rev:'var(--rev)',done:'var(--done)'};
+
+  const priOrder = {crit:0,hi:1,med:2,low:3};
+  const sorted = [...taskArr].sort((a,b)=>{
+    const pa=priOrder[a.priority]??2, pb=priOrder[b.priority]??2;
+    if(pa!==pb) return pa-pb;
+    return (a.dueDate||'9999').localeCompare(b.dueDate||'9999');
+  });
+
+  sorted.forEach(t => {
+    let startD = t.createdAt ? new Date(t.createdAt) : new Date(today);
+    startD.setHours(0,0,0,0);
+    let endD = t.dueDate ? new Date(t.dueDate+'T00:00:00') : new Date(startD.getTime()+7*86400000);
+    if(endD <= startD) endD = new Date(startD.getTime()+86400000);
+
+    const left = dayPos(startD);
+    const right = dayPos(endD);
+    const width = Math.max(1, right - left);
+    const st = statusMap[t.status] || 'st-todo';
+    const assigneeName = USERS[t.assignee]?.name || t.assignee || '';
+
+    html += `<div class="gantt-row">
+      <div class="gantt-row-label">
+        <div class="g-dot" style="background:${dotColor[t.status]||'var(--todo)'}"></div>
+        ${escH(t.title||'Untitled')}
+      </div>
+      <div class="gantt-row-bar">
+        <div class="gantt-bar ${st}" style="left:${left}%;width:${width}%" title="${escH(t.title||'')} — ${statusLabel[t.status]||''}${assigneeName?' · '+assigneeName:''}${t.dueDate?' · Due: '+t.dueDate:''}">
+          <span>${escH(t.title||'')}</span>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  const todayPos = dayPos(today);
+  if(todayPos > 0 && todayPos < 100){
+    html += `<div style="position:relative;height:0"><div class="gantt-today" style="left:calc(200px + ${todayPos}% * (100% - 200px) / 100);height:${sorted.length*30+40}px;top:-${sorted.length*30+40}px"></div></div>`;
+  }
+
+  if(p.endDate){
+    const mileD = new Date(p.endDate+'T00:00:00');
+    if(!isNaN(mileD)){
+      const mPos = dayPos(mileD);
+      html += `<div style="position:relative;height:20px;margin-top:4px">
+        <div class="gantt-row-label" style="font-size:10px;color:var(--pm);font-weight:600">🏁 Target end</div>
+        <div class="gantt-row-bar"><div class="gantt-milestone" style="left:${mPos}%" title="Milestone: ${p.endDate}"></div></div>
+      </div>`;
+    }
+  }
+
+  $('gantt-wrap').innerHTML = html;
+}
 
 // ════════════════════════════════════════════════
 // TASK REVIEW WORKFLOW
