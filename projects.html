@@ -546,6 +546,12 @@ function boot(){
     $('emptyNewBtn').style.display = 'inline-flex';
   }
 
+  db.ref('faster_projects/.write_test').set('ok').then(() => {
+    db.ref('faster_projects/.write_test').remove();
+  }).catch(() => {
+    toast('Firebase rules block writes to faster_projects — update your Realtime Database rules to allow this path','err');
+  });
+
   db.ref('.info/connected').on('value', snap => {
     const on = snap.val() === true;
     $('pill').className = 'livepill ' + (on ? 'lon' : 'loff');
@@ -950,15 +956,15 @@ window.saveProject = async function(){
       payload.pmUname   = ME_UNAME;
       payload.createdAt = new Date().toISOString();
       payload.createdBy = ME_UNAME;
-      payload.tasks     = {};
+      payload.status    = 'active';
       await db.ref('faster_projects/'+id).set(payload);
       ACTIVE_PROJECT_ID = id;
       toast('Project created','ok');
     }
     closeModal('projModal');
   } catch(e){
-    console.error(e);
-    toast('Failed to save project','err');
+    console.error('saveProject error:', e);
+    toast('Failed to save project: ' + (e.message || e.code || 'Check Firebase rules for faster_projects path'),'err');
   }
 };
 
@@ -1050,8 +1056,8 @@ window.saveTask = async function(){
     }
     closeModal('taskModal');
   } catch(e){
-    console.error(e);
-    toast('Failed to save task','err');
+    console.error('saveTask error:', e);
+    toast('Failed to save task: ' + (e.message || e.code || 'unknown'),'err');
   }
 };
 
