@@ -601,7 +601,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   <div id="gs-box">
     <div id="gs-input-wrap">
       <span class="gs-icon">🔍</span>
-      <input id="gs-input" placeholder="Search orders, chemicals, assets…" autocomplete="off"
+      <input id="gs-input" placeholder="Search orders, chemicals, assets, projects…" autocomplete="off"
              oninput="gsSearch(this.value)" onkeydown="gsKey(event)">
       <span id="gs-kbd">Esc</span>
     </div>
@@ -694,6 +694,10 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         <div class="stat-icon">🛡️</div>
         <div><div class="stat-val" id="stat-safety">—</div><div class="stat-lbl">Safety logs</div></div>
       </div>
+      <div class="stat-card" onclick="location.href='projects.html'" title="View Project Management">
+        <div class="stat-icon">📋</div>
+        <div><div class="stat-val" id="stat-projects">—</div><div class="stat-lbl">Projects</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -781,6 +785,23 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Book experiments with date ranges</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Experiment details &amp; researcher info</div>
           <div class="tc-feat"><div class="tc-dot" style="background:#ff7525"></div>Conflict detection &amp; live sync</div>
+        </div>
+      </a>
+
+      <!-- PROJECT MANAGEMENT -->
+      <a href="projects.html" class="tc tool-card" style="--tc:#14b8a6">
+        <div class="tc-bar"></div>
+        <div class="tc-top">
+          <div class="tc-icon">📋</div>
+          <div class="tc-arr">↗</div>
+        </div>
+        <div class="tc-name">Project Management</div>
+        <div class="tc-desc">Organize lab work into projects with Kanban boards. Admins nominate project managers; PMs build teams and assign tasks.</div>
+        <div class="tc-feats">
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Kanban: To Do → In Progress → Review → Done</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Drag-and-drop task cards across columns</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Priority, assignee, due date on every task</div>
+          <div class="tc-feat"><div class="tc-dot" style="background:#14b8a6"></div>Real-time Firebase sync across the team</div>
         </div>
       </a>
 
@@ -1571,7 +1592,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       {path:'faster_chemicals',     module:'Chemicals',icon:'🧪',nameKey:'name',  href:'chemicals.html'},
       {path:'faster_assets_v5',     module:'Assets',   icon:'🔬',nameKey:'name',  href:'assets.html'},
       {path:'faster_planning',      module:'Planning', icon:'📅',nameKey:'title', href:'planning.html'},
-      {path:'faster_safety/reports',module:'Safety',   icon:'🛡️',nameKey:'title', href:'safety.html'}
+      {path:'faster_safety/reports',module:'Safety',   icon:'🛡️',nameKey:'title', href:'safety.html'},
+      {path:'faster_projects',      module:'Projects', icon:'📋',nameKey:'name',  href:'projects.html'}
     ];
     gsItems=[];let done=0;
     paths.forEach(p=>{
@@ -1618,7 +1640,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     {path:'faster_chemicals',     icon:'🧪',module:'Chemicals',labelKey:'name',  timeKey:'addedAt',   href:'chemicals.html'},
     {path:'faster_assets_v5',     icon:'🔬',module:'Assets',   labelKey:'name',  timeKey:'addedAt',   href:'assets.html'},
     {path:'faster_safety/reports',icon:'🛡️',module:'Safety',   labelKey:'title', timeKey:'reportedAt',href:'safety.html'},
-    {path:'faster_planning',      icon:'📅',module:'Planning', labelKey:'title', timeKey:'startDate', href:'planning.html'}
+    {path:'faster_planning',      icon:'📅',module:'Planning', labelKey:'title', timeKey:'startDate', href:'planning.html'},
+    {path:'faster_projects',      icon:'📋',module:'Projects', labelKey:'name',  timeKey:'createdAt', href:'projects.html'}
   ];
   let afEvents=[];
   function timeAgo(ts){
@@ -1846,7 +1869,8 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       'faster_orders':'stat-orders',
       'faster_chemicals':'stat-chemicals',
       'faster_assets_v5':'stat-assets',
-      'faster_planning':'stat-bookings'
+      'faster_planning':'stat-bookings',
+      'faster_projects':'stat-projects'
     };
 
     AF_SOURCES.forEach(src=>{
