@@ -711,6 +711,19 @@ function toast(msg, kind){
   t.className = 'toast show' + (kind?' '+kind:'');
   setTimeout(()=>{t.className='toast'+(kind?' '+kind:'');},2600);
 }
+
+function avatarHTML(uname, size, cls){
+  const u = USERS[uname];
+  const name = u ? u.name : (uname || '');
+  const photo = u ? u.photoURL : '';
+  const ini = initials(name || uname);
+  const sz = size || 22;
+  const c = cls || '';
+  if(photo){
+    return `<img src="${escH(photo)}" alt="${escH(name)}" class="${c}" style="width:${sz}px;height:${sz}px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.outerHTML='<div class=\\'${c}\\' style=\\'width:${sz}px;height:${sz}px;border-radius:50%;background:var(--pm);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(sz*0.4)}px;font-family:var(--mono);flex-shrink:0\\'>${escH(ini)}</div>'">`;
+  }
+  return `<div class="${c}" style="width:${sz}px;height:${sz}px;border-radius:50%;background:var(--pm);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(sz*0.4)}px;font-family:var(--mono);flex-shrink:0">${escH(ini)}</div>`;
+}
 function setConnected(on){
   $('pill').className = 'livepill ' + (on ? 'lon' : 'loff');
   $('ldot').style.background = on ? 'var(--done)' : 'var(--red)';
@@ -857,7 +870,7 @@ function renderAdminPMPanel(){
     const clickAttr = isA ? '' : `onclick="togglePM('${escH(uname)}')"`;
     return `
       <div class="pm-row">
-        <div class="pm-avatar">${escH(initials(u.name))}</div>
+        ${avatarHTML(uname, 30, 'pm-avatar')}
         <div class="pm-info">
           <div class="pm-name">${escH(u.name)}</div>
           <div class="pm-uname">
@@ -987,10 +1000,7 @@ function renderProjectHeader(){
           <span><b>Timeline:</b> ${escH(dateRange)}</span>
         </div>
         <div class="proj-team">
-          ${team.map(u => {
-            const nm = USERS[u]?.name || u;
-            return `<div class="tm" title="${escH(nm)}">${escH(initials(nm))}</div>`;
-          }).join('')}
+          ${team.map(u => avatarHTML(u, 28, 'tm')).join('')}
         </div>
       </div>
       <div class="proj-hdr-actions">
@@ -1083,7 +1093,7 @@ function cardHTML(t, canEdit){
           <span class="pri-tag ${priCls}">${priLabel}</span>
           ${dueTxt ? `<span class="due-tag ${dueC}">📅 ${escH(dueTxt)}</span>` : ''}
         </div>
-        ${assigneeName ? `<div class="card-assignee" title="${escH(assigneeName)}">${escH(initials(assigneeName))}</div>` : ''}
+        ${t.assignee ? avatarHTML(t.assignee, 22, 'card-assignee') : ''}
       </div>
       ${actionBtns}
     </div>
@@ -1216,7 +1226,7 @@ function renderMemberPicker(selected){
   wrap.innerHTML = entries.map(([uname, u]) => {
     const on = sel.has(uname);
     return `<div class="mp-chip ${on?'on':''}" onclick="toggleMember(this)" data-uname="${escH(uname)}">
-      <div class="mc-dot">${escH(initials(u.name))}</div>
+      ${avatarHTML(uname, 20, 'mc-dot')}
       <span>${escH(u.name)}</span>
     </div>`;
   }).join('');
@@ -1611,7 +1621,7 @@ function renderGantt(){
 
     html += `<div class="gantt-row">
       <div class="gantt-row-label">
-        ${ini ? `<div class="g-avatar">${escH(ini)}</div>` : `<div class="g-dot" style="background:${statusColor[t.status]||'var(--todo)'}"></div>`}
+        ${t.assignee ? avatarHTML(t.assignee, 18, 'g-avatar') : `<div class="g-dot" style="background:${statusColor[t.status]||'var(--todo)'}"></div>`}
         ${escH(t.title||'Untitled')}
       </div>
       <div class="gantt-row-bar">
@@ -1621,7 +1631,7 @@ function renderGantt(){
              data-pri="${t.priority||'med'}" data-start="${startD.toISOString().slice(0,10)}"
              onclick="openEditTask('${t.id}')"
              onmouseenter="showGanttTip(event,this)" onmouseleave="hideGanttTip()">
-          ${ini ? `<div class="bar-avatar">${escH(ini)}</div>` : ''}
+          ${t.assignee ? avatarHTML(t.assignee, 16, 'bar-avatar') : ''}
           <div class="bar-text">${escH(t.title||'')}</div>
         </div>
       </div>
@@ -1829,7 +1839,7 @@ function renderGreeting(){
   const tod = h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   const firstName = ME_NAME ? ME_NAME.split(' ')[0] : 'there';
   $('pm-greet-text').textContent = `${tod}, ${firstName}!`;
-  $('pm-avatar').textContent = initials(ME_NAME || ME_UNAME || '?');
+  $('pm-avatar').innerHTML = avatarHTML(ME_UNAME, 42, 'pm-greeting-avatar');
   $('pm-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
   let roleHtml = '';
