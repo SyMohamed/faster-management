@@ -180,6 +180,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .empty-col{padding:24px 14px;text-align:center;color:var(--muted2);font-size:11px;
   font-family:var(--mono);border:1px dashed var(--b1);border-radius:6px}
 
+/* Submit / review buttons on cards */
+.card-actions{display:flex;gap:6px;margin-top:8px;padding-left:4px}
+.card-btn{font-size:10px;font-family:var(--mono);font-weight:600;padding:3px 8px;border-radius:5px;
+  border:none;cursor:pointer;transition:all .12s}
+.card-btn.submit{background:var(--rev-bg);color:var(--rev);border:1px solid var(--rev-bd)}
+.card-btn.submit:hover{background:var(--rev);color:#fff}
+.card-btn.approve{background:var(--done-bg);color:var(--done);border:1px solid var(--done-bd)}
+.card-btn.approve:hover{background:var(--done);color:#fff}
+.card-btn.reject{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.card-btn.reject:hover{background:var(--red);color:#fff}
+
+/* Review comment on card */
+.card-review{margin-top:6px;padding:6px 8px;background:var(--s3);border-radius:5px;
+  font-size:10px;color:var(--muted);line-height:1.4;border-left:2px solid var(--rev)}
+.card-review b{color:var(--text);font-weight:600}
+.card-review.rejected{border-left-color:var(--red)}
+
+/* Project sort controls */
+.proj-tab .sort-btn{background:none;border:none;cursor:pointer;font-size:11px;color:var(--muted);
+  padding:0 2px;opacity:0;transition:opacity .15s}
+.proj-tab:hover .sort-btn{opacity:1}
+.proj-tab .sort-btn:hover{color:var(--pm)}
+
+/* Review modal extras */
+.review-info{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;margin-bottom:14px}
+.review-info h4{font-size:13px;font-weight:600;margin-bottom:4px}
+.review-info p{font-size:12px;color:var(--muted);line-height:1.5}
+.review-info .meta{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:6px}
+
 /* Modals */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;
   align-items:flex-start;justify-content:center;padding:50px 16px 32px;overflow-y:auto}
@@ -438,6 +467,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
+<!-- ══════════ MODAL: REVIEW TASK ══════════ -->
+<div class="modal" id="reviewModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2 id="reviewModalTitle">Review task</h2>
+      <button class="modal-close" onclick="closeModal('reviewModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="review-info" id="review-info"></div>
+      <div class="field">
+        <label>Comments / feedback</label>
+        <textarea id="rv-comment" placeholder="Add feedback for the assignee…"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" onclick="rejectTask()" style="display:inline-flex">Return with feedback</button>
+      <div style="flex:1"></div>
+      <button class="btn-o" onclick="closeModal('reviewModal')">Cancel</button>
+      <button class="btn" onclick="approveTask()">Approve &amp; mark done</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -557,6 +609,8 @@ function boot(){
     toast('Firebase rules block writes to faster_projects — update your Realtime Database rules to allow this path','err');
   });
 
+  loadMyProjectOrder();
+
   db.ref('.info/connected').on('value', snap => {
     setConnected(snap.val() === true);
   });
@@ -665,14 +719,25 @@ window.togglePM = async function(uname){
 // ════════════════════════════════════════════════
 function getVisibleProjects(){
   const all = Object.entries(PROJECTS).map(([id, p]) => ({id, ...p}));
-  return all
-    .filter(p => {
-      if(IS_ADMIN) return true;
-      if(p.pmUname === ME_UNAME) return true;
-      if(Array.isArray(p.team) && p.team.includes(ME_UNAME)) return true;
-      return false;
-    })
-    .sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''));
+  const filtered = all.filter(p => {
+    if(IS_ADMIN) return true;
+    if(p.pmUname === ME_UNAME) return true;
+    if(Array.isArray(p.team) && p.team.includes(ME_UNAME)) return true;
+    return false;
+  });
+  if(myProjectOrder && myProjectOrder.length){
+    const orderMap = {};
+    myProjectOrder.forEach((id, i) => orderMap[id] = i);
+    filtered.sort((a,b) => {
+      const oa = orderMap[a.id] !== undefined ? orderMap[a.id] : 9999;
+      const ob = orderMap[b.id] !== undefined ? orderMap[b.id] : 9999;
+      if(oa !== ob) return oa - ob;
+      return (b.createdAt||'').localeCompare(a.createdAt||'');
+    });
+  } else {
+    filtered.sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''));
+  }
+  return filtered;
 }
 
 function renderProjectTabs(){
@@ -684,12 +749,16 @@ function renderProjectTabs(){
     return;
   }
   wrap.style.display = 'block';
-  tabs.innerHTML = list.map(p => {
+  tabs.innerHTML = list.map((p, idx) => {
     const taskCount = p.tasks ? Object.keys(p.tasks).length : 0;
+    const upBtn = idx > 0 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',-1)" title="Move left">◀</button>` : '';
+    const downBtn = idx < list.length-1 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',1)" title="Move right">▶</button>` : '';
     return `<div class="proj-tab ${p.id===ACTIVE_PROJECT_ID?'on':''}" onclick="selectProject('${p.id}')">
+      ${upBtn}
       <div class="dot"></div>
       <span>${escH(p.name||'Untitled')}</span>
       <span class="count">${taskCount}</span>
+      ${downBtn}
     </div>`;
   }).join('');
   if(ME_IS_PM()){
@@ -804,12 +873,32 @@ function cardHTML(t, canEdit){
   const priLabel = {low:'Low',med:'Med',hi:'High',crit:'Crit'}[t.priority] || 'Med';
   const priCls   = t.priority || 'med';
   const draggable = canEdit ? `draggable="true" ondragstart="dragStart(event,'${t.id}')" ondragend="dragEnd(event)"` : '';
-  const clickHandler = canEdit ? `onclick="openEditTask('${t.id}')"` : '';
+  const isMyTask = t.assignee === ME_UNAME;
+  const clickHandler = (canEdit || isMyTask) ? `onclick="openEditTask('${t.id}')"` : '';
+
+  let actionBtns = '';
+  if(isMyTask && t.status === 'prog'){
+    actionBtns = `<div class="card-actions"><button class="card-btn submit" onclick="event.stopPropagation();submitForReview('${t.id}')">Submit for review</button></div>`;
+  }
+  if(canEdit && t.status === 'rev'){
+    actionBtns = `<div class="card-actions">
+      <button class="card-btn approve" onclick="event.stopPropagation();openReviewModal('${t.id}')">Review</button>
+    </div>`;
+  }
+
+  let reviewComment = '';
+  if(t.reviewComment && (t.status === 'prog' || t.status === 'rev')){
+    const reviewer = t.reviewedBy ? (USERS[t.reviewedBy]?.name || t.reviewedBy) : 'PM';
+    const rejected = t.reviewResult === 'rejected';
+    reviewComment = `<div class="card-review${rejected?' rejected':''}"><b>${escH(reviewer)}:</b> ${escH(t.reviewComment)}</div>`;
+  }
+
   return `
     <div class="card pri-${priCls}" ${draggable} ${clickHandler} data-taskid="${t.id}">
       <div class="card-pri"></div>
       <div class="card-title">${escH(t.title||'Untitled task')}</div>
       ${t.desc ? `<div class="card-desc">${escH(t.desc)}</div>` : ''}
+      ${reviewComment}
       <div class="card-foot">
         <div class="card-foot-l">
           <span class="pri-tag ${priCls}">${priLabel}</span>
@@ -817,6 +906,7 @@ function cardHTML(t, canEdit){
         </div>
         ${assigneeName ? `<div class="card-assignee" title="${escH(assigneeName)}">${escH(initials(assigneeName))}</div>` : ''}
       </div>
+      ${actionBtns}
     </div>
   `;
 }
@@ -1017,7 +1107,8 @@ window.openEditTask = function(taskId){
   if(!p) return;
   const t = (p.tasks || {})[taskId];
   if(!t) return;
-  if(!canEditProject(p)){ toast('Only the PM or an admin can edit tasks','err'); return; }
+  const isMyTask = t.assignee === ME_UNAME;
+  if(!canEditProject(p) && !isMyTask){ toast('You can only edit tasks assigned to you','err'); return; }
   editingTaskId = taskId;
   $('taskModalTitle').textContent = 'Edit task';
   $('tk-title').value = t.title || '';
@@ -1026,7 +1117,7 @@ window.openEditTask = function(taskId){
   $('tk-pri').value   = t.priority || 'med';
   $('tk-st').value    = t.status || 'todo';
   populateAssigneeSelect(p.team || [], t.assignee || '');
-  $('tk-del-btn').style.display = 'inline-flex';
+  $('tk-del-btn').style.display = canEditProject(p) ? 'inline-flex' : 'none';
   openModal('taskModal');
 };
 
@@ -1041,8 +1132,11 @@ function populateAssigneeSelect(team, selected){
 }
 
 window.saveTask = async function(){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
   const title = $('tk-title').value.trim();
   if(!title){ toast('Task title is required','err'); return; }
+  const isMyTask = editingTaskId && p && p.tasks && p.tasks[editingTaskId] && p.tasks[editingTaskId].assignee === ME_UNAME;
+  if(!canEditProject(p) && !isMyTask){ toast('You cannot edit this task','err'); return; }
   const payload = {
     title,
     desc:     $('tk-desc').value.trim(),
@@ -1080,6 +1174,116 @@ window.deleteTask = async function(){
   } catch(e){
     toast('Failed to delete','err');
   }
+};
+
+// ════════════════════════════════════════════════
+// TASK REVIEW WORKFLOW
+// ════════════════════════════════════════════════
+let reviewingTaskId = null;
+
+window.submitForReview = async function(taskId){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p || !p.tasks || !p.tasks[taskId]) return;
+  const t = p.tasks[taskId];
+  if(t.assignee !== ME_UNAME){ toast('Only the assignee can submit for review','err'); return; }
+  try {
+    await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${taskId}`).update({
+      status: 'rev',
+      submittedForReview: true,
+      submittedAt: new Date().toISOString(),
+      submittedBy: ME_UNAME,
+      updatedAt: new Date().toISOString()
+    });
+    toast('Task submitted for review','ok');
+  } catch(e){
+    toast('Failed to submit: '+(e.message||''),'err');
+  }
+};
+
+window.openReviewModal = function(taskId){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  const t = (p.tasks || {})[taskId];
+  if(!t) return;
+  reviewingTaskId = taskId;
+  const assigneeName = USERS[t.assignee]?.name || t.assignee || 'Unassigned';
+  const submitted = t.submittedAt ? new Date(t.submittedAt).toLocaleDateString() : '—';
+  $('reviewModalTitle').textContent = 'Review: ' + (t.title || 'Task');
+  $('review-info').innerHTML = `
+    <h4>${escH(t.title||'Untitled')}</h4>
+    ${t.desc ? `<p>${escH(t.desc)}</p>` : ''}
+    <div class="meta">Assignee: <b>${escH(assigneeName)}</b> · Submitted: ${escH(submitted)}</div>
+  `;
+  $('rv-comment').value = '';
+  openModal('reviewModal');
+};
+
+window.approveTask = async function(){
+  if(!reviewingTaskId) return;
+  const comment = $('rv-comment').value.trim();
+  try {
+    await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${reviewingTaskId}`).update({
+      status: 'done',
+      reviewResult: 'approved',
+      reviewComment: comment || 'Approved',
+      reviewedBy: ME_UNAME,
+      reviewedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    closeModal('reviewModal');
+    toast('Task approved and marked done','ok');
+  } catch(e){
+    toast('Failed to approve: '+(e.message||''),'err');
+  }
+};
+
+window.rejectTask = async function(){
+  if(!reviewingTaskId) return;
+  const comment = $('rv-comment').value.trim();
+  if(!comment){ toast('Please add feedback so the assignee knows what to fix','err'); return; }
+  try {
+    await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${reviewingTaskId}`).update({
+      status: 'prog',
+      reviewResult: 'rejected',
+      reviewComment: comment,
+      reviewedBy: ME_UNAME,
+      reviewedAt: new Date().toISOString(),
+      submittedForReview: false,
+      updatedAt: new Date().toISOString()
+    });
+    closeModal('reviewModal');
+    toast('Task returned to assignee with feedback','ok');
+  } catch(e){
+    toast('Failed to reject: '+(e.message||''),'err');
+  }
+};
+
+// ════════════════════════════════════════════════
+// PROJECT ORDERING (per user)
+// ════════════════════════════════════════════════
+let myProjectOrder = [];
+
+function loadMyProjectOrder(){
+  if(!ME_UNAME || !db) return;
+  db.ref('faster_user_prefs/'+ME_UNAME+'/projectOrder').on('value', snap => {
+    myProjectOrder = snap.val() || [];
+  });
+}
+
+window.moveProject = async function(id, dir){
+  const visible = getVisibleProjects();
+  const ids = visible.map(p => p.id);
+  const idx = ids.indexOf(id);
+  if(idx < 0) return;
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= ids.length) return;
+  ids.splice(idx, 1);
+  ids.splice(newIdx, 0, id);
+  myProjectOrder = ids;
+  try {
+    await db.ref('faster_user_prefs/'+ME_UNAME+'/projectOrder').set(ids);
+  } catch(e){ /* silent */ }
+  renderProjectTabs();
 };
 
 // Kick off
