@@ -1980,7 +1980,17 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     "Together we innovate.",
     "Precision. Passion. Progress.",
     "Where curiosity meets discovery.",
-    "Part of something extraordinary."
+    "Part of something extraordinary.",
+    "Driven by curiosity, powered by data.",
+    "From hypothesis to breakthrough.",
+    "Safety first. Discovery always.",
+    "The future of energy starts here.",
+    "One experiment at a time.",
+    "Where bold ideas meet rigorous science.",
+    "Fueling tomorrow's discoveries today.",
+    "Excellence is not optional — it's the standard.",
+    "Research that moves the world forward.",
+    "Built by scientists, for scientists."
   ];
 
   const WS_TAGS_GENERIC = [
@@ -1990,7 +2000,15 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     "Innovation starts here.",
     "Where curiosity meets discovery.",
     "Pushing the boundaries of photonics.",
-    "Part of something extraordinary."
+    "Part of something extraordinary.",
+    "Another day, another breakthrough.",
+    "The data doesn't lie — trust the process.",
+    "Good science takes patience and persistence.",
+    "Your next discovery could change everything.",
+    "Stay curious. Stay relentless.",
+    "Think big, measure carefully.",
+    "The lab is your playground.",
+    "Research today, impact tomorrow."
   ];
 
   function getPersonalizedTags(){
@@ -1998,32 +2016,63 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     var first = name ? name.split(' ')[0] : '';
     var role = sessionStorage.getItem('faster_role_v1') || 'member';
     var h = new Date().getHours();
+    var day = new Date().getDay();
     var tags = [];
 
     if(first){
       tags.push(first + ", let's make today count.");
       tags.push("Great to see you, " + first + "!");
       tags.push(first + ", your work matters.");
+      tags.push("Ready to tackle something big, " + first + "?");
+      tags.push(first + ", the lab is better with you here.");
+      tags.push("What will you discover today, " + first + "?");
+      tags.push(first + " — focused, driven, unstoppable.");
+      tags.push("The team is stronger with you, " + first + ".");
+      tags.push(first + ", own the day.");
+      tags.push("One step closer to the goal, " + first + ".");
+
       if(h < 12){
         tags.push("Fresh morning, fresh ideas, " + first + ".");
         tags.push(first + ", coffee first, then science.");
+        tags.push("Rise and grind, " + first + ".");
+        tags.push(first + ", morning momentum is the best kind.");
+        tags.push("Early start? That's the " + first + " we know.");
       } else if(h < 17){
         tags.push("Keep the momentum going, " + first + ".");
         tags.push(first + ", you're crushing it today.");
+        tags.push("Afternoon focus mode, " + first + ".");
+        tags.push(first + ", don't stop now — you're on a roll.");
+        tags.push("Halfway through the day, " + first + " — finish strong.");
       } else {
         tags.push("Burning the midnight oil, " + first + "?");
         tags.push(first + ", don't forget to rest too.");
+        tags.push("Evening sessions hit different, " + first + ".");
+        tags.push(first + ", wrapping up or just getting started?");
+        tags.push("Dedication looks good on you, " + first + ".");
       }
+
+      if(day === 0 || day === 6){
+        tags.push("Weekend warrior mode, " + first + "!");
+        tags.push(first + ", science never sleeps — but you should.");
+      }
+      if(day === 1) tags.push("Happy Monday, " + first + " — let's set the tone.");
+      if(day === 5) tags.push("Friday vibes, " + first + " — close out the week strong.");
     }
 
     if(role === 'admin'){
       tags.push("The lab runs smoother because of you.");
       tags.push("Your team looks up to you" + (first ? ", " + first : "") + ".");
       tags.push("Admin mode: keeping everything on track.");
+      tags.push("Behind every great lab is a great admin.");
+      tags.push("You keep the gears turning" + (first ? ", " + first : "") + ".");
+      tags.push("Approvals, oversight, leadership — you do it all.");
     } else if(role === 'member'){
       tags.push("Every experiment starts with a curious mind.");
       tags.push("Your contributions drive the lab forward.");
       tags.push("Collaboration is your superpower.");
+      tags.push("Great researchers ask great questions.");
+      tags.push("Your data, your story, your impact.");
+      tags.push("The best discoveries come from teamwork.");
     }
 
     tags = tags.concat(WS_TAGS_GENERIC);

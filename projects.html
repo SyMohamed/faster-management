@@ -1827,12 +1827,21 @@ const PM_TAGLINES_BASE = [
   "Every task done is a step forward.",
   "Collaboration makes the dream work.",
   "Great things take great teamwork.",
-  "One task at a time, one win at a time."
+  "One task at a time, one win at a time.",
+  "Ship it, learn from it, improve it.",
+  "Done is better than perfect.",
+  "Clear the board, clear your mind.",
+  "The best plans evolve with the team.",
+  "Track it, own it, deliver it.",
+  "Deadlines are just milestones in disguise.",
+  "Stay organized, stay ahead.",
+  "Move fast, but don't break things."
 ];
 
 function getProjectTaglines(){
   const first = ME_NAME ? ME_NAME.split(' ')[0] : '';
   const h = new Date().getHours();
+  const day = new Date().getDay();
   const tags = [...PM_TAGLINES_BASE];
 
   if(first){
@@ -1840,17 +1849,44 @@ function getProjectTaglines(){
     tags.push("Your team is counting on you, " + first + ".");
     tags.push(first + ", you're building something amazing.");
     tags.push("Keep the momentum going, " + first + "!");
-    if(h < 12) tags.push("Fresh start, " + first + " — what will you tackle first?");
-    else if(h < 17) tags.push("Afternoon push, " + first + " — finish strong.");
-    else tags.push("Late session, " + first + "? Your dedication inspires.");
+    tags.push(first + ", check your board — anything to close out?");
+    tags.push("What's the one thing to finish today, " + first + "?");
+    tags.push(first + " — plan, execute, deliver. Repeat.");
+    tags.push("Your Kanban board is waiting, " + first + ".");
+    tags.push(first + ", small wins add up to big results.");
+    tags.push("Lead by example, " + first + ".");
+
+    if(h < 12){
+      tags.push("Fresh start, " + first + " — what will you tackle first?");
+      tags.push("Morning planning sets the pace, " + first + ".");
+      tags.push(first + ", map out the day and conquer it.");
+    } else if(h < 17){
+      tags.push("Afternoon push, " + first + " — finish strong.");
+      tags.push(first + ", the board won't clear itself.");
+      tags.push("Deep work zone, " + first + " — keep going.");
+    } else {
+      tags.push("Late session, " + first + "? Your dedication inspires.");
+      tags.push(first + ", wrap up what you can — tomorrow is a new sprint.");
+      tags.push("Evening review time, " + first + " — what did we accomplish?");
+    }
+
+    if(day === 1) tags.push("Monday kickoff, " + first + " — set the priorities.");
+    if(day === 5) tags.push("Friday, " + first + " — close tickets, celebrate wins.");
+    if(day === 0 || day === 6) tags.push("Weekend hustle, " + first + " — respect.");
   }
 
   if(IS_ADMIN){
     tags.push("The whole lab benefits from your leadership.");
+    tags.push("You see the big picture — that's your strength.");
+    tags.push("Every approval you make keeps things moving.");
   } else if(isPM(ME_UNAME)){
     tags.push("Your projects are shaping the future of FASTER.");
+    tags.push("A great PM removes blockers, not just tracks tasks.");
+    tags.push("Your roadmap is the team's compass.");
   } else {
     tags.push("Every contribution counts — keep it up.");
+    tags.push("Own your tasks, deliver your best.");
+    tags.push("Your work feeds into something bigger.");
   }
 
   for(let i = tags.length-1; i > 0; i--){
