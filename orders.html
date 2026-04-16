@@ -176,6 +176,48 @@ body{font-size:1rem}
 .admin-only{display:none!important}
 .admin-btn{display:none!important}
 
+/* ── My Orders Dashboard ── */
+.dash-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.dash-header h2{font-size:18px;font-weight:600;margin:0}
+.dash-actions{display:flex;gap:8px;flex-wrap:wrap}
+.dash-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+.dash-tab{background:none;border:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:500;padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:8px}
+.dash-tab:hover{color:var(--text)}
+.dash-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.dash-tab .tab-count{background:var(--surface2);border-radius:10px;padding:1px 8px;font-size:11px;font-family:var(--mono)}
+.dash-tab.active .tab-count{background:rgba(31,111,235,.2);color:var(--accent)}
+.dash-cards{display:grid;grid-template-columns:1fr;gap:12px}
+.req-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;transition:border-color .15s}
+.req-card:hover{border-color:var(--accent)}
+.req-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.req-card-item{font-size:15px;font-weight:500;flex:1}
+.req-card-badge{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:10px;white-space:nowrap}
+.rb-requested{background:var(--pr-bg);color:var(--pr)}
+.rb-approved{background:var(--po-bg);color:var(--po)}
+.rb-done{background:var(--del-bg);color:var(--delivered)}
+.req-card-meta{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted)}
+.req-card-meta span{display:flex;align-items:center;gap:4px}
+.req-card-details{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px}
+.req-card-actions{margin-top:12px;display:flex;gap:8px;justify-content:flex-end}
+.dash-empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px}
+.back-bar{margin-bottom:20px;display:flex;align-items:center;gap:12px}
+
+/* ── Admin Requests Panel ── */
+.admin-req-panel{margin-top:32px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.admin-req-panel h3{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.admin-req-panel h3 .arq-count{background:rgba(248,81,73,.12);color:var(--delayed);font-size:11px;padding:2px 8px;border-radius:10px;font-family:var(--mono)}
+.arq-table{width:100%;border-collapse:collapse;font-size:13px}
+.arq-table th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+.arq-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.arq-table tr:last-child td{border-bottom:none}
+
+/* ── Request Modal ── */
+.nom-search{position:relative}
+.nom-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-height:180px;overflow-y:auto;z-index:10;display:none}
+.nom-dropdown.open{display:block}
+.nom-opt{padding:8px 12px;cursor:pointer;font-size:13px;transition:background .1s}
+.nom-opt:hover{background:var(--surface2)}
+
 </style>
 </head>
 <body>
@@ -197,6 +239,43 @@ body{font-size:1rem}
 </div>
 
 <div class="content">
+
+  <!-- ═══ MY ORDERS DASHBOARD (default landing) ═══ -->
+  <div id="my-orders-dash">
+    <div class="dash-header">
+      <h2 id="dash-greeting">My Orders</h2>
+      <div class="dash-actions">
+        <button class="btn" onclick="openRequestModal()">+ Raise Request</button>
+        <button class="btn-ghost" onclick="showAllOrders()">View All Orders →</button>
+      </div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" data-tab="requested" onclick="switchDashTab('requested')">Requested <span class="tab-count" id="dash-count-requested">0</span></button>
+      <button class="dash-tab" data-tab="approved" onclick="switchDashTab('approved')">Approved <span class="tab-count" id="dash-count-approved">0</span></button>
+      <button class="dash-tab" data-tab="done" onclick="switchDashTab('done')">Done <span class="tab-count" id="dash-count-done">0</span></button>
+    </div>
+
+    <div class="dash-cards" id="dash-content">
+      <div class="dash-empty">Loading…</div>
+    </div>
+
+    <!-- Admin: all pending order requests -->
+    <div id="admin-requests-panel" class="admin-req-panel" style="display:none">
+      <h3>Order Requests from Team <span class="arq-count" id="arq-count">0</span></h3>
+      <table class="arq-table">
+        <thead><tr><th>Item</th><th>Requested by</th><th>Nominated</th><th>Date raised</th><th>Status</th><th>Details</th><th>Actions</th></tr></thead>
+        <tbody id="arq-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ ALL ORDERS VIEW (hidden until "View All Orders" clicked) ═══ -->
+  <div id="all-orders-view" style="display:none">
+    <div class="back-bar">
+      <button class="btn-ghost" onclick="showMyOrders()">← Back to My Orders</button>
+      <span style="font-size:13px;color:var(--muted)">Showing all lab orders</span>
+    </div>
 
   <!-- Setup Banner -->
   <div class="setup-banner" id="setup-banner" style="display:none">
@@ -282,6 +361,36 @@ body{font-size:1rem}
       <button class="btn-ghost" onclick="prevPage()">← Prev</button>
       <span id="pag-pages"></span>
       <button class="btn-ghost" onclick="nextPage()">Next →</button>
+    </div>
+  </div>
+
+  </div><!-- /all-orders-view -->
+</div><!-- /content -->
+
+<!-- Raise Request Modal -->
+<div class="modal-bg" id="requestModal">
+  <div class="modal">
+    <div class="modal-title" id="req-modal-title">Raise an Order Request</div>
+    <div class="form-group"><label>Item / material needed *</label><textarea id="r-item" placeholder="e.g. Helium 5.0 Grade 99.999% cylinder" rows="2"></textarea></div>
+    <div class="form-group nom-search">
+      <label>Nominate a team member to handle this *</label>
+      <input id="r-nominee" placeholder="Start typing a name…" autocomplete="off" oninput="filterNominees()" onfocus="filterNominees()">
+      <div class="nom-dropdown" id="nom-dropdown"></div>
+    </div>
+    <div class="form-group"><label>Details / justification</label><textarea id="r-details" placeholder="Why do you need this? Any specifications…" rows="3"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Priority</label>
+        <select id="r-priority">
+          <option>Normal</option>
+          <option>Urgent</option>
+          <option>Low</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Date needed by</label><input id="r-needed-by" type="date"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('requestModal')">Cancel</button>
+      <button class="btn" onclick="saveRequest()">Submit Request</button>
     </div>
   </div>
 </div>
@@ -732,6 +841,8 @@ function viewDetail(key) {
   detailKey = key;
   const o = orders[key];
   if (!o) return;
+  document.getElementById('detail-edit').style.display = '';
+  document.getElementById('detail-delete').style.display = '';
   document.getElementById('detail-title').textContent = o.item || 'Order Detail';
   const fields = [
     ['Requester', o.requester], ['Item', o.item],
@@ -877,6 +988,276 @@ function adminMarkDelivered(key) {
 }
 
 checkAdminSession();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ORDER REQUESTS SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+const REQ_PATH = 'faster_order_requests';
+let reqRef = null;
+let orderRequests = {};
+let currentDashTab = 'requested';
+const ME = sessionStorage.getItem('faster_user_v1') || '';
+
+function initRequests() {
+  if (!isConfigured || !db) return;
+  reqRef = db.ref(REQ_PATH);
+  reqRef.on('value', snap => {
+    orderRequests = snap.val() || {};
+    renderDashboard();
+    if (IS_ADMIN || window.FASTER_IS_ADMIN) renderAdminRequests();
+  });
+}
+
+function getRequestsArray() {
+  return Object.entries(orderRequests).map(([k, v]) => ({...v, _key: k}));
+}
+
+// ── Dashboard view switching ─────────────────────────────────────────────
+function showAllOrders() {
+  document.getElementById('my-orders-dash').style.display = 'none';
+  document.getElementById('all-orders-view').style.display = 'block';
+}
+
+function showMyOrders() {
+  document.getElementById('all-orders-view').style.display = 'none';
+  document.getElementById('my-orders-dash').style.display = 'block';
+  renderDashboard();
+}
+
+function switchDashTab(tab) {
+  currentDashTab = tab;
+  document.querySelectorAll('.dash-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.tab === tab);
+  });
+  renderDashboard();
+}
+
+// ── Dashboard render ─────────────────────────────────────────────────────
+function renderDashboard() {
+  const reqs = getRequestsArray();
+  const myReqs = reqs.filter(r =>
+    r.requestedBy === ME || r.nominatedUser === ME
+  );
+
+  const requested = myReqs.filter(r => r.status === 'Requested');
+  const approved  = myReqs.filter(r => r.status === 'Approved');
+  const done      = myReqs.filter(r => r.status === 'Done');
+
+  document.getElementById('dash-count-requested').textContent = requested.length;
+  document.getElementById('dash-count-approved').textContent = approved.length;
+  document.getElementById('dash-count-done').textContent = done.length;
+
+  const greeting = ME ? `${ME}'s Orders` : 'My Orders';
+  document.getElementById('dash-greeting').textContent = greeting;
+
+  let items = [];
+  if (currentDashTab === 'requested') items = requested;
+  else if (currentDashTab === 'approved') items = approved;
+  else items = done;
+
+  items.sort((a, b) => (b._ts || 0) - (a._ts || 0));
+
+  const container = document.getElementById('dash-content');
+  if (!items.length) {
+    const labels = {requested: 'pending requests', approved: 'approved orders', done: 'completed orders'};
+    container.innerHTML = `<div class="dash-empty">No ${labels[currentDashTab]} found.</div>`;
+    return;
+  }
+
+  container.innerHTML = items.map(r => {
+    const badgeCls = r.status === 'Requested' ? 'rb-requested' : r.status === 'Approved' ? 'rb-approved' : 'rb-done';
+    const isNominee = r.nominatedUser === ME && r.requestedBy !== ME;
+    const nomineeTag = isNominee ? `<span style="color:var(--pr);font-size:11px">Nominated to you</span>` : '';
+    return `<div class="req-card">
+      <div class="req-card-top">
+        <div class="req-card-item">${esc(r.item || '—')}</div>
+        <span class="req-card-badge ${badgeCls}">${r.status}</span>
+      </div>
+      <div class="req-card-meta">
+        <span>Requested by: <strong>${esc(r.requestedBy || '—')}</strong></span>
+        <span>Nominated: <strong>${esc(r.nominatedUser || '—')}</strong></span>
+        <span>Date: ${r.dateRaised || '—'}</span>
+        ${r.priority === 'Urgent' ? '<span style="color:var(--delayed)">⚡ Urgent</span>' : ''}
+        ${r.neededBy ? `<span>Needed by: ${r.neededBy}</span>` : ''}
+        ${nomineeTag}
+      </div>
+      ${r.details ? `<div class="req-card-details">${esc(r.details)}</div>` : ''}
+      <div class="req-card-actions">
+        ${r.status === 'Requested' && (IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px;color:var(--po);border-color:var(--po)" onclick="approveRequest('${r._key}')">Approve</button>` : ''}
+        ${r.status === 'Approved' && (IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px;color:var(--delivered);border-color:var(--delivered)" onclick="markRequestDone('${r._key}')">Mark Done</button>` : ''}
+        ${r.status !== 'Done' && (r.requestedBy === ME || IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px" onclick="viewRequestDetail('${r._key}')">View</button>` : ''}
+        ${r.status === 'Done' ? `<button class="btn-ghost" style="font-size:12px" onclick="viewRequestDetail('${r._key}')">View</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── Admin requests panel ─────────────────────────────────────────────────
+function renderAdminRequests() {
+  const panel = document.getElementById('admin-requests-panel');
+  if (!IS_ADMIN && !window.FASTER_IS_ADMIN) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+
+  const reqs = getRequestsArray().filter(r => r.status !== 'Done');
+  reqs.sort((a, b) => (b._ts || 0) - (a._ts || 0));
+
+  document.getElementById('arq-count').textContent = reqs.length;
+  const tbody = document.getElementById('arq-tbody');
+
+  if (!reqs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No pending requests</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = reqs.map(r => {
+    const badgeCls = r.status === 'Requested' ? 'rb-requested' : 'rb-approved';
+    return `<tr>
+      <td><strong>${esc(r.item || '—')}</strong></td>
+      <td>${esc(r.requestedBy || '—')}</td>
+      <td>${esc(r.nominatedUser || '—')}</td>
+      <td style="font-family:var(--mono);font-size:12px">${r.dateRaised || '—'}</td>
+      <td><span class="req-card-badge ${badgeCls}" style="font-size:11px">${r.status}</span></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.details || '')}">${esc(r.details || '—')}</td>
+      <td style="white-space:nowrap">
+        ${r.status === 'Requested' ? `<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--po);border-color:var(--po)" onclick="approveRequest('${r._key}')">Approve</button>` : ''}
+        ${r.status === 'Approved' ? `<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--delivered);border-color:var(--delivered)" onclick="markRequestDone('${r._key}')">Done</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Request CRUD ─────────────────────────────────────────────────────────
+function openRequestModal() {
+  if (!isConfigured) { toast('Configure Firebase first', 'toast-red'); return; }
+  document.getElementById('req-modal-title').textContent = 'Raise an Order Request';
+  ['r-item', 'r-details', 'r-nominee'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('r-priority').value = 'Normal';
+  document.getElementById('r-needed-by').value = '';
+  document.getElementById('nom-dropdown').classList.remove('open');
+  document.getElementById('requestModal').classList.add('open');
+}
+
+function saveRequest() {
+  const item = document.getElementById('r-item').value.trim();
+  const nominee = document.getElementById('r-nominee').value.trim();
+  if (!item) { toast('Item description is required', 'toast-red'); return; }
+  if (!nominee) { toast('Please nominate a team member', 'toast-red'); return; }
+
+  const record = {
+    requestedBy: ME || 'Anonymous',
+    nominatedUser: nominee,
+    item: item,
+    details: document.getElementById('r-details').value.trim(),
+    priority: document.getElementById('r-priority').value,
+    neededBy: document.getElementById('r-needed-by').value,
+    dateRaised: new Date().toISOString().slice(0, 10),
+    status: 'Requested',
+    _ts: Date.now()
+  };
+
+  closeModal('requestModal');
+  reqRef.push(record)
+    .then(() => toast('Request submitted — your team and admin can see it now', 'toast-green'))
+    .catch(e => toast('Error: ' + e.message, 'toast-red'));
+}
+
+function approveRequest(key) {
+  if (!reqRef) return;
+  reqRef.child(key).update({
+    status: 'Approved',
+    approvedBy: ME,
+    approvedDate: new Date().toISOString().slice(0, 10)
+  }).then(() => toast('Request approved', 'toast-green'))
+    .catch(e => toast('Error: ' + e.message, 'toast-red'));
+}
+
+function markRequestDone(key) {
+  if (!reqRef) return;
+  reqRef.child(key).update({
+    status: 'Done',
+    completedDate: new Date().toISOString().slice(0, 10)
+  }).then(() => toast('Request marked as done', 'toast-green'))
+    .catch(e => toast('Error: ' + e.message, 'toast-red'));
+}
+
+function viewRequestDetail(key) {
+  const r = orderRequests[key];
+  if (!r) return;
+  const fields = [
+    ['Item', r.item], ['Requested by', r.requestedBy],
+    ['Nominated to', r.nominatedUser], ['Status', r.status],
+    ['Priority', r.priority], ['Date Raised', r.dateRaised],
+    ['Needed by', r.neededBy], ['Details', r.details],
+    ['Approved by', r.approvedBy], ['Approved date', r.approvedDate],
+    ['Completed date', r.completedDate],
+  ];
+  document.getElementById('detail-title').textContent = r.item || 'Request Detail';
+  document.getElementById('detail-body').innerHTML = fields.map(([l, v]) => `
+    <div class="info-label">${l}</div>
+    <div class="info-val">${v || '—'}</div>
+  `).join('');
+  document.getElementById('detail-edit').style.display = 'none';
+  document.getElementById('detail-delete').style.display = 'none';
+  document.getElementById('detailModal').classList.add('open');
+}
+
+// ── Nominee autocomplete ─────────────────────────────────────────────────
+let teamMembers = [];
+function loadTeamMembers() {
+  if (!db) return;
+  db.ref('faster_users').on('value', snap => {
+    const data = snap.val();
+    if (!data) return;
+    teamMembers = Object.values(data).map(u => u.display || u.name || u.uname || '').filter(Boolean);
+  });
+}
+
+function filterNominees() {
+  const val = document.getElementById('r-nominee').value.toLowerCase();
+  const dd = document.getElementById('nom-dropdown');
+  let list = teamMembers.length ? teamMembers : getKnownUsers();
+  if (val) list = list.filter(n => n.toLowerCase().includes(val));
+  if (!list.length) { dd.classList.remove('open'); return; }
+  dd.innerHTML = list.slice(0, 10).map(n =>
+    `<div class="nom-opt" onmousedown="pickNominee('${n.replace(/'/g, "\\'")}')">${esc(n)}</div>`
+  ).join('');
+  dd.classList.add('open');
+}
+
+function pickNominee(name) {
+  document.getElementById('r-nominee').value = name;
+  document.getElementById('nom-dropdown').classList.remove('open');
+}
+
+function getKnownUsers() {
+  const arr = getOrdersArray();
+  const names = new Set();
+  arr.forEach(o => { if (o.requester) names.add(o.requester); if (o.addedBy && o.addedBy !== 'System') names.add(o.addedBy); });
+  return [...names].sort();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nom-search')) document.getElementById('nom-dropdown').classList.remove('open');
+});
+
+// ── Close request modal on backdrop ──────────────────────────────────────
+document.getElementById('requestModal').addEventListener('click', e => {
+  if (e.target.id === 'requestModal') closeModal('requestModal');
+});
+
+// ── Boot requests after Firebase is ready ────────────────────────────────
+const _origFullRefresh = fullRefresh;
+fullRefresh = function() {
+  _origFullRefresh();
+  if (!reqRef) { initRequests(); loadTeamMembers(); }
+  else renderDashboard();
+};
 </script>
 </body>
 </html>
