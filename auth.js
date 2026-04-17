@@ -304,19 +304,58 @@ document.addEventListener('DOMContentLoaded', function(){
   };
 
   /* ── Global helper to post to Slack ───────────────────────────────────── */
-  window.FASTER_slackNotify = function(text, blocks){
+  window.FASTER_slackNotify = function(text, targetUname){
     try {
       var db = firebase.app().database();
-      db.ref('faster_settings/slack_webhook').once('value', function(snap){
-        var url = snap.val();
-        if(!url) return;
-        var payload = blocks ? {text: text, blocks: blocks} : {text: text};
-        fetch(url, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(payload)
-        }).catch(function(){});
+      // Get Slack settings
+      db.ref('faster_settings').once('value', function(snap){
+        var settings = snap.val() || {};
+        var webhookUrl = settings.slack_webhook;
+        var botToken = settings.slack_bot_token;
+
+        // If target user has a Slack ID, try DM first
+        if(targetUname){
+          db.ref('faster_users/' + targetUname + '/slackId').once('value', function(uSnap){
+            var slackId = uSnap.val();
+            if(slackId && botToken){
+              // Send DM via bot token (through proxy if configured)
+              var proxyUrl = settings.slack_proxy_url;
+              _sendSlackDM(botToken, slackId, text, proxyUrl);
+            }
+            // Also post to channel with @mention
+            if(webhookUrl){
+              var mention = slackId ? '<@' + slackId + '> ' : '';
+              _postWebhook(webhookUrl, mention + text);
+            }
+          });
+        } else if(webhookUrl){
+          _postWebhook(webhookUrl, text);
+        }
       });
     } catch(e){}
   };
+
+  function _postWebhook(url, text){
+    fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text: text})
+    }).catch(function(){});
+  }
+
+  function _sendSlackDM(token, slackUserId, text, proxyUrl){
+    var apiUrl = proxyUrl || 'https://slack.com/api/chat.postMessage';
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        channel: slackUserId,
+        text: text,
+        unfurl_links: false
+      })
+    }).catch(function(){});
+  }
 })();

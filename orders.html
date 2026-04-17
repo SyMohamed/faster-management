@@ -1312,7 +1312,7 @@ function confirmApproval() {
         'approved', 'orders.html');
     }
 
-    // Slack notification
+    // Slack notification (targeted to requester)
     if(typeof FASTER_slackNotify === 'function'){
       FASTER_slackNotify(
         '✅ *' + rt + ' Request Approved*\n' +
@@ -1320,7 +1320,8 @@ function confirmApproval() {
         '*Requested by:* ' + (r.requestedBy||'—') + '\n' +
         '*Approved by:* ' + ME + '\n' +
         '*' + (refLabels[rt]||'Ref') + ':* ' + ref +
-        (comment ? '\n*Note:* ' + comment : '')
+        (comment ? '\n*Note:* ' + comment : ''),
+        requesterUname
       );
     }
   }).catch(e => toast('Error: ' + e.message, 'toast-red'));
@@ -1360,7 +1361,8 @@ function markRequestDone(key) {
         '*Item:* ' + (r.item||'—') + '\n' +
         '*Requested by:* ' + (r.requestedBy||'—') + '\n' +
         '*Completed by:* ' + ME +
-        (r.trackingNumber ? '\n*Tracking:* ' + r.trackingNumber : '')
+        (r.trackingNumber ? '\n*Tracking:* ' + r.trackingNumber : ''),
+        requesterUname
       );
     }
   }).catch(e => toast('Error: ' + e.message, 'toast-red'));

@@ -602,6 +602,27 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   </div>
 </div>
 
+<div id="slack-link-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9500;align-items:center;justify-content:center" onclick="if(event.target===this)closeSlackLink()">
+  <div class="pw-change-box" style="max-width:460px">
+    <h3>💬 Link Your Slack ID</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+      When your requests are approved or tasks are assigned, you'll get a <strong>direct Slack DM</strong>.<br><br>
+      <strong>How to find your Slack Member ID:</strong><br>
+      1. Open Slack → click your profile picture → <strong>Profile</strong><br>
+      2. Click the <strong>⋮ More</strong> button → <strong>Copy member ID</strong><br>
+      3. Paste it below (looks like <code style="background:var(--surface2);padding:1px 6px;border-radius:4px;font-family:monospace">U04ABCD1234</code>)
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input class="login-input" id="slack-id-input" placeholder="Your Slack Member ID (e.g. U04ABCD1234)" style="font-family:monospace">
+      <div id="slack-id-status" style="font-size:11px;color:var(--muted);font-family:monospace"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <button class="login-btn" style="background:var(--surface2);color:var(--text);width:auto" onclick="closeSlackLink()">Cancel</button>
+        <button class="login-btn" style="width:auto" onclick="saveSlackId()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Global search overlay (⌘K / Ctrl+K) ─────────────────────────────── -->
 <div id="gs-overlay" onclick="if(event.target===this)closeGS()">
   <div id="gs-box">
@@ -648,6 +669,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       <div class="user-menu" id="user-menu">
         <button class="user-menu-item" onclick="openPwChange()">🔑 Change Password</button>
         <button class="user-menu-item" onclick="triggerPhotoUpload()" id="photo-menu-btn">📷 Change Profile Photo</button>
+        <button class="user-menu-item" onclick="openSlackLink()">💬 Link Slack ID</button>
         <div class="user-menu-sep"></div>
         <button class="user-menu-item" style="color:var(--red)" onclick="signOut()">⏏ Sign Out</button>
       </div>
@@ -940,13 +962,31 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         </div>
         <div class="admin-panel-body">
           <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6">
-            Connect a Slack channel to get notified when requests are approved or completed.<br>
-            In Slack: Channel settings → Integrations → Webhooks → <strong>Add Incoming Webhook</strong> → copy the URL.
+            Notifications go to your Slack channel <strong>and</strong> as personal DMs to members who linked their Slack ID.<br>
+            Members can link their Slack ID from the user menu → <strong>💬 Link Slack ID</strong>.
           </div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px;margin-top:10px">1. Channel webhook (for team-wide posts)</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Slack → Channel settings → Integrations → Webhooks → Add Incoming Webhook</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="slack-webhook-input" placeholder="https://hooks.slack.com/services/..." style="flex:1;font-size:13px;font-family:var(--mono);padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text)">
-            <button class="btn btn-sm" onclick="saveSlackWebhook()">Save</button>
+            <input id="slack-webhook-input" placeholder="https://hooks.slack.com/services/..." style="flex:1;font-size:12px;font-family:var(--mono);padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text)">
             <button class="btn-o btn-sm" onclick="testSlackWebhook()">Test</button>
+          </div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px;margin-top:14px">2. Bot token (for personal DMs — optional)</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Create a Slack App → OAuth → Bot Token (xoxb-...) with <code style="background:var(--surface2);padding:1px 4px;border-radius:3px">chat:write</code> scope</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="slack-bot-token-input" placeholder="xoxb-..." type="password" style="flex:1;font-size:12px;font-family:var(--mono);padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text)">
+          </div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px;margin-top:14px">3. CORS proxy URL (for DMs from browser — optional)</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">If DMs fail due to CORS, deploy a <a href="https://developers.cloudflare.com/workers/" target="_blank" style="color:var(--accent)">Cloudflare Worker</a> proxy and paste the URL</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="slack-proxy-input" placeholder="https://your-worker.workers.dev/slack (optional)" style="flex:1;font-size:12px;font-family:var(--mono);padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text)">
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-sm" onclick="saveSlackWebhook()">Save All</button>
           </div>
           <div id="slack-status" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:6px"></div>
         </div>
@@ -1311,6 +1351,32 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     setTimeout(()=>document.getElementById('pw-old').focus(),100);
   };
   window.closePwChange=function(){ document.getElementById('pw-change-overlay').classList.remove('open'); };
+
+  /* ── Slack ID linking ─────────────────────────────────────────────── */
+  window.openSlackLink=function(){
+    document.getElementById('user-menu').classList.remove('open');
+    const overlay=document.getElementById('slack-link-overlay');
+    overlay.style.display='flex';
+    const uname=sessionStorage.getItem(UNAME_KEY)||'';
+    if(db && uname){
+      db.ref('faster_users/'+uname+'/slackId').once('value',s=>{
+        const sid=s.val()||'';
+        document.getElementById('slack-id-input').value=sid;
+        document.getElementById('slack-id-status').textContent=sid?'Currently linked: '+sid:'Not linked yet';
+      });
+    }
+  };
+  window.closeSlackLink=function(){ document.getElementById('slack-link-overlay').style.display='none'; };
+  window.saveSlackId=async function(){
+    const sid=document.getElementById('slack-id-input').value.trim();
+    const uname=sessionStorage.getItem(UNAME_KEY)||'';
+    if(!uname||!db){ _toast('Not signed in','warn'); return; }
+    await db.ref('faster_users/'+uname+'/slackId').set(sid||null);
+    document.getElementById('slack-id-status').textContent=sid?'Linked: '+sid:'Removed';
+    _toast(sid?'Slack ID linked — you\'ll receive DMs':'Slack ID removed','ok');
+    closeSlackLink();
+  };
+
   window.changePassword=async function(){
     const errEl=document.getElementById('pw-change-err');
     const oldPw=document.getElementById('pw-old').value;
@@ -1867,15 +1933,20 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* ── Slack webhook ──────────────────────────────────────────────────── */
   window.saveSlackWebhook=async function(){
-    const url=document.getElementById('slack-webhook-input').value.trim();
-    if(!url){ _toast('Paste your Slack webhook URL','warn'); return; }
-    await db.ref('faster_settings/slack_webhook').set(url);
-    document.getElementById('slack-status').textContent='Saved ✓';
-    _toast('Slack webhook saved','ok');
+    const webhook=document.getElementById('slack-webhook-input').value.trim();
+    const botToken=document.getElementById('slack-bot-token-input').value.trim();
+    const proxyUrl=document.getElementById('slack-proxy-input').value.trim();
+    const updates={};
+    updates['slack_webhook']=webhook||null;
+    updates['slack_bot_token']=botToken||null;
+    updates['slack_proxy_url']=proxyUrl||null;
+    await db.ref('faster_settings').update(updates);
+    document.getElementById('slack-status').textContent='Settings saved ✓';
+    _toast('Slack settings saved','ok');
   };
   window.testSlackWebhook=async function(){
     const url=document.getElementById('slack-webhook-input').value.trim();
-    if(!url){ _toast('Save a webhook URL first','warn'); return; }
+    if(!url){ _toast('Enter a webhook URL first','warn'); return; }
     document.getElementById('slack-status').textContent='Sending test…';
     try{
       await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🧪 Test from FASTER Lab workspace — Slack integration is working!'})});
@@ -1888,10 +1959,12 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   };
   function loadSlackConfig(){
     if(!db) return;
-    db.ref('faster_settings/slack_webhook').once('value',s=>{
-      const url=s.val()||'';
-      document.getElementById('slack-webhook-input').value=url;
-      if(url) document.getElementById('slack-status').textContent='Connected';
+    db.ref('faster_settings').once('value',s=>{
+      const cfg=s.val()||{};
+      document.getElementById('slack-webhook-input').value=cfg.slack_webhook||'';
+      document.getElementById('slack-bot-token-input').value=cfg.slack_bot_token||'';
+      document.getElementById('slack-proxy-input').value=cfg.slack_proxy_url||'';
+      if(cfg.slack_webhook) document.getElementById('slack-status').textContent='Connected';
     });
   }
 
