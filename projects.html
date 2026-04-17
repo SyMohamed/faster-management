@@ -369,9 +369,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .gantt-ctx-sep{height:1px;background:var(--b1);margin:4px 0}
 
 /* Dependency arrows on Gantt */
-.gantt-dep-line{position:absolute;pointer-events:none;z-index:0}
-.gantt-dep-line line{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4,3}
-.gantt-dep-line polygon{fill:var(--muted)}
+.gantt-dep-svg{position:absolute;left:220px;top:0;width:calc(100% - 220px);pointer-events:none;z-index:0;overflow:visible}
+.gantt-dep-path{fill:none;stroke:var(--muted);stroke-width:1.5;opacity:.25;
+  transition:opacity .25s,stroke .25s,stroke-width .25s}
+.gantt-dep-arrow{fill:var(--muted);opacity:.25;transition:opacity .25s,fill .25s}
+.gantt-dep-group:hover .gantt-dep-path{stroke:var(--pm);stroke-width:2.5;opacity:1}
+.gantt-dep-group:hover .gantt-dep-arrow{fill:var(--pm);opacity:1}
+.gantt-dep-group{pointer-events:all;cursor:pointer}
+.gantt-dep-hit{fill:transparent;stroke:transparent;stroke-width:14}
+.gantt-row.dep-highlight .gantt-bar{box-shadow:0 0 0 2px var(--pm),0 4px 16px rgba(20,184,166,.3);z-index:6}
 
 /* Milestone inputs in project modal */
 .ms-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
@@ -1904,20 +1910,34 @@ function renderGantt(){
     </div>`;
   });
 
-  // Dependency arrows (SVG overlay)
+  // Dependency arrows (SVG overlay with curved paths)
+  const depLinks = [];
   sorted.forEach(t => {
     if(!t.dependsOn || !taskPosMap[t.dependsOn] || !taskPosMap[t.id]) return;
-    const from = taskPosMap[t.dependsOn];
-    const to = taskPosMap[t.id];
-    const fromX = from.right;
-    const toX = to.left;
-    const fromY = from.row * 34 + 56;
-    const toY = to.row * 34 + 56;
-    html += `<svg class="gantt-dep-line" style="left:220px;top:0;width:calc(100% - 220px);height:${Math.max(fromY,toY)+20}px;position:absolute">
-      <line x1="${fromX}%" y1="${fromY}" x2="${toX}%" y2="${toY}"/>
-      <polygon points="${toX}%,${toY} ${toX-0.5}%,${toY-4} ${toX-0.5}%,${toY+4}"/>
-    </svg>`;
+    depLinks.push({fromId: t.dependsOn, toId: t.id, from: taskPosMap[t.dependsOn], to: taskPosMap[t.id]});
   });
+  if(depLinks.length){
+    const svgH = (sorted.length + milestones.length + 2) * 34 + 60;
+    html += `<svg class="gantt-dep-svg" style="height:${svgH}px">
+      <defs><marker id="dep-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6 Z" class="gantt-dep-arrow"/>
+      </marker></defs>`;
+    depLinks.forEach((d,i) => {
+      const x1 = d.from.right;
+      const x2 = d.to.left;
+      const y1 = d.from.row * 34 + 56;
+      const y2 = d.to.row * 34 + 56;
+      const midX = (x1 + x2) / 2;
+      const cpOffset = Math.abs(y2 - y1) * 0.3 + 15;
+      html += `<g class="gantt-dep-group" data-from="${d.fromId}" data-to="${d.toId}"
+                  onmouseenter="highlightDep('${d.fromId}','${d.toId}',true)"
+                  onmouseleave="highlightDep('${d.fromId}','${d.toId}',false)">
+        <path class="gantt-dep-hit" d="M ${x1}% ${y1} C ${midX+cpOffset/100*50}% ${y1}, ${midX-cpOffset/100*50}% ${y2}, ${x2}% ${y2}"/>
+        <path class="gantt-dep-path" d="M ${x1}% ${y1} C ${midX+cpOffset/100*50}% ${y1}, ${midX-cpOffset/100*50}% ${y2}, ${x2}% ${y2}" marker-end="url(#dep-arrow)"/>
+      </g>`;
+    });
+    html += `</svg>`;
+  }
 
   // Milestones
   milestones.forEach((m,i) => {
@@ -1996,6 +2016,15 @@ function showGanttTip(e, el, isMilestone){
   tip.classList.add('show');
 }
 function hideGanttTip(){ $('gantt-tip').classList.remove('show'); }
+
+window.highlightDep = function(fromId, toId, on){
+  document.querySelectorAll('.gantt-row').forEach(row => {
+    const rid = row.dataset.rowid;
+    if(rid === fromId || rid === toId){
+      row.classList.toggle('dep-highlight', on);
+    }
+  });
+};
 
 // Gantt context menu — click bar to change status or open editor
 window.showGanttCtx = function(e, taskId){
