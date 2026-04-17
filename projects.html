@@ -297,28 +297,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .gantt-zoom.active{background:var(--pm-bg);border-color:var(--pm);color:var(--pm)}
 .gantt-wrap{min-width:600px;position:relative}
 .gantt-header{display:flex;border-bottom:1px solid var(--b1);padding-bottom:6px;margin-bottom:8px}
-.gantt-label-col{width:220px;flex-shrink:0;font-size:10px;color:var(--muted);font-family:var(--mono);
+.gantt-label-col{width:240px;flex-shrink:0;font-size:11px;color:var(--muted);font-family:var(--mono);
   text-transform:uppercase;letter-spacing:.3px}
 .gantt-timeline{flex:1;display:flex;position:relative}
-.gantt-month{flex:1;text-align:center;font-size:9px;font-family:var(--mono);color:var(--muted);
-  letter-spacing:.3px;text-transform:uppercase;border-left:1px solid var(--b1);padding-left:4px}
-.gantt-row{display:flex;align-items:center;height:32px;margin-bottom:2px;transition:background .12s;border-radius:4px}
+.gantt-month{flex:1;text-align:center;font-size:10px;font-family:var(--mono);color:var(--muted);
+  letter-spacing:.3px;text-transform:uppercase;border-left:1px solid var(--b1);padding-left:6px}
+.gantt-row{display:flex;align-items:center;height:40px;margin-bottom:3px;transition:background .12s;border-radius:4px}
 .gantt-row:hover{background:var(--s2)}
-.gantt-row-label{width:220px;flex-shrink:0;font-size:11px;color:var(--text);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;padding:0 10px 0 4px;display:flex;align-items:center;gap:6px}
-.gantt-row-label .g-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.gantt-row-label .g-avatar{width:18px;height:18px;border-radius:50%;background:var(--pm);color:#000;
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:7px;
+.gantt-row-label{width:240px;flex-shrink:0;font-size:13px;color:var(--text);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;padding:0 12px 0 6px;display:flex;align-items:center;gap:8px}
+.gantt-row-label .g-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gantt-row-label .g-avatar{width:22px;height:22px;border-radius:50%;background:var(--pm);color:#000;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9px;
   font-family:var(--mono);flex-shrink:0}
-.gantt-row-bar{flex:1;position:relative;height:24px}
-.gantt-bar{position:absolute;height:20px;border-radius:5px;top:2px;min-width:6px;
-  cursor:pointer;display:flex;align-items:center;padding:0 6px;gap:4px;
-  transition:box-shadow .15s,transform .1s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.gantt-bar:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.35);z-index:5}
-.gantt-bar .bar-avatar{width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:7px;
-  font-family:var(--mono);flex-shrink:0;border:1px solid rgba(255,255,255,.3)}
-.gantt-bar .bar-text{font-size:9px;font-family:var(--mono);font-weight:600;color:#fff;
+.gantt-row-bar{flex:1;position:relative;height:32px}
+.gantt-bar{position:absolute;height:26px;border-radius:6px;top:3px;min-width:8px;
+  cursor:pointer;display:flex;align-items:center;padding:0 8px;gap:5px;
+  transition:box-shadow .15s,transform .1s;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.gantt-bar:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.4);z-index:5}
+.gantt-bar .bar-avatar{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:8px;
+  font-family:var(--mono);flex-shrink:0;border:1.5px solid rgba(255,255,255,.35)}
+.gantt-bar .bar-text{font-size:11px;font-family:var(--mono);font-weight:600;color:#fff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .gantt-bar .bar-pct{font-size:8px;font-family:var(--mono);color:rgba(255,255,255,.7);flex-shrink:0}
 .gantt-bar.st-todo{background:var(--todo);opacity:.5}
@@ -340,8 +340,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   font-family:var(--mono);font-weight:700;text-transform:uppercase}
 
 /* Milestones */
-.gantt-ms-row{display:flex;align-items:center;height:26px;margin-bottom:2px}
-.gantt-ms-label{width:220px;flex-shrink:0;font-size:11px;color:var(--pm);font-weight:600;
+.gantt-ms-row{display:flex;align-items:center;height:36px;margin-bottom:3px}
+.gantt-ms-label{width:240px;flex-shrink:0;font-size:13px;color:var(--pm);font-weight:600;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px 0 4px;
   display:flex;align-items:center;gap:6px}
 .gantt-ms-bar{flex:1;position:relative;height:20px}
@@ -369,15 +369,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .gantt-ctx-sep{height:1px;background:var(--b1);margin:4px 0}
 
 /* Dependency arrows on Gantt */
-.gantt-dep-svg{position:absolute;left:220px;top:0;width:calc(100% - 220px);pointer-events:none;z-index:0;overflow:visible}
-.gantt-dep-path{fill:none;stroke:var(--muted);stroke-width:1.5;opacity:.25;
+.gantt-dep-svg{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:4;overflow:visible}
+.gantt-dep-path{fill:none;stroke:var(--muted);stroke-width:2;opacity:.3;
   transition:opacity .25s,stroke .25s,stroke-width .25s}
-.gantt-dep-arrow{fill:var(--muted);opacity:.25;transition:opacity .25s,fill .25s}
-.gantt-dep-group:hover .gantt-dep-path{stroke:var(--pm);stroke-width:2.5;opacity:1}
-.gantt-dep-group:hover .gantt-dep-arrow{fill:var(--pm);opacity:1}
+.gantt-dep-arrow{fill:var(--muted);opacity:.3;transition:opacity .25s,fill .25s}
 .gantt-dep-group{pointer-events:all;cursor:pointer}
-.gantt-dep-hit{fill:transparent;stroke:transparent;stroke-width:14}
-.gantt-row.dep-highlight .gantt-bar{box-shadow:0 0 0 2px var(--pm),0 4px 16px rgba(20,184,166,.3);z-index:6}
+.gantt-dep-group:hover .gantt-dep-path{stroke:var(--pm);stroke-width:3;opacity:1}
+.gantt-dep-group:hover .gantt-dep-arrow{fill:var(--pm);opacity:1}
+.gantt-dep-hit{fill:transparent;stroke:transparent;stroke-width:16}
+.gantt-row.dep-highlight .gantt-bar{box-shadow:0 0 0 2px var(--pm),0 4px 16px rgba(20,184,166,.3)!important;z-index:6}
 
 /* Milestone inputs in project modal */
 .ms-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
@@ -1910,34 +1910,12 @@ function renderGantt(){
     </div>`;
   });
 
-  // Dependency arrows (SVG overlay with curved paths)
-  const depLinks = [];
+  // Store dep data for post-render SVG drawing
+  window._ganttDeps = [];
   sorted.forEach(t => {
     if(!t.dependsOn || !taskPosMap[t.dependsOn] || !taskPosMap[t.id]) return;
-    depLinks.push({fromId: t.dependsOn, toId: t.id, from: taskPosMap[t.dependsOn], to: taskPosMap[t.id]});
+    window._ganttDeps.push({fromId: t.dependsOn, toId: t.id});
   });
-  if(depLinks.length){
-    const svgH = (sorted.length + milestones.length + 2) * 34 + 60;
-    html += `<svg class="gantt-dep-svg" style="height:${svgH}px">
-      <defs><marker id="dep-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-        <path d="M0,0 L8,3 L0,6 Z" class="gantt-dep-arrow"/>
-      </marker></defs>`;
-    depLinks.forEach((d,i) => {
-      const x1 = d.from.right;
-      const x2 = d.to.left;
-      const y1 = d.from.row * 34 + 56;
-      const y2 = d.to.row * 34 + 56;
-      const midX = (x1 + x2) / 2;
-      const cpOffset = Math.abs(y2 - y1) * 0.3 + 15;
-      html += `<g class="gantt-dep-group" data-from="${d.fromId}" data-to="${d.toId}"
-                  onmouseenter="highlightDep('${d.fromId}','${d.toId}',true)"
-                  onmouseleave="highlightDep('${d.fromId}','${d.toId}',false)">
-        <path class="gantt-dep-hit" d="M ${x1}% ${y1} C ${midX+cpOffset/100*50}% ${y1}, ${midX-cpOffset/100*50}% ${y2}, ${x2}% ${y2}"/>
-        <path class="gantt-dep-path" d="M ${x1}% ${y1} C ${midX+cpOffset/100*50}% ${y1}, ${midX-cpOffset/100*50}% ${y2}, ${x2}% ${y2}" marker-end="url(#dep-arrow)"/>
-      </g>`;
-    });
-    html += `</svg>`;
-  }
 
   // Milestones
   milestones.forEach((m,i) => {
@@ -1977,7 +1955,7 @@ function renderGantt(){
   const todayPos = dayPos(today);
   const rowCount = sorted.length + milestones.length + (p.endDate?1:0);
   if(todayPos > 0 && todayPos < 100){
-    const lineH = rowCount*34+50;
+    const lineH = rowCount*43+60;
     html += `<div style="position:absolute;top:30px;left:calc(220px + (100% - 220px) * ${todayPos/100});width:0;height:${lineH}px;z-index:1">
       <div class="gantt-today" style="height:100%"></div>
       <div class="gantt-today-label">Today</div>
@@ -1986,6 +1964,83 @@ function renderGantt(){
 
   $('gantt-wrap').style.cssText = wrapWidth;
   $('gantt-wrap').innerHTML = html;
+
+  // Draw dependency arrows using actual pixel positions from rendered bars
+  requestAnimationFrame(drawGanttDeps);
+}
+
+function drawGanttDeps(){
+  const deps = window._ganttDeps || [];
+  const existing = document.querySelector('.gantt-dep-svg');
+  if(existing) existing.remove();
+  if(!deps.length) return;
+
+  const wrap = $('gantt-wrap');
+  if(!wrap) return;
+  const bars = {};
+  wrap.querySelectorAll('.gantt-bar[data-tid]').forEach(bar => {
+    bars[bar.dataset.tid] = bar;
+  });
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'gantt-dep-svg');
+  svg.style.height = wrap.scrollHeight + 'px';
+
+  const defs = document.createElementNS(svgNS, 'defs');
+  const marker = document.createElementNS(svgNS, 'marker');
+  marker.setAttribute('id', 'dep-arrow');
+  marker.setAttribute('markerWidth', '10');
+  marker.setAttribute('markerHeight', '8');
+  marker.setAttribute('refX', '10');
+  marker.setAttribute('refY', '4');
+  marker.setAttribute('orient', 'auto');
+  const markerPath = document.createElementNS(svgNS, 'path');
+  markerPath.setAttribute('d', 'M0,0 L10,4 L0,8 Z');
+  markerPath.setAttribute('class', 'gantt-dep-arrow');
+  marker.appendChild(markerPath);
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+
+  deps.forEach(d => {
+    const fromBar = bars[d.fromId];
+    const toBar = bars[d.toId];
+    if(!fromBar || !toBar) return;
+
+    const fRect = fromBar.getBoundingClientRect();
+    const tRect = toBar.getBoundingClientRect();
+    const x1 = fRect.right - wrapRect.left;
+    const y1 = fRect.top + fRect.height/2 - wrapRect.top;
+    const x2 = tRect.left - wrapRect.left;
+    const y2 = tRect.top + tRect.height/2 - wrapRect.top;
+
+    const dx = x2 - x1;
+    const cp = Math.max(30, Math.abs(dx) * 0.4);
+
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('class', 'gantt-dep-group');
+    g.setAttribute('data-from', d.fromId);
+    g.setAttribute('data-to', d.toId);
+    g.addEventListener('mouseenter', () => highlightDep(d.fromId, d.toId, true));
+    g.addEventListener('mouseleave', () => highlightDep(d.fromId, d.toId, false));
+
+    const hitPath = document.createElementNS(svgNS, 'path');
+    hitPath.setAttribute('class', 'gantt-dep-hit');
+    hitPath.setAttribute('d', `M${x1},${y1} C${x1+cp},${y1} ${x2-cp},${y2} ${x2},${y2}`);
+    g.appendChild(hitPath);
+
+    const visPath = document.createElementNS(svgNS, 'path');
+    visPath.setAttribute('class', 'gantt-dep-path');
+    visPath.setAttribute('d', `M${x1},${y1} C${x1+cp},${y1} ${x2-cp},${y2} ${x2},${y2}`);
+    visPath.setAttribute('marker-end', 'url(#dep-arrow)');
+    g.appendChild(visPath);
+
+    svg.appendChild(g);
+  });
+
+  wrap.style.position = 'relative';
+  wrap.appendChild(svg);
 }
 
 // Gantt tooltip
