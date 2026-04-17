@@ -152,3 +152,171 @@ document.addEventListener('DOMContentLoaded', function(){
     }, 2500);
   }
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IN-APP NOTIFICATION BELL — shows on every sub-page
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){
+  var uname = sessionStorage.getItem('faster_uname_v1');
+  if(!uname) return;
+
+  /* ── Inject bell HTML ─────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function(){
+    var slot = document.querySelector('.nav-right, .nav-r, .header-right, .hdr-right, .nav-actions');
+    if(!slot) return;
+
+    var bellWrap = document.createElement('div');
+    bellWrap.id = 'notif-bell-wrap';
+    bellWrap.style.cssText = 'position:relative;display:inline-flex';
+    bellWrap.innerHTML =
+      '<button id="notif-bell-btn" style="background:var(--s2,var(--surface2,#181f2a));border:1px solid var(--b1,var(--border,#232e3d));border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;transition:border-color .15s;flex-shrink:0" title="Notifications">🔔' +
+        '<span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-family:monospace;padding:0 4px;border:2px solid var(--bg,#0d1117)"></span>' +
+      '</button>' +
+      '<div id="notif-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;width:320px;max-height:400px;overflow-y:auto;background:var(--s1,var(--surface,#161b22));border:1px solid var(--b2,var(--border2,#2e3f54));border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:9500;padding:6px 0">' +
+        '<div style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--muted,#6a7d94);text-transform:uppercase;letter-spacing:.5px;font-family:monospace;border-bottom:1px solid var(--b1,var(--border,#232e3d));display:flex;justify-content:space-between;align-items:center">Notifications<button id="notif-clear-btn" style="background:none;border:none;color:var(--muted,#6a7d94);cursor:pointer;font-size:10px;font-family:monospace">Mark all read</button></div>' +
+        '<div id="notif-list"></div>' +
+      '</div>';
+
+    var themeBtn = document.getElementById('faster-theme-btn');
+    if(themeBtn && themeBtn.parentNode === slot){
+      slot.insertBefore(bellWrap, themeBtn);
+    } else {
+      slot.insertBefore(bellWrap, slot.firstChild);
+    }
+
+    document.getElementById('notif-bell-btn').onclick = function(e){
+      e.stopPropagation();
+      var dd = document.getElementById('notif-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    };
+    document.getElementById('notif-clear-btn').onclick = function(){
+      _markAllRead();
+    };
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('#notif-bell-wrap')){
+        document.getElementById('notif-dropdown').style.display = 'none';
+      }
+    });
+
+    _initNotifListener();
+  });
+
+  /* ── Firebase notification listener ───────────────────────────────────── */
+  var _notifRef = null;
+  var _notifs = {};
+
+  function _initNotifListener(){
+    var checkFB = setInterval(function(){
+      if(typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return;
+      clearInterval(checkFB);
+      try {
+        var db = firebase.app().database();
+        _notifRef = db.ref('faster_notifications/' + uname);
+        _notifRef.orderByChild('_ts').limitToLast(30).on('value', function(snap){
+          _notifs = snap.val() || {};
+          _renderNotifs();
+        });
+      } catch(e){ /* Firebase not ready yet */ }
+    }, 500);
+  }
+
+  function _renderNotifs(){
+    var entries = Object.entries(_notifs).map(function(kv){ return {id:kv[0], n:kv[1]}; });
+    entries.sort(function(a,b){ return (b.n._ts||0) - (a.n._ts||0); });
+    var unread = entries.filter(function(e){ return !e.n.read; }).length;
+
+    var badge = document.getElementById('notif-badge');
+    if(badge){
+      if(unread > 0){
+        badge.textContent = unread > 9 ? '9+' : unread;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    var list = document.getElementById('notif-list');
+    if(!list) return;
+    if(!entries.length){
+      list.innerHTML = '<div style="padding:24px 14px;text-align:center;color:var(--muted,#6a7d94);font-size:12px">No notifications yet</div>';
+      return;
+    }
+
+    list.innerHTML = entries.map(function(e){
+      var n = e.n;
+      var bg = n.read ? '' : 'background:var(--s2,var(--surface2,rgba(255,255,255,.03)));';
+      var icon = n.type === 'approved' ? '✅' : n.type === 'done' ? '🏁' : n.type === 'rejected' ? '↩️' : n.type === 'assigned' ? '📋' : '🔔';
+      var time = n._ts ? _timeAgo(n._ts) : '';
+      var href = n.href || '#';
+      return '<a href="' + href + '" style="display:flex;gap:10px;padding:10px 14px;text-decoration:none;color:inherit;transition:background .1s;border-bottom:1px solid var(--b1,var(--border,#232e3d));' + bg + '" onclick="window._markNotifRead(\'' + e.id + '\')" onmouseover="this.style.background=\'var(--s2,rgba(255,255,255,.05))\'" onmouseout="this.style.background=\'' + (n.read?'':'var(--s2,rgba(255,255,255,.03))') + '\'">' +
+        '<div style="font-size:16px;flex-shrink:0;margin-top:2px">' + icon + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:12px;color:var(--text,#e6edf3);line-height:1.4' + (n.read?'':';font-weight:600') + '">' + _escN(n.message||'Notification') + '</div>' +
+          '<div style="font-size:10px;color:var(--muted,#6a7d94);font-family:monospace;margin-top:2px">' + time + '</div>' +
+        '</div>' +
+        (!n.read ? '<div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-top:6px"></div>' : '') +
+      '</a>';
+    }).join('');
+  }
+
+  window._markNotifRead = function(id){
+    if(!_notifRef) return;
+    _notifRef.child(id + '/read').set(true);
+  };
+
+  function _markAllRead(){
+    if(!_notifRef) return;
+    var updates = {};
+    Object.keys(_notifs).forEach(function(id){
+      if(!_notifs[id].read) updates[id + '/read'] = true;
+    });
+    if(Object.keys(updates).length) _notifRef.update(updates);
+  }
+
+  function _timeAgo(ts){
+    var diff = (Date.now() - ts) / 1000;
+    if(diff < 60) return 'just now';
+    if(diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if(diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    if(diff < 604800) return Math.floor(diff/86400) + 'd ago';
+    return new Date(ts).toLocaleDateString();
+  }
+
+  function _escN(s){
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  /* ── Global helper to send notifications from any page ────────────────── */
+  window.FASTER_notify = function(targetUname, message, type, href){
+    if(!targetUname) return Promise.resolve();
+    try {
+      var db = firebase.app().database();
+      return db.ref('faster_notifications/' + targetUname).push({
+        message: message,
+        type: type || 'info',
+        href: href || '',
+        read: false,
+        _ts: Date.now()
+      });
+    } catch(e){ return Promise.resolve(); }
+  };
+
+  /* ── Global helper to post to Slack ───────────────────────────────────── */
+  window.FASTER_slackNotify = function(text, blocks){
+    try {
+      var db = firebase.app().database();
+      db.ref('faster_settings/slack_webhook').once('value', function(snap){
+        var url = snap.val();
+        if(!url) return;
+        var payload = blocks ? {text: text, blocks: blocks} : {text: text};
+        fetch(url, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        }).catch(function(){});
+      });
+    } catch(e){}
+  };
+})();

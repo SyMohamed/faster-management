@@ -931,6 +931,26 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
           <div class="rp-status" id="rp-status"></div>
         </div>
       </div>
+
+      <!-- Slack integration -->
+      <div class="admin-panel collapsed" id="slack-panel">
+        <div class="admin-panel-header collapsible" onclick="togglePanel('slack-panel')">
+          <h3>💬 Slack Notifications <span class="panel-chevron">▾</span></h3>
+          <span style="font-size:11px;color:var(--accent);font-family:var(--mono)">Admin</span>
+        </div>
+        <div class="admin-panel-body">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+            Connect a Slack channel to get notified when requests are approved or completed.<br>
+            In Slack: Channel settings → Integrations → Webhooks → <strong>Add Incoming Webhook</strong> → copy the URL.
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="slack-webhook-input" placeholder="https://hooks.slack.com/services/..." style="flex:1;font-size:13px;font-family:var(--mono);padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text)">
+            <button class="btn btn-sm" onclick="saveSlackWebhook()">Save</button>
+            <button class="btn-o btn-sm" onclick="testSlackWebhook()">Test</button>
+          </div>
+          <div id="slack-status" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:6px"></div>
+        </div>
+      </div>
     </div>
     <div class="activity-feed collapsed" id="activity-feed-panel">
       <div class="activity-feed-header" onclick="toggleActivityFeed()">
@@ -1327,7 +1347,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   function showAdminPanel(){
     const p=document.getElementById('admin-members-panel');
     if(p) p.style.display='';
-    loadMembers(); loadPendingRequests(); loadPendingPlanning(); loadReportPanel();
+    loadMembers(); loadPendingRequests(); loadPendingPlanning(); loadReportPanel(); loadSlackConfig();
   }
 
   function loadMembers(){
@@ -1844,6 +1864,36 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     await db.ref('faster_config/emailjs').set({serviceId:sid,templateId:tid,publicKey:pk});
     _toast('EmailJS config saved ✓','ok');
   };
+
+  /* ── Slack webhook ──────────────────────────────────────────────────── */
+  window.saveSlackWebhook=async function(){
+    const url=document.getElementById('slack-webhook-input').value.trim();
+    if(!url){ _toast('Paste your Slack webhook URL','warn'); return; }
+    await db.ref('faster_settings/slack_webhook').set(url);
+    document.getElementById('slack-status').textContent='Saved ✓';
+    _toast('Slack webhook saved','ok');
+  };
+  window.testSlackWebhook=async function(){
+    const url=document.getElementById('slack-webhook-input').value.trim();
+    if(!url){ _toast('Save a webhook URL first','warn'); return; }
+    document.getElementById('slack-status').textContent='Sending test…';
+    try{
+      await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'🧪 Test from FASTER Lab workspace — Slack integration is working!'})});
+      document.getElementById('slack-status').textContent='Test sent — check your Slack channel';
+      _toast('Test message sent to Slack','ok');
+    }catch(e){
+      document.getElementById('slack-status').textContent='Failed: '+e.message;
+      _toast('Slack test failed','warn');
+    }
+  };
+  function loadSlackConfig(){
+    if(!db) return;
+    db.ref('faster_settings/slack_webhook').once('value',s=>{
+      const url=s.val()||'';
+      document.getElementById('slack-webhook-input').value=url;
+      if(url) document.getElementById('slack-status').textContent='Connected';
+    });
+  }
 
   /* ── Load report panel data (called from showAdminPanel) ──────────────── */
   function loadReportPanel(){
