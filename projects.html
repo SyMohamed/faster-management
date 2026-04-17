@@ -96,20 +96,54 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .pm-toggle.on{background:var(--pm-bg);border-color:var(--pm)}
 .pm-toggle.on::after{left:20px;background:var(--pm)}
 
-/* Project tabs strip */
-.proj-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.proj-tabs::-webkit-scrollbar{display:none}
-.proj-tab{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;
-  cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:10px;
-  font-family:var(--font);color:var(--text);font-size:13px;font-weight:600;flex-shrink:0}
-.proj-tab:hover{border-color:var(--b2)}
-.proj-tab.on{background:var(--pm-bg);border-color:var(--pm);color:var(--pm)}
-.proj-tab .dot{width:8px;height:8px;border-radius:50%;background:var(--pm);flex-shrink:0}
-.proj-tab .count{font-size:10px;font-family:var(--mono);color:var(--muted);
-  background:var(--s3);padding:2px 6px;border-radius:10px}
-.proj-tab.on .count{background:rgba(20,184,166,.2);color:var(--pm)}
-.proj-tab.add{background:transparent;border-style:dashed;color:var(--muted)}
-.proj-tab.add:hover{color:var(--pm);border-color:var(--pm)}
+/* Project cards grid */
+.proj-tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:22px}
+@media(max-width:600px){.proj-tabs{grid-template-columns:1fr}}
+.proj-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;
+  cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative}
+.proj-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.3);border-color:var(--b2)}
+.proj-card.on{border-color:var(--pm);box-shadow:0 0 0 1px var(--pm),0 8px 24px rgba(20,184,166,.15)}
+.proj-card-cover{width:100%;height:100px;object-fit:cover;display:block}
+.proj-card-gradient{width:100%;height:100px;display:flex;align-items:flex-end;padding:10px 14px;
+  background:linear-gradient(135deg,var(--pc1,var(--pm)),var(--pc2,var(--prog)))}
+.proj-card-gradient .cover-icon{font-size:32px;opacity:.4;position:absolute;top:12px;right:14px}
+.proj-card-body{padding:14px 16px 12px}
+.proj-card-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-card-desc{font-size:11px;color:var(--muted);line-height:1.45;margin-bottom:10px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.proj-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.proj-card-footer-l{display:flex;align-items:center;gap:-4px}
+.proj-card-footer-l .tm{width:22px;height:22px;margin-left:-6px;border:2px solid var(--s1)}
+.proj-card-footer-l .tm:first-child{margin-left:0}
+.proj-card-stats{display:flex;gap:8px;font-size:10px;font-family:var(--mono);color:var(--muted)}
+.proj-card-stats .pcs{display:flex;align-items:center;gap:3px}
+.proj-card-stats .pcs-dot{width:6px;height:6px;border-radius:50%}
+.proj-card-progress{width:100%;height:3px;background:var(--b1);border-radius:2px;margin-top:10px;overflow:hidden}
+.proj-card-progress-fill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.proj-card .sort-btn{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.5);border:none;
+  cursor:pointer;font-size:10px;color:#fff;padding:2px 6px;border-radius:4px;opacity:0;transition:opacity .15s;z-index:2}
+.proj-card:hover .sort-btn{opacity:.7}
+.proj-card .sort-btn:hover{opacity:1}
+.proj-card-add{background:transparent;border:2px dashed var(--b1);border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  min-height:160px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:13px}
+.proj-card-add:hover{border-color:var(--pm);color:var(--pm);background:var(--pm-bg)}
+.proj-card-add .add-icon{font-size:28px;opacity:.5}
+
+/* Color picker in project modal */
+.color-picker{display:flex;gap:6px;flex-wrap:wrap}
+.color-swatch{width:28px;height:28px;border-radius:8px;cursor:pointer;border:2px solid transparent;
+  transition:all .15s;display:flex;align-items:center;justify-content:center}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.on{border-color:#fff;box-shadow:0 0 0 2px var(--pm)}
+.color-swatch .check{display:none;color:#fff;font-size:12px;font-weight:700}
+.color-swatch.on .check{display:block}
+
+/* Cover image preview */
+.cover-preview{width:100%;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--b1);margin-top:6px}
+.cover-upload{position:relative;display:inline-flex;align-items:center;gap:5px;margin-top:6px}
+.cover-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
 
 /* Project header card */
 .proj-hdr{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
@@ -595,6 +629,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <textarea id="pm-desc" placeholder="Short description of goals, scope, deliverables…"></textarea>
       </div>
       <div class="field">
+        <label>Card color</label>
+        <div class="color-picker" id="pm-colors"></div>
+      </div>
+      <div class="field">
+        <label>Cover image (optional)</label>
+        <input id="pm-cover-url" placeholder="Paste image URL or upload below">
+        <label class="btn-o btn-sm cover-upload" style="margin-top:6px">📷 Upload image<input type="file" accept="image/*" onchange="handleCoverUpload(event)"></label>
+        <img id="pm-cover-preview" class="cover-preview" style="display:none">
+      </div>
+      <div class="field">
         <label>Team members</label>
         <div class="member-pick" id="pm-members"></div>
       </div>
@@ -1021,20 +1065,48 @@ function renderProjectTabs(){
     const tasks = p.tasks ? Object.values(p.tasks) : [];
     const taskCount = tasks.length;
     const doneCount = tasks.filter(t=>t.status==='done').length;
+    const progCount = tasks.filter(t=>t.status==='prog').length;
+    const todoCount = tasks.filter(t=>t.status==='todo').length;
     const pct = taskCount ? Math.round(doneCount/taskCount*100) : 0;
-    const upBtn = idx > 0 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',-1)" title="Move left">◀</button>` : '';
-    const downBtn = idx < list.length-1 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',1)" title="Move right">▶</button>` : '';
-    return `<div class="proj-tab ${p.id===ACTIVE_PROJECT_ID?'on':''}" onclick="selectProject('${p.id}')">
-      ${upBtn}
-      <div class="dot"></div>
-      <span>${escH(p.name||'Untitled')}</span>
-      <span class="count">${doneCount}/${taskCount}</span>
-      ${downBtn}
-      <div class="proj-progress"><div class="proj-progress-fill" style="width:${pct}%"></div></div>
+    const ci = p.colorIdx || 0;
+    const c = PROJECT_COLORS[ci] || PROJECT_COLORS[0];
+    const team = Array.isArray(p.team) ? p.team : [];
+    const pmName = USERS[p.pmUname]?.name || p.pmUname || '';
+
+    let coverHtml;
+    if(p.coverImage && !p.coverImage.startsWith('data:')){
+      coverHtml = `<img class="proj-card-cover" src="${escH(p.coverImage)}" onerror="this.outerHTML='<div class=proj-card-gradient style=--pc1:${c.c1};--pc2:${c.c2}><div class=cover-icon>📋</div></div>'">`;
+    } else if(p.coverImage){
+      coverHtml = `<img class="proj-card-cover" src="${escH(p.coverImage)}">`;
+    } else {
+      coverHtml = `<div class="proj-card-gradient" style="--pc1:${c.c1};--pc2:${c.c2}"><div class="cover-icon">📋</div></div>`;
+    }
+
+    const sortBtns = list.length > 1 ? `<div>
+      ${idx > 0 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',-1)">◀</button>` : ''}
+      ${idx < list.length-1 ? `<button class="sort-btn" onclick="event.stopPropagation();moveProject('${p.id}',1)" style="left:auto;right:6px">▶</button>` : ''}
+    </div>` : '';
+
+    return `<div class="proj-card${p.id===ACTIVE_PROJECT_ID?' on':''}" onclick="selectProject('${p.id}')">
+      ${sortBtns}
+      ${coverHtml}
+      <div class="proj-card-body">
+        <div class="proj-card-name">${escH(p.name||'Untitled')}</div>
+        ${p.desc ? `<div class="proj-card-desc">${escH(p.desc)}</div>` : '<div class="proj-card-desc" style="opacity:.4">No description</div>'}
+        <div class="proj-card-footer">
+          <div class="proj-card-footer-l">${team.slice(0,4).map(u=>avatarHTML(u,22,'tm')).join('')}${team.length>4?`<span style="font-size:10px;color:var(--muted);margin-left:4px">+${team.length-4}</span>`:''}</div>
+          <div class="proj-card-stats">
+            <div class="pcs"><div class="pcs-dot" style="background:var(--done)"></div>${doneCount}</div>
+            <div class="pcs"><div class="pcs-dot" style="background:var(--prog)"></div>${progCount}</div>
+            <div class="pcs"><div class="pcs-dot" style="background:var(--todo)"></div>${todoCount}</div>
+          </div>
+        </div>
+        <div class="proj-card-progress"><div class="proj-card-progress-fill" style="width:${pct}%;background:linear-gradient(90deg,${c.c1},${c.c2})"></div></div>
+      </div>
     </div>`;
   }).join('');
   if(ME_IS_PM()){
-    tabs.innerHTML += `<div class="proj-tab add" onclick="openNewProject()">+ New project</div>`;
+    tabs.innerHTML += `<div class="proj-card-add" onclick="openNewProject()"><div class="add-icon">+</div>New project</div>`;
   }
 }
 
@@ -1295,15 +1367,67 @@ function animateCount(id, target){
 // ════════════════════════════════════════════════
 // PROJECT MODAL
 // ════════════════════════════════════════════════
+const PROJECT_COLORS = [
+  {c1:'#14b8a6',c2:'#0ea5e9',label:'Teal'},
+  {c1:'#3b82f6',c2:'#6366f1',label:'Blue'},
+  {c1:'#8b5cf6',c2:'#a855f7',label:'Purple'},
+  {c1:'#ec4899',c2:'#f43f5e',label:'Pink'},
+  {c1:'#f97316',c2:'#eab308',label:'Orange'},
+  {c1:'#22c55e',c2:'#14b8a6',label:'Green'},
+  {c1:'#ef4444',c2:'#f97316',label:'Red'},
+  {c1:'#6366f1',c2:'#ec4899',label:'Indigo'},
+  {c1:'#0ea5e9',c2:'#22c55e',label:'Cyan'},
+  {c1:'#64748b',c2:'#475569',label:'Slate'}
+];
+let selectedColor = 0;
+
+function renderColorPicker(idx){
+  selectedColor = idx || 0;
+  $('pm-colors').innerHTML = PROJECT_COLORS.map((c,i) =>
+    `<div class="color-swatch${i===selectedColor?' on':''}" style="background:linear-gradient(135deg,${c.c1},${c.c2})" onclick="pickColor(${i})" title="${c.label}"><span class="check">✓</span></div>`
+  ).join('');
+}
+window.pickColor = function(i){
+  selectedColor = i;
+  document.querySelectorAll('.color-swatch').forEach((el,j)=>el.classList.toggle('on',j===i));
+};
+
+window.handleCoverUpload = function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 500000){ toast('Image too large (max 500KB)','err'); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    $('pm-cover-url').value = ev.target.result;
+    $('pm-cover-preview').src = ev.target.result;
+    $('pm-cover-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+};
+
+$('pm-cover-url').addEventListener('input', function(){
+  const v = this.value.trim();
+  if(v){
+    $('pm-cover-preview').src = v;
+    $('pm-cover-preview').style.display = 'block';
+  } else {
+    $('pm-cover-preview').style.display = 'none';
+  }
+});
+
 window.openNewProject = function(){
   if(!ME_IS_PM()){ toast('Only PMs and admins can create projects','err'); return; }
   editingProjectId = null;
   $('projModalTitle').textContent = 'New project';
   $('pm-name').value = '';
   $('pm-desc').value = '';
+  $('pm-cover-url').value = '';
+  $('pm-cover-preview').style.display = 'none';
   $('pm-start').value = '';
   $('pm-end').value = '';
   $('pm-del-btn').style.display = 'none';
+  renderColorPicker(0);
   renderMemberPicker([ME_UNAME]);
   renderMilestoneInputs([]);
   openModal('projModal');
@@ -1318,8 +1442,12 @@ window.openEditProject = function(id){
   $('projModalTitle').textContent = 'Edit project';
   $('pm-name').value  = p.name || '';
   $('pm-desc').value  = p.desc || '';
+  $('pm-cover-url').value = p.coverImage || '';
+  if(p.coverImage){ $('pm-cover-preview').src=p.coverImage; $('pm-cover-preview').style.display='block'; }
+  else $('pm-cover-preview').style.display='none';
   $('pm-start').value = p.startDate || '';
   $('pm-end').value   = p.endDate || '';
+  renderColorPicker(p.colorIdx || 0);
   renderMilestoneInputs(p.milestones || []);
   $('pm-del-btn').style.display = (IS_ADMIN || p.pmUname === ME_UNAME) ? 'inline-flex' : 'none';
   renderMemberPicker(p.team || []);
@@ -1384,12 +1512,14 @@ window.saveProject = async function(){
   const team = getPickedMembers();
   const payload = {
     name,
-    desc:      $('pm-desc').value.trim(),
+    desc:       $('pm-desc').value.trim(),
     team,
+    colorIdx:   selectedColor,
+    coverImage: $('pm-cover-url').value.trim(),
     milestones: getMilestones(),
-    startDate: $('pm-start').value || '',
-    endDate:   $('pm-end').value || '',
-    updatedAt: new Date().toISOString()
+    startDate:  $('pm-start').value || '',
+    endDate:    $('pm-end').value || '',
+    updatedAt:  new Date().toISOString()
   };
   try {
     if(editingProjectId){
