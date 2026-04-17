@@ -1163,7 +1163,7 @@ function renderProjectHeader(){
         ${canEdit ? `<button class="btn btn-sm" onclick="openNewTask('todo')">+ Add task</button>` : ''}
         ${canEdit ? `<button class="btn-o btn-sm" onclick="openNewMilestone()">◆ Add milestone</button>` : ''}
         ${canEdit ? `<label class="btn-o btn-sm upload-btn">📎 Import Excel<input type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)"></label>` : ''}
-        ${canEdit ? `<button class="btn-o btn-sm" onclick="openEditProject('${p.id}')">Edit project</button>` : ''}
+        ${canEdit ? `<button class="btn-o btn-sm" onclick="openEditProject('${ACTIVE_PROJECT_ID}')">Edit project</button>` : ''}
       </div>
     </div>
   `;
