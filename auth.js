@@ -303,59 +303,38 @@ document.addEventListener('DOMContentLoaded', function(){
     } catch(e){ return Promise.resolve(); }
   };
 
-  /* ── Global helper to post to Slack ───────────────────────────────────── */
-  window.FASTER_slackNotify = function(text, targetUname){
+  /* ── Global helper to send email notification ─────────────────────────── */
+  window.FASTER_emailNotify = function(targetUname, subject, message){
     try {
       var db = firebase.app().database();
-      // Get Slack settings
-      db.ref('faster_settings').once('value', function(snap){
-        var settings = snap.val() || {};
-        var webhookUrl = settings.slack_webhook;
-        var botToken = settings.slack_bot_token;
-
-        // If target user has a Slack ID, try DM first
-        if(targetUname){
-          db.ref('faster_users/' + targetUname + '/slackId').once('value', function(uSnap){
-            var slackId = uSnap.val();
-            if(slackId && botToken){
-              // Send DM via bot token (through proxy if configured)
-              var proxyUrl = settings.slack_proxy_url;
-              _sendSlackDM(botToken, slackId, text, proxyUrl);
-            }
-            // Also post to channel with @mention
-            if(webhookUrl){
-              var mention = slackId ? '<@' + slackId + '> ' : '';
-              _postWebhook(webhookUrl, mention + text);
-            }
-          });
-        } else if(webhookUrl){
-          _postWebhook(webhookUrl, text);
-        }
+      if(!targetUname) return;
+      db.ref('faster_users/' + targetUname + '/email').once('value', function(uSnap){
+        var email = uSnap.val();
+        if(!email) return;
+        db.ref('faster_config/emailjs').once('value', function(cfgSnap){
+          var cfg = cfgSnap.val();
+          if(!cfg || !cfg.serviceId || !cfg.templateId || !cfg.publicKey) return;
+          if(typeof emailjs === 'undefined'){
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+            s.onload = function(){ _doSendEmail(cfg, email, subject, message); };
+            document.head.appendChild(s);
+          } else {
+            _doSendEmail(cfg, email, subject, message);
+          }
+        });
       });
     } catch(e){}
   };
 
-  function _postWebhook(url, text){
-    fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({text: text})
-    }).catch(function(){});
-  }
-
-  function _sendSlackDM(token, slackUserId, text, proxyUrl){
-    var apiUrl = proxyUrl || 'https://slack.com/api/chat.postMessage';
-    fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({
-        channel: slackUserId,
-        text: text,
-        unfurl_links: false
-      })
-    }).catch(function(){});
+  function _doSendEmail(cfg, toEmail, subject, message){
+    try {
+      emailjs.init(cfg.publicKey);
+      emailjs.send(cfg.serviceId, cfg.templateId, {
+        to_email: toEmail,
+        subject: subject || 'FASTER Lab Notification',
+        message: message
+      }).catch(function(){});
+    } catch(e){}
   }
 })();

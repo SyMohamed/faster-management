@@ -572,6 +572,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     <div class="wau-box-name">Join FASTER Lab</div>
     <p class="wau-box-sub">Your request will be reviewed by an admin</p>
     <input class="login-input" id="reg-name" placeholder="Full name" autocomplete="name">
+    <input class="login-input" id="reg-email" placeholder="Email address" type="email" autocomplete="email">
     <input class="login-input" id="reg-user" placeholder="Username (letters &amp; numbers)"
            autocomplete="username">
     <input class="login-input" id="reg-pass" type="password" placeholder="Password (min 6 chars)"
@@ -602,22 +603,18 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   </div>
 </div>
 
-<div id="slack-link-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9500;align-items:center;justify-content:center" onclick="if(event.target===this)closeSlackLink()">
+<div id="email-link-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9500;align-items:center;justify-content:center" onclick="if(event.target===this)closeEmailLink()">
   <div class="pw-change-box" style="max-width:460px">
-    <h3>💬 Link Your Slack ID</h3>
+    <h3>📧 Update Your Email</h3>
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
-      When your requests are approved or tasks are assigned, you'll get a <strong>direct Slack DM</strong>.<br><br>
-      <strong>How to find your Slack Member ID:</strong><br>
-      1. Open Slack → click your profile picture → <strong>Profile</strong><br>
-      2. Click the <strong>⋮ More</strong> button → <strong>Copy member ID</strong><br>
-      3. Paste it below (looks like <code style="background:var(--surface2);padding:1px 6px;border-radius:4px;font-family:monospace">U04ABCD1234</code>)
+      Your email is used for notifications — you'll receive an email when your requests are approved or tasks are assigned.
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <input class="login-input" id="slack-id-input" placeholder="Your Slack Member ID (e.g. U04ABCD1234)" style="font-family:monospace">
-      <div id="slack-id-status" style="font-size:11px;color:var(--muted);font-family:monospace"></div>
+      <input class="login-input" id="email-link-input" placeholder="your.name@email.com" type="email">
+      <div id="email-link-status" style="font-size:11px;color:var(--muted);font-family:monospace"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
-        <button class="login-btn" style="background:var(--surface2);color:var(--text);width:auto" onclick="closeSlackLink()">Cancel</button>
-        <button class="login-btn" style="width:auto" onclick="saveSlackId()">Save</button>
+        <button class="login-btn" style="background:var(--surface2);color:var(--text);width:auto" onclick="closeEmailLink()">Cancel</button>
+        <button class="login-btn" style="width:auto" onclick="saveUserEmail()">Save</button>
       </div>
     </div>
   </div>
@@ -669,7 +666,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
       <div class="user-menu" id="user-menu">
         <button class="user-menu-item" onclick="openPwChange()">🔑 Change Password</button>
         <button class="user-menu-item" onclick="triggerPhotoUpload()" id="photo-menu-btn">📷 Change Profile Photo</button>
-        <button class="user-menu-item" onclick="openSlackLink()">💬 Link Slack ID</button>
+        <button class="user-menu-item" onclick="openEmailLink()">📧 Update Email</button>
         <div class="user-menu-sep"></div>
         <button class="user-menu-item" style="color:var(--red)" onclick="signOut()">⏏ Sign Out</button>
       </div>
@@ -1147,7 +1144,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
 
   /* ── Registration form ───────────────────────────────────────────────── */
   window.showRegForm=function(){
-    ['reg-name','reg-user','reg-pass','reg-pass2'].forEach(id=>document.getElementById(id).value='');
+    ['reg-name','reg-email','reg-user','reg-pass','reg-pass2'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('reg-err').textContent='';
     document.getElementById('reg-form-overlay').classList.add('open');
     setTimeout(()=>document.getElementById('reg-name').focus(),120);
@@ -1157,10 +1154,12 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     const errEl=document.getElementById('reg-err');
     errEl.textContent=''; errEl.style.color='var(--red)';
     const name=document.getElementById('reg-name').value.trim();
+    const email=document.getElementById('reg-email').value.trim();
     const username=document.getElementById('reg-user').value.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'');
     const pass=document.getElementById('reg-pass').value;
     const pass2=document.getElementById('reg-pass2').value;
-    if(!name||!username||!pass){ errEl.textContent='Fill in all fields'; return; }
+    if(!name||!email||!username||!pass){ errEl.textContent='Fill in all fields'; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ errEl.textContent='Enter a valid email address'; return; }
     if(pass.length<6){ errEl.textContent='Password must be at least 6 characters'; return; }
     if(pass!==pass2){ errEl.textContent='Passwords do not match'; return; }
     if(!db){ errEl.textContent='Not connected to server'; return; }
@@ -1171,7 +1170,7 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     if(uSnap.val()){ errEl.textContent='Username already taken'; return; }
     if(pSnap.val()){ errEl.textContent='A request for this username is already pending'; return; }
     const hash=await sha256(pass);
-    await db.ref('faster_pending').push({name,username,passwordHash:hash,requestedAt:new Date().toISOString(),status:'pending'});
+    await db.ref('faster_pending').push({name,email,username,passwordHash:hash,requestedAt:new Date().toISOString(),status:'pending'});
     errEl.style.color='var(--green)';
     errEl.textContent='Request submitted! An admin will review it soon.';
     setTimeout(()=>{ closeRegForm(); errEl.textContent=''; },3000);
@@ -1352,29 +1351,30 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
   };
   window.closePwChange=function(){ document.getElementById('pw-change-overlay').classList.remove('open'); };
 
-  /* ── Slack ID linking ─────────────────────────────────────────────── */
-  window.openSlackLink=function(){
+  /* ── Email linking ─────────────────────────────────────────────── */
+  window.openEmailLink=function(){
     document.getElementById('user-menu').classList.remove('open');
-    const overlay=document.getElementById('slack-link-overlay');
+    const overlay=document.getElementById('email-link-overlay');
     overlay.style.display='flex';
     const uname=sessionStorage.getItem(UNAME_KEY)||'';
     if(db && uname){
-      db.ref('faster_users/'+uname+'/slackId').once('value',s=>{
-        const sid=s.val()||'';
-        document.getElementById('slack-id-input').value=sid;
-        document.getElementById('slack-id-status').textContent=sid?'Currently linked: '+sid:'Not linked yet';
+      db.ref('faster_users/'+uname+'/email').once('value',s=>{
+        const em=s.val()||'';
+        document.getElementById('email-link-input').value=em;
+        document.getElementById('email-link-status').textContent=em?'Current: '+em:'No email set';
       });
     }
   };
-  window.closeSlackLink=function(){ document.getElementById('slack-link-overlay').style.display='none'; };
-  window.saveSlackId=async function(){
-    const sid=document.getElementById('slack-id-input').value.trim();
+  window.closeEmailLink=function(){ document.getElementById('email-link-overlay').style.display='none'; };
+  window.saveUserEmail=async function(){
+    const em=document.getElementById('email-link-input').value.trim();
     const uname=sessionStorage.getItem(UNAME_KEY)||'';
     if(!uname||!db){ _toast('Not signed in','warn'); return; }
-    await db.ref('faster_users/'+uname+'/slackId').set(sid||null);
-    document.getElementById('slack-id-status').textContent=sid?'Linked: '+sid:'Removed';
-    _toast(sid?'Slack ID linked — you\'ll receive DMs':'Slack ID removed','ok');
-    closeSlackLink();
+    if(em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ _toast('Enter a valid email','warn'); return; }
+    await db.ref('faster_users/'+uname+'/email').set(em||null);
+    document.getElementById('email-link-status').textContent=em?'Saved: '+em:'Removed';
+    _toast(em?'Email saved — you\'ll receive notifications':'Email removed','ok');
+    closeEmailLink();
   };
 
   window.changePassword=async function(){
@@ -1490,16 +1490,16 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
         '<div class="pending-row">'+
           '<div class="pending-info">'+
             '<div class="pending-name">'+escHtml(r.name)+'</div>'+
-            '<div class="pending-meta">@'+escHtml(r.username)+' &middot; '+new Date(r.requestedAt).toLocaleDateString()+'</div>'+
+            '<div class="pending-meta">@'+escHtml(r.username)+' &middot; '+(r.email?escHtml(r.email)+' &middot; ':'')+new Date(r.requestedAt).toLocaleDateString()+'</div>'+
           '</div>'+
           '<div class="pending-actions">'+
-            '<button class="btn-approve" data-rid="'+rid+'" data-uname="'+escAttr(r.username)+'" data-name="'+escAttr(r.name)+'" data-hash="'+escAttr(r.passwordHash)+'">Approve</button>'+
+            '<button class="btn-approve" data-rid="'+rid+'" data-uname="'+escAttr(r.username)+'" data-name="'+escAttr(r.name)+'" data-hash="'+escAttr(r.passwordHash)+'" data-email="'+escAttr(r.email||'')+'">Approve</button>'+
             '<button class="btn-reject" data-rid="'+rid+'">Reject</button>'+
           '</div>'+
         '</div>'
       ).join('');
       list.querySelectorAll('.btn-approve').forEach(btn=>{
-        btn.onclick=()=>approveRequest(btn.dataset.rid,btn.dataset.uname,btn.dataset.name,btn.dataset.hash);
+        btn.onclick=()=>approveRequest(btn.dataset.rid,btn.dataset.uname,btn.dataset.name,btn.dataset.hash,btn.dataset.email);
       });
       list.querySelectorAll('.btn-reject').forEach(btn=>{ btn.onclick=()=>rejectRequest(btn.dataset.rid); });
     });
@@ -1640,12 +1640,14 @@ html{font-size:clamp(13px, 1vw + 4px, 22px)}body{font-size:1rem}
     }catch(e){ _toast('Error rejecting extension','err'); console.error(e); }
   };
 
-  window.approveRequest=async function(rid,username,name,passwordHash){
+  window.approveRequest=async function(rid,username,name,passwordHash,email){
     if(!db) return;
     try{
       const snap=await db.ref('faster_users/'+username).once('value');
       if(snap.val()){ _toast('Username @'+username+' already exists. Ask them to use a different one.','warn'); return; }
-      await db.ref('faster_users/'+username).set({name,passwordHash,role:'member',createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()});
+      const userData={name,passwordHash,role:'member',createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()};
+      if(email) userData.email=email;
+      await db.ref('faster_users/'+username).set(userData);
       await db.ref('faster_pending/'+rid).remove();
       _toast(name+' approved and added!','ok');
     }catch(e){ console.error(e); _toast('Error approving request','err'); }

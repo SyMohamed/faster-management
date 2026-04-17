@@ -1312,16 +1312,14 @@ function confirmApproval() {
         'approved', 'orders.html');
     }
 
-    // Slack notification (targeted to requester)
-    if(typeof FASTER_slackNotify === 'function'){
-      FASTER_slackNotify(
-        '✅ *' + rt + ' Request Approved*\n' +
-        '*Item:* ' + (r.item||'—') + '\n' +
-        '*Requested by:* ' + (r.requestedBy||'—') + '\n' +
-        '*Approved by:* ' + ME + '\n' +
-        '*' + (refLabels[rt]||'Ref') + ':* ' + ref +
-        (comment ? '\n*Note:* ' + comment : ''),
-        requesterUname
+    // Email notification to requester
+    if(requesterUname && typeof FASTER_emailNotify === 'function'){
+      FASTER_emailNotify(requesterUname,
+        'Your ' + rt + ' request has been approved',
+        'Hi,\n\nYour ' + rt + ' request "' + (r.item||'') + '" has been approved by ' + ME + '.\n\n' +
+        (refLabels[rt]||'Reference') + ': ' + ref +
+        (comment ? '\nNote: ' + comment : '') +
+        '\n\nYou can track this in the FASTER Lab Orders Tracker.\n\n— FASTER Lab'
       );
     }
   }).catch(e => toast('Error: ' + e.message, 'toast-red'));
@@ -1355,14 +1353,12 @@ function markRequestDone(key) {
         'Your ' + rt + ' request "' + (r.item||'').slice(0,40) + '" is complete!',
         'done', 'orders.html');
     }
-    if(typeof FASTER_slackNotify === 'function'){
-      FASTER_slackNotify(
-        '🏁 *' + rt + ' Request Complete*\n' +
-        '*Item:* ' + (r.item||'—') + '\n' +
-        '*Requested by:* ' + (r.requestedBy||'—') + '\n' +
-        '*Completed by:* ' + ME +
-        (r.trackingNumber ? '\n*Tracking:* ' + r.trackingNumber : ''),
-        requesterUname
+    if(requesterUname && typeof FASTER_emailNotify === 'function'){
+      FASTER_emailNotify(requesterUname,
+        'Your ' + rt + ' request is complete',
+        'Hi,\n\nYour ' + rt + ' request "' + (r.item||'') + '" has been completed by ' + ME + '.' +
+        (r.trackingNumber ? '\nTracking: ' + r.trackingNumber : '') +
+        '\n\n— FASTER Lab'
       );
     }
   }).catch(e => toast('Error: ' + e.message, 'toast-red'));
