@@ -658,8 +658,38 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
+<!-- ══════════ MODAL: ADD / EDIT MILESTONE ══════════ -->
+<div class="modal" id="msModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2 id="msModalTitle">Add milestone</h2>
+      <button class="modal-close" onclick="closeModal('msModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Milestone name</label>
+        <input id="ms-name" placeholder="e.g. Phase 1 complete, Design review, Final delivery">
+      </div>
+      <div class="field">
+        <label>Target date</label>
+        <input id="ms-date" type="date">
+      </div>
+      <div class="field">
+        <label>Description (optional)</label>
+        <textarea id="ms-desc" placeholder="What does hitting this milestone mean?"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="ms-del-btn" onclick="deleteMilestone()" style="display:none">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn-o" onclick="closeModal('msModal')">Cancel</button>
+      <button class="btn" onclick="saveMilestone()">Save milestone</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
-<div class="kbd-hint" id="kbd-hint"><kbd>N</kbd> New task · <kbd>P</kbd> New project · <kbd>?</kbd> Shortcuts</div>
+<div class="kbd-hint" id="kbd-hint"><kbd>N</kbd> New task · <kbd>M</kbd> New milestone · <kbd>P</kbd> New project · <kbd>?</kbd> Shortcuts</div>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -1005,6 +1035,7 @@ function renderProjectHeader(){
       </div>
       <div class="proj-hdr-actions">
         ${canEdit ? `<button class="btn btn-sm" onclick="openNewTask('todo')">+ Add task</button>` : ''}
+        ${canEdit ? `<button class="btn-o btn-sm" onclick="openNewMilestone()">◆ Add milestone</button>` : ''}
         ${canEdit ? `<label class="btn-o btn-sm upload-btn">📎 Import Excel<input type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)"></label>` : ''}
         ${canEdit ? `<button class="btn-o btn-sm" onclick="openEditProject('${p.id}')">Edit project</button>` : ''}
       </div>
@@ -1554,6 +1585,7 @@ function renderGantt(){
   const taskArr = Object.entries(tasks).map(([id,t])=>({id,...t}));
   if(!taskArr.length && !(p.milestones && p.milestones.length)){ $('gantt-section').style.display='none'; return; }
   $('gantt-section').style.display='block';
+  const canEdit = canEditProject(p);
 
   const today = new Date(); today.setHours(0,0,0,0);
   let minDate = new Date(today), maxDate = new Date(today);
@@ -1643,12 +1675,15 @@ function renderGantt(){
     const mD = new Date(m.date+'T00:00:00');
     if(isNaN(mD)) return;
     const mPos = dayPos(mD);
+    const msDesc = m.desc ? ' — '+m.desc : '';
     html += `<div class="gantt-ms-row">
-      <div class="gantt-ms-label">◆ ${escH(m.name||'Milestone '+(i+1))}</div>
+      <div class="gantt-ms-label" ${canEdit ? `style="cursor:pointer" onclick="openEditMilestone(${i})"` : ''}>◆ ${escH(m.name||'Milestone '+(i+1))}</div>
       <div class="gantt-ms-bar">
         <div class="gantt-diamond" style="left:calc(${mPos}% - 7px)"
-             title="${escH(m.name||'Milestone')}: ${m.date}"
-             onmouseenter="showGanttTip(event,this,true)" onmouseleave="hideGanttTip()"></div>
+             title="${escH(m.name||'Milestone')}: ${m.date}${escH(msDesc)}"
+             ${canEdit ? `onclick="openEditMilestone(${i})"` : ''}
+             onmouseenter="showGanttTip(event,this,true)" onmouseleave="hideGanttTip()"
+             data-title="${escH(m.name||'Milestone')}" data-due="${m.date}" data-desc="${escH(m.desc||'')}"></div>
       </div>
     </div>`;
   });
@@ -1688,7 +1723,10 @@ function renderGantt(){
 function showGanttTip(e, el, isMilestone){
   const tip = $('gantt-tip');
   if(isMilestone){
-    tip.innerHTML = `<h5>${escH(el.title||'Milestone')}</h5>`;
+    const d = el.dataset || {};
+    tip.innerHTML = `<h5>◆ ${escH(d.title||el.title||'Milestone')}</h5>
+      ${d.due ? `<div class="tip-row"><span>Target date</span><b>${d.due}</b></div>` : ''}
+      ${d.desc ? `<div class="tip-row" style="flex-direction:column;gap:2px"><span>Description</span><span style="color:var(--text)">${escH(d.desc)}</span></div>` : ''}`;
   } else {
     const d = el.dataset;
     const priLabel = {low:'Low',med:'Medium',hi:'High',crit:'Critical'}[d.pri]||'Medium';
@@ -1787,6 +1825,83 @@ window.rejectTask = async function(){
     toast('Task returned to assignee with feedback','ok');
   } catch(e){
     toast('Failed to reject: '+(e.message||''),'err');
+  }
+};
+
+// ════════════════════════════════════════════════
+// MILESTONE MODAL (standalone add/edit)
+// ════════════════════════════════════════════════
+let editingMilestoneIdx = null;
+
+window.openNewMilestone = function(){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  if(!canEditProject(p)){ toast('Only the PM or an admin can add milestones','err'); return; }
+  editingMilestoneIdx = null;
+  $('msModalTitle').textContent = 'Add milestone';
+  $('ms-name').value = '';
+  $('ms-date').value = '';
+  $('ms-desc').value = '';
+  $('ms-del-btn').style.display = 'none';
+  openModal('msModal');
+  $('ms-name').focus();
+};
+
+window.openEditMilestone = function(idx){
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p || !canEditProject(p)) return;
+  const ms = Array.isArray(p.milestones) ? p.milestones : [];
+  if(!ms[idx]) return;
+  editingMilestoneIdx = idx;
+  $('msModalTitle').textContent = 'Edit milestone';
+  $('ms-name').value = ms[idx].name || '';
+  $('ms-date').value = ms[idx].date || '';
+  $('ms-desc').value = ms[idx].desc || '';
+  $('ms-del-btn').style.display = 'inline-flex';
+  openModal('msModal');
+};
+
+window.saveMilestone = async function(){
+  const name = $('ms-name').value.trim();
+  const date = $('ms-date').value;
+  if(!name){ toast('Milestone name is required','err'); return; }
+  if(!date){ toast('Target date is required','err'); return; }
+  const desc = $('ms-desc').value.trim();
+
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  const ms = Array.isArray(p.milestones) ? [...p.milestones] : [];
+
+  if(editingMilestoneIdx !== null && ms[editingMilestoneIdx]){
+    ms[editingMilestoneIdx] = {name, date, desc};
+  } else {
+    ms.push({name, date, desc});
+  }
+
+  ms.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+  try {
+    await db.ref('faster_projects/'+ACTIVE_PROJECT_ID+'/milestones').set(ms);
+    closeModal('msModal');
+    toast(editingMilestoneIdx !== null ? 'Milestone updated' : 'Milestone added','ok');
+  } catch(e){
+    toast('Failed to save milestone: '+(e.message||''),'err');
+  }
+};
+
+window.deleteMilestone = async function(){
+  if(editingMilestoneIdx === null) return;
+  if(!confirm('Delete this milestone?')) return;
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  const ms = Array.isArray(p.milestones) ? [...p.milestones] : [];
+  ms.splice(editingMilestoneIdx, 1);
+  try {
+    await db.ref('faster_projects/'+ACTIVE_PROJECT_ID+'/milestones').set(ms.length ? ms : null);
+    closeModal('msModal');
+    toast('Milestone deleted','ok');
+  } catch(e){
+    toast('Failed to delete milestone','err');
   }
 };
 
@@ -1943,6 +2058,10 @@ document.addEventListener('keydown', function(e){
     e.preventDefault();
     if(ACTIVE_PROJECT_ID && !READONLY) openNewTask('todo');
   }
+  if(e.key === 'm' || e.key === 'M'){
+    e.preventDefault();
+    if(ACTIVE_PROJECT_ID && !READONLY) openNewMilestone();
+  }
   if(e.key === 'p' || e.key === 'P'){
     e.preventDefault();
     if(ME_IS_PM() && !READONLY) openNewProject();
@@ -1952,7 +2071,7 @@ document.addEventListener('keydown', function(e){
     hint.style.opacity = hint.style.opacity === '1' ? '0.6' : '1';
   }
   if(e.key === 'Escape'){
-    ['projModal','taskModal','reviewModal'].forEach(id => closeModal(id));
+    ['projModal','taskModal','reviewModal','msModal'].forEach(id => closeModal(id));
   }
 });
 
