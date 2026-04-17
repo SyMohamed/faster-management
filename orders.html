@@ -222,6 +222,34 @@ body{font-size:1rem}
 .nom-opt{padding:8px 12px;cursor:pointer;font-size:13px;transition:background .1s}
 .nom-opt:hover{background:var(--surface2)}
 
+/* Request type badges */
+.type-badge{font-size:10px;font-family:var(--mono);font-weight:600;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.type-order{background:rgba(88,166,255,.12);color:var(--po)}
+.type-lem{background:rgba(168,85,247,.12);color:var(--cancelled)}
+.type-corelabs{background:rgba(20,184,166,.12);color:#14b8a6}
+.type-other{background:rgba(106,125,148,.12);color:var(--muted)}
+
+/* Tracking number display */
+.req-tracking{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:3px 10px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text);margin-top:6px}
+.req-tracking .track-label{font-size:10px;color:var(--muted);font-weight:400}
+
+/* Activity log */
+.req-log{margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.req-log-title{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.log-entry{display:flex;gap:10px;padding:6px 0;font-size:12px;position:relative}
+.log-entry::before{content:'';position:absolute;left:5px;top:18px;bottom:-6px;width:1px;background:var(--border)}
+.log-entry:last-child::before{display:none}
+.log-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:2px;border:2px solid var(--surface)}
+.log-dot.created{background:var(--po)}
+.log-dot.approved{background:#22c55e}
+.log-dot.done{background:var(--delivered)}
+.log-dot.comment{background:var(--muted)}
+.log-body{flex:1;min-width:0}
+.log-msg{color:var(--text);line-height:1.4}
+.log-msg strong{font-weight:600}
+.log-time{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+
 </style>
 </head>
 <body>
@@ -268,7 +296,7 @@ body{font-size:1rem}
     <div id="admin-requests-panel" class="admin-req-panel" style="display:none">
       <h3>Order Requests from Team <span class="arq-count" id="arq-count">0</span></h3>
       <table class="arq-table">
-        <thead><tr><th>Item</th><th>Requested by</th><th>Nominated</th><th>Date raised</th><th>Status</th><th>Details</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Type</th><th>Item</th><th>Requested by</th><th>Nominated</th><th>Date raised</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
         <tbody id="arq-tbody"></tbody>
       </table>
     </div>
@@ -374,15 +402,16 @@ body{font-size:1rem}
 <!-- Raise Request Modal -->
 <div class="modal-bg" id="requestModal">
   <div class="modal">
-    <div class="modal-title" id="req-modal-title">Raise an Order Request</div>
-    <div class="form-group"><label>Item / material needed *</label><textarea id="r-item" placeholder="e.g. Helium 5.0 Grade 99.999% cylinder" rows="2"></textarea></div>
-    <div class="form-group nom-search">
-      <label>Nominate a team member to handle this *</label>
-      <input id="r-nominee" placeholder="Start typing a name…" autocomplete="off" oninput="filterNominees()" onfocus="filterNominees()">
-      <div class="nom-dropdown" id="nom-dropdown"></div>
-    </div>
-    <div class="form-group"><label>Details / justification</label><textarea id="r-details" placeholder="Why do you need this? Any specifications…" rows="3"></textarea></div>
+    <div class="modal-title" id="req-modal-title">Raise a Request</div>
     <div class="form-row">
+      <div class="form-group"><label>Request type *</label>
+        <select id="r-type">
+          <option value="Order">Order (PR/PO)</option>
+          <option value="LEM">LEM Request</option>
+          <option value="CoreLabs">CoreLabs</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
       <div class="form-group"><label>Priority</label>
         <select id="r-priority">
           <option>Normal</option>
@@ -390,11 +419,35 @@ body{font-size:1rem}
           <option>Low</option>
         </select>
       </div>
-      <div class="form-group"><label>Date needed by</label><input id="r-needed-by" type="date"></div>
     </div>
+    <div class="form-group"><label>Item / material / service needed *</label><textarea id="r-item" placeholder="e.g. Helium 5.0 Grade 99.999% cylinder" rows="2"></textarea></div>
+    <div class="form-group nom-search">
+      <label>Nominate a team member to handle this *</label>
+      <input id="r-nominee" placeholder="Start typing a name…" autocomplete="off" oninput="filterNominees()" onfocus="filterNominees()">
+      <div class="nom-dropdown" id="nom-dropdown"></div>
+    </div>
+    <div class="form-group"><label>Details / justification</label><textarea id="r-details" placeholder="Why do you need this? Any specifications…" rows="3"></textarea></div>
+    <div class="form-group"><label>Date needed by</label><input id="r-needed-by" type="date"></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('requestModal')">Cancel</button>
       <button class="btn" onclick="saveRequest()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Request Modal (nominated person fills tracking info) -->
+<div class="modal-bg" id="approveModal">
+  <div class="modal">
+    <div class="modal-title">Process Request</div>
+    <div id="approve-info" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px"></div>
+    <div class="form-group" id="approve-ref-group">
+      <label id="approve-ref-label">Tracking number *</label>
+      <input id="approve-ref" placeholder="">
+    </div>
+    <div class="form-group"><label>Comments</label><textarea id="approve-comment" placeholder="Any notes for the requester…" rows="2"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('approveModal')">Cancel</button>
+      <button class="btn" onclick="confirmApproval()">Approve &amp; Notify Requester</button>
     </div>
   </div>
 </div>
@@ -1083,10 +1136,16 @@ function renderDashboard() {
     const badgeCls = r.status === 'Requested' ? 'rb-requested' : r.status === 'Approved' ? 'rb-approved' : 'rb-done';
     const isNominee = r.nominatedUser === ME && r.requestedBy !== ME;
     const nomineeTag = isNominee ? `<span style="color:var(--pr);font-size:11px">Nominated to you</span>` : '';
+    const rt = r.requestType || 'Order';
+    const typeCls = {Order:'type-order',LEM:'type-lem',CoreLabs:'type-corelabs',Other:'type-other'}[rt] || 'type-other';
+    const refLabels = {Order:'PR #',LEM:'LEM Ticket',CoreLabs:'CoreLabs Ref',Other:'Ref'};
     return `<div class="req-card">
       <div class="req-card-top">
         <div class="req-card-item">${esc(r.item || '—')}</div>
-        <span class="req-card-badge ${badgeCls}">${r.status}</span>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          <span class="type-badge ${typeCls}">${rt}</span>
+          <span class="req-card-badge ${badgeCls}">${r.status}</span>
+        </div>
       </div>
       <div class="req-card-meta">
         <span>Requested by: <strong>${esc(r.requestedBy || '—')}</strong></span>
@@ -1096,12 +1155,12 @@ function renderDashboard() {
         ${r.neededBy ? `<span>Needed by: ${r.neededBy}</span>` : ''}
         ${nomineeTag}
       </div>
+      ${r.trackingNumber ? `<div class="req-tracking" style="margin-top:8px"><span class="track-label">${refLabels[rt]||'Ref'}:</span> ${esc(r.trackingNumber)}</div>` : ''}
       ${r.details ? `<div class="req-card-details">${esc(r.details)}</div>` : ''}
       <div class="req-card-actions">
-        ${r.status === 'Requested' && (IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px;color:var(--po);border-color:var(--po)" onclick="approveRequest('${r._key}')">Approve</button>` : ''}
+        ${r.status === 'Requested' && (r.nominatedUser === ME || IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px;color:var(--po);border-color:var(--po)" onclick="approveRequest('${r._key}')">Process &amp; Approve</button>` : ''}
         ${r.status === 'Approved' && (IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px;color:var(--delivered);border-color:var(--delivered)" onclick="markRequestDone('${r._key}')">Mark Done</button>` : ''}
-        ${r.status !== 'Done' && (r.requestedBy === ME || IS_ADMIN || window.FASTER_IS_ADMIN) ? `<button class="btn-ghost" style="font-size:12px" onclick="viewRequestDetail('${r._key}')">View</button>` : ''}
-        ${r.status === 'Done' ? `<button class="btn-ghost" style="font-size:12px" onclick="viewRequestDetail('${r._key}')">View</button>` : ''}
+        <button class="btn-ghost" style="font-size:12px" onclick="viewRequestDetail('${r._key}')">View</button>
       </div>
     </div>`;
   }).join('');
@@ -1126,22 +1185,26 @@ function renderAdminRequests() {
   const tbody = document.getElementById('arq-tbody');
 
   if (!reqs.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No pending requests</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No pending requests</td></tr>';
     return;
   }
 
   tbody.innerHTML = reqs.map(r => {
     const badgeCls = r.status === 'Requested' ? 'rb-requested' : 'rb-approved';
+    const rt = r.requestType || 'Order';
+    const typeCls = {Order:'type-order',LEM:'type-lem',CoreLabs:'type-corelabs',Other:'type-other'}[rt] || 'type-other';
     return `<tr>
+      <td><span class="type-badge ${typeCls}">${rt}</span></td>
       <td><strong>${esc(r.item || '—')}</strong></td>
       <td>${esc(r.requestedBy || '—')}</td>
       <td>${esc(r.nominatedUser || '—')}</td>
       <td style="font-family:var(--mono);font-size:12px">${r.dateRaised || '—'}</td>
       <td><span class="req-card-badge ${badgeCls}" style="font-size:11px">${r.status}</span></td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.details || '')}">${esc(r.details || '—')}</td>
+      <td style="font-family:var(--mono);font-size:12px">${r.trackingNumber ? esc(r.trackingNumber) : '—'}</td>
       <td style="white-space:nowrap">
-        ${r.status === 'Requested' ? `<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--po);border-color:var(--po)" onclick="approveRequest('${r._key}')">Approve</button>` : ''}
+        ${r.status === 'Requested' ? `<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--po);border-color:var(--po)" onclick="approveRequest('${r._key}')">Process</button>` : ''}
         ${r.status === 'Approved' ? `<button class="btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--delivered);border-color:var(--delivered)" onclick="markRequestDone('${r._key}')">Done</button>` : ''}
+        <button class="btn-ghost" style="font-size:11px;padding:3px 8px" onclick="viewRequestDetail('${r._key}')">View</button>
       </td>
     </tr>`;
   }).join('');
@@ -1150,8 +1213,9 @@ function renderAdminRequests() {
 // ── Request CRUD ─────────────────────────────────────────────────────────
 function openRequestModal() {
   if (!isConfigured) { toast('Configure Firebase first', 'toast-red'); return; }
-  document.getElementById('req-modal-title').textContent = 'Raise an Order Request';
+  document.getElementById('req-modal-title').textContent = 'Raise a Request';
   ['r-item', 'r-details', 'r-nominee'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('r-type').value = 'Order';
   document.getElementById('r-priority').value = 'Normal';
   document.getElementById('r-needed-by').value = '';
   document.getElementById('nom-dropdown').classList.remove('open');
@@ -1161,18 +1225,28 @@ function openRequestModal() {
 function saveRequest() {
   const item = document.getElementById('r-item').value.trim();
   const nominee = document.getElementById('r-nominee').value.trim();
+  const reqType = document.getElementById('r-type').value;
   if (!item) { toast('Item description is required', 'toast-red'); return; }
   if (!nominee) { toast('Please nominate a team member', 'toast-red'); return; }
 
+  const now = new Date().toISOString();
   const record = {
     requestedBy: ME || 'Anonymous',
     nominatedUser: nominee,
+    requestType: reqType,
     item: item,
     details: document.getElementById('r-details').value.trim(),
     priority: document.getElementById('r-priority').value,
     neededBy: document.getElementById('r-needed-by').value,
-    dateRaised: new Date().toISOString().slice(0, 10),
+    dateRaised: now.slice(0, 10),
     status: 'Requested',
+    trackingNumber: '',
+    log: [{
+      action: 'created',
+      by: ME || 'Anonymous',
+      date: now,
+      msg: 'Request raised — ' + reqType + ' for "' + item + '", nominated ' + nominee
+    }],
     _ts: Date.now()
   };
 
@@ -1182,21 +1256,74 @@ function saveRequest() {
     .catch(e => toast('Error: ' + e.message, 'toast-red'));
 }
 
+let approvingKey = null;
 function approveRequest(key) {
   if (!reqRef) return;
-  reqRef.child(key).update({
+  const r = orderRequests[key];
+  if (!r) return;
+  approvingKey = key;
+  const typeLabels = {Order:'PR Number',LEM:'LEM Ticket Number',CoreLabs:'CoreLabs Reference',Other:'Reference Number'};
+  const placeholders = {Order:'e.g. PR12345',LEM:'e.g. LEM-2026-0042',CoreLabs:'e.g. CL-REQ-123',Other:'Reference or ticket number'};
+  const rt = r.requestType || 'Order';
+  document.getElementById('approve-ref-label').textContent = (typeLabels[rt] || 'Reference') + ' *';
+  document.getElementById('approve-ref').placeholder = placeholders[rt] || '';
+  document.getElementById('approve-ref').value = '';
+  document.getElementById('approve-comment').value = '';
+  document.getElementById('approve-info').innerHTML =
+    '<strong>' + esc(r.item) + '</strong><br>' +
+    '<span style="font-size:12px;color:var(--muted)">Type: ' + esc(rt) + ' · Requested by: ' + esc(r.requestedBy) + ' · Date: ' + (r.dateRaised||'—') + '</span>';
+  document.getElementById('approveModal').classList.add('open');
+}
+
+function confirmApproval() {
+  if (!approvingKey || !reqRef) return;
+  const ref = document.getElementById('approve-ref').value.trim();
+  const comment = document.getElementById('approve-comment').value.trim();
+  if (!ref) { toast('Please enter the tracking number', 'toast-red'); return; }
+
+  const r = orderRequests[approvingKey];
+  const existingLog = Array.isArray(r?.log) ? [...r.log] : [];
+  const rt = r?.requestType || 'Order';
+  const refLabels = {Order:'PR #',LEM:'LEM Ticket',CoreLabs:'CoreLabs Ref',Other:'Ref'};
+
+  existingLog.push({
+    action: 'approved',
+    by: ME,
+    date: new Date().toISOString(),
+    msg: 'Approved by ' + ME + '. ' + (refLabels[rt]||'Ref') + ': ' + ref + (comment ? '. Note: ' + comment : '')
+  });
+
+  reqRef.child(approvingKey).update({
     status: 'Approved',
     approvedBy: ME,
-    approvedDate: new Date().toISOString().slice(0, 10)
-  }).then(() => toast('Request approved', 'toast-green'))
-    .catch(e => toast('Error: ' + e.message, 'toast-red'));
+    approvedDate: new Date().toISOString().slice(0, 10),
+    trackingNumber: ref,
+    approvalComment: comment,
+    log: existingLog
+  }).then(() => {
+    closeModal('approveModal');
+    toast('Approved — requester can now see the tracking number', 'toast-green');
+  }).catch(e => toast('Error: ' + e.message, 'toast-red'));
 }
+
+document.getElementById('approveModal').addEventListener('click', e => {
+  if (e.target.id === 'approveModal') closeModal('approveModal');
+});
 
 function markRequestDone(key) {
   if (!reqRef) return;
+  const r = orderRequests[key];
+  const existingLog = Array.isArray(r?.log) ? [...r.log] : [];
+  existingLog.push({
+    action: 'done',
+    by: ME,
+    date: new Date().toISOString(),
+    msg: 'Marked as done by ' + ME
+  });
   reqRef.child(key).update({
     status: 'Done',
-    completedDate: new Date().toISOString().slice(0, 10)
+    completedDate: new Date().toISOString().slice(0, 10),
+    log: existingLog
   }).then(() => toast('Request marked as done', 'toast-green'))
     .catch(e => toast('Error: ' + e.message, 'toast-red'));
 }
@@ -1204,19 +1331,45 @@ function markRequestDone(key) {
 function viewRequestDetail(key) {
   const r = orderRequests[key];
   if (!r) return;
+  const rt = r.requestType || 'Order';
+  const typeCls = {Order:'type-order',LEM:'type-lem',CoreLabs:'type-corelabs',Other:'type-other'}[rt] || 'type-other';
+  const refLabels = {Order:'PR Number',LEM:'LEM Ticket',CoreLabs:'CoreLabs Ref',Other:'Reference'};
+
   const fields = [
-    ['Item', r.item], ['Requested by', r.requestedBy],
-    ['Nominated to', r.nominatedUser], ['Status', r.status],
-    ['Priority', r.priority], ['Date Raised', r.dateRaised],
-    ['Needed by', r.neededBy], ['Details', r.details],
-    ['Approved by', r.approvedBy], ['Approved date', r.approvedDate],
-    ['Completed date', r.completedDate],
+    ['Type', `<span class="type-badge ${typeCls}">${rt}</span>`],
+    ['Item', esc(r.item)],
+    ['Requested by', esc(r.requestedBy)],
+    ['Nominated to', esc(r.nominatedUser)],
+    ['Status', r.status],
+    ['Priority', r.priority],
+    ['Date Raised', r.dateRaised],
+    ['Needed by', r.neededBy || '—'],
+    ['Details', esc(r.details) || '—'],
   ];
+  if (r.trackingNumber) {
+    fields.push([refLabels[rt] || 'Reference', `<span class="req-tracking"><span class="track-label">${refLabels[rt]||'Ref'}:</span> ${esc(r.trackingNumber)}</span>`]);
+  }
+  if (r.approvedBy) fields.push(['Approved by', esc(r.approvedBy)]);
+  if (r.approvedDate) fields.push(['Approved date', r.approvedDate]);
+  if (r.approvalComment) fields.push(['Approval note', esc(r.approvalComment)]);
+  if (r.completedDate) fields.push(['Completed', r.completedDate]);
+
+  let logHtml = '';
+  if (Array.isArray(r.log) && r.log.length) {
+    logHtml = '<div class="req-log"><div class="req-log-title">Activity Log</div>';
+    r.log.forEach(entry => {
+      const dotCls = entry.action === 'created' ? 'created' : entry.action === 'approved' ? 'approved' : entry.action === 'done' ? 'done' : 'comment';
+      const time = entry.date ? new Date(entry.date).toLocaleString() : '';
+      logHtml += `<div class="log-entry"><div class="log-dot ${dotCls}"></div><div class="log-body"><div class="log-msg">${esc(entry.msg)}</div><div class="log-time">${time}</div></div></div>`;
+    });
+    logHtml += '</div>';
+  }
+
   document.getElementById('detail-title').textContent = r.item || 'Request Detail';
   document.getElementById('detail-body').innerHTML = fields.map(([l, v]) => `
     <div class="info-label">${l}</div>
     <div class="info-val">${v || '—'}</div>
-  `).join('');
+  `).join('') + logHtml;
   document.getElementById('detail-edit').style.display = 'none';
   document.getElementById('detail-delete').style.display = 'none';
   document.getElementById('detailModal').classList.add('open');
