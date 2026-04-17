@@ -148,24 +148,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .col-add:hover{background:var(--s3);color:var(--pm)}
 .col-body{padding:10px;display:flex;flex-direction:column;gap:8px;flex:1;min-height:80px}
 
-/* Collapsed card stack — when 3+ cards, show first 2 full, rest stacked */
+/* Collapsed card stack — when 4+ cards, compact the extras */
 .col-body.stacked .card.stacked-card{
-  margin-top:-52px;position:relative;z-index:1;
-  max-height:28px;overflow:hidden;opacity:.85;
+  padding:6px 12px;position:relative;z-index:1;opacity:.9;
   transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer}
 .col-body.stacked .card.stacked-card:hover{
-  max-height:none;overflow:visible;opacity:1;z-index:10;
-  transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  padding:11px 12px;opacity:1;z-index:10;
+  transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
 .col-body.stacked .card.stacked-card .card-desc,
 .col-body.stacked .card.stacked-card .card-actions,
 .col-body.stacked .card.stacked-card .card-review{display:none}
 .col-body.stacked .card.stacked-card:hover .card-desc,
 .col-body.stacked .card.stacked-card:hover .card-actions,
 .col-body.stacked .card.stacked-card:hover .card-review{display:block}
-.col-body.stacked .card.stacked-card .card-foot{display:none}
-.col-body.stacked .card.stacked-card:hover .card-foot{display:flex}
+.col-body.stacked .card.stacked-card .card-foot{
+  margin-top:0}
 .col-body.stacked .card.stacked-card .card-title{
-  margin-bottom:0;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  margin-bottom:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .col-body.stacked .card.stacked-card:hover .card-title{
   margin-bottom:6px;font-size:13px;white-space:normal}
 
@@ -323,6 +322,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .gantt-legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
 .gantt-leg{display:flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);color:var(--muted)}
 .gantt-leg .swatch{width:10px;height:10px;border-radius:2px}
+
+/* Gantt context menu */
+.gantt-ctx{position:fixed;z-index:10000;background:var(--s1);border:1px solid var(--b2);
+  border-radius:10px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.5);min-width:180px}
+.gantt-ctx-title{padding:6px 10px;font-size:11px;font-weight:700;color:var(--muted);
+  font-family:var(--mono);text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--b1);margin-bottom:4px}
+.gantt-ctx-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;
+  cursor:pointer;font-size:12px;color:var(--text);transition:background .1s}
+.gantt-ctx-item:hover{background:var(--s2)}
+.gantt-ctx-item .ctx-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gantt-ctx-sep{height:1px;background:var(--b1);margin:4px 0}
+
+/* Dependency arrows on Gantt */
+.gantt-dep-line{position:absolute;pointer-events:none;z-index:0}
+.gantt-dep-line line{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4,3}
+.gantt-dep-line polygon{fill:var(--muted)}
 
 /* Milestone inputs in project modal */
 .ms-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
@@ -500,6 +515,27 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   <div id="project-view" style="display:none">
     <div class="proj-hdr" id="proj-hdr"></div>
     <div id="upload-preview" style="display:none"></div>
+    <div class="gantt-section" id="gantt-section">
+      <div class="gantt-title">
+        <span>Project Timeline</span>
+        <div class="gantt-title-actions">
+          <span id="gantt-range" style="font-weight:400;font-size:10px"></span>
+          <button class="gantt-zoom active" onclick="setGanttZoom('fit')" data-z="fit">Fit</button>
+          <button class="gantt-zoom" onclick="setGanttZoom('month')" data-z="month">Month</button>
+          <button class="gantt-zoom" onclick="setGanttZoom('quarter')" data-z="quarter">Quarter</button>
+        </div>
+      </div>
+      <div class="gantt-wrap" id="gantt-wrap"></div>
+      <div class="gantt-legend">
+        <div class="gantt-leg"><div class="swatch" style="background:var(--todo);opacity:.5"></div>To do</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--prog)"></div>In progress</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--rev)"></div>In review</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--done)"></div>Done</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--pm);width:10px;height:10px;transform:rotate(45deg);border-radius:2px"></div>Milestone</div>
+        <div class="gantt-leg"><div class="swatch" style="background:var(--red);width:2px;height:10px"></div>Today</div>
+      </div>
+    </div>
+    <div class="gantt-tip" id="gantt-tip"></div>
     <div class="board" id="board">
       <div class="col" data-st="todo"   ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'todo')">
         <div class="col-hdr">
@@ -530,27 +566,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <div class="col-body" id="col-done"></div>
       </div>
     </div>
-    <div class="gantt-section" id="gantt-section">
-      <div class="gantt-title">
-        <span>Project Timeline</span>
-        <div class="gantt-title-actions">
-          <span id="gantt-range" style="font-weight:400;font-size:10px"></span>
-          <button class="gantt-zoom active" onclick="setGanttZoom('fit')" data-z="fit">Fit</button>
-          <button class="gantt-zoom" onclick="setGanttZoom('month')" data-z="month">Month</button>
-          <button class="gantt-zoom" onclick="setGanttZoom('quarter')" data-z="quarter">Quarter</button>
-        </div>
-      </div>
-      <div class="gantt-wrap" id="gantt-wrap"></div>
-      <div class="gantt-legend">
-        <div class="gantt-leg"><div class="swatch" style="background:var(--todo);opacity:.5"></div>To do</div>
-        <div class="gantt-leg"><div class="swatch" style="background:var(--prog)"></div>In progress</div>
-        <div class="gantt-leg"><div class="swatch" style="background:var(--rev)"></div>In review</div>
-        <div class="gantt-leg"><div class="swatch" style="background:var(--done)"></div>Done</div>
-        <div class="gantt-leg"><div class="swatch" style="background:var(--pm);width:10px;height:10px;transform:rotate(45deg);border-radius:2px"></div>Milestone</div>
-        <div class="gantt-leg"><div class="swatch" style="background:var(--red);width:2px;height:10px"></div>Today</div>
-      </div>
-    </div>
-    <div class="gantt-tip" id="gantt-tip"></div>
   </div>
 
   <!-- EMPTY STATE -->
@@ -641,9 +656,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </div>
       <div class="field-row">
         <div class="field">
-          <label>Due date</label>
+          <label>Start date</label>
+          <input id="tk-start" type="date">
+        </div>
+        <div class="field">
+          <label>End date</label>
           <input id="tk-due" type="date">
         </div>
+      </div>
+      <div class="field-row">
         <div class="field">
           <label>Status</label>
           <select id="tk-st">
@@ -652,6 +673,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
             <option value="rev">In review</option>
             <option value="done">Done</option>
           </select>
+        </div>
+        <div class="field">
+          <label>Depends on</label>
+          <select id="tk-depends"><option value="">— None —</option></select>
         </div>
       </div>
     </div>
@@ -1101,7 +1126,7 @@ function renderBoard(){
 
   const canEdit = canEditProject(p);
 
-  const STACK_THRESHOLD = 3;
+  const STACK_THRESHOLD = 4;
   ['todo','prog','rev','done'].forEach(st => {
     const body = $('col-'+st);
     const count = cols[st].length;
@@ -1116,7 +1141,7 @@ function renderBoard(){
     body.className = 'col-body' + (shouldStack && !expanded ? ' stacked' : '');
 
     let html = cols[st].map((t, i) => {
-      const isStacked = shouldStack && !expanded && i >= 2;
+      const isStacked = shouldStack && !expanded && i >= 3;
       const cls = isStacked ? ' stacked-card' : '';
       return cardHTML(t, canEdit, cls);
     }).join('');
@@ -1413,10 +1438,12 @@ window.openNewTask = function(status){
   $('taskModalTitle').textContent = 'New task';
   $('tk-title').value = '';
   $('tk-desc').value = '';
+  $('tk-start').value = new Date().toISOString().slice(0,10);
   $('tk-due').value = '';
   $('tk-pri').value = 'med';
   $('tk-st').value = status || 'todo';
   populateAssigneeSelect(p.team || [], ME_UNAME);
+  populateDependsSelect(p.tasks || {}, null);
   $('tk-del-btn').style.display = 'none';
   openModal('taskModal');
   $('tk-title').focus();
@@ -1433,10 +1460,12 @@ window.openEditTask = function(taskId){
   $('taskModalTitle').textContent = 'Edit task';
   $('tk-title').value = t.title || '';
   $('tk-desc').value  = t.desc || '';
+  $('tk-start').value = t.startDate || '';
   $('tk-due').value   = t.dueDate || '';
   $('tk-pri').value   = t.priority || 'med';
   $('tk-st').value    = t.status || 'todo';
   populateAssigneeSelect(p.team || [], t.assignee || '');
+  populateDependsSelect(p.tasks || {}, taskId, t.dependsOn || '');
   $('tk-del-btn').style.display = canEditProject(p) ? 'inline-flex' : 'none';
   openModal('taskModal');
 };
@@ -1451,6 +1480,15 @@ function populateAssigneeSelect(team, selected){
     }).join('');
 }
 
+function populateDependsSelect(tasks, currentId, selected){
+  const sel = $('tk-depends');
+  sel.innerHTML = '<option value="">— None —</option>' +
+    Object.entries(tasks).filter(([id]) => id !== currentId).map(([id, t]) => {
+      const isSel = id === selected ? 'selected' : '';
+      return `<option value="${id}" ${isSel}>${escH(t.title||'Untitled')}</option>`;
+    }).join('');
+}
+
 window.saveTask = async function(){
   const p = PROJECTS[ACTIVE_PROJECT_ID];
   const title = $('tk-title').value.trim();
@@ -1459,11 +1497,13 @@ window.saveTask = async function(){
   if(!canEditProject(p) && !isMyTask){ toast('You cannot edit this task','err'); return; }
   const payload = {
     title,
-    desc:     $('tk-desc').value.trim(),
-    assignee: $('tk-assignee').value,
-    priority: $('tk-pri').value,
-    dueDate:  $('tk-due').value || '',
-    status:   $('tk-st').value,
+    desc:      $('tk-desc').value.trim(),
+    assignee:  $('tk-assignee').value,
+    priority:  $('tk-pri').value,
+    startDate: $('tk-start').value || '',
+    dueDate:   $('tk-due').value || '',
+    status:    $('tk-st').value,
+    dependsOn: $('tk-depends').value || '',
     updatedAt: new Date().toISOString()
   };
   try {
@@ -1606,9 +1646,11 @@ window.confirmImport = async function(){
     batch[`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${id}`] = {
       title: r.title,
       assignee: r.assignee,
+      startDate: new Date().toISOString().slice(0,10),
       dueDate: r.dueDate,
       priority: r.priority,
       status: 'todo',
+      dependsOn: '',
       desc: '',
       createdAt: new Date().toISOString(),
       createdBy: ME_UNAME,
@@ -1695,8 +1737,9 @@ function renderGantt(){
     return (a.dueDate||'9999').localeCompare(b.dueDate||'9999');
   });
 
-  sorted.forEach(t => {
-    let startD = t.createdAt ? new Date(t.createdAt) : new Date(today);
+  const taskPosMap = {};
+  sorted.forEach((t, rowIdx) => {
+    let startD = t.startDate ? new Date(t.startDate+'T00:00:00') : (t.createdAt ? new Date(t.createdAt) : new Date(today));
     startD.setHours(0,0,0,0);
     let endD = t.dueDate ? new Date(t.dueDate+'T00:00:00') : new Date(startD.getTime()+7*86400000);
     if(endD <= startD) endD = new Date(startD.getTime()+86400000);
@@ -1706,25 +1749,44 @@ function renderGantt(){
     const width = Math.max(2, right - left);
     const st = statusMap[t.status] || 'st-todo';
     const assigneeName = USERS[t.assignee]?.name || t.assignee || '';
-    const ini = assigneeName ? initials(assigneeName) : '';
+    const depLabel = t.dependsOn && tasks[t.dependsOn] ? tasks[t.dependsOn].title : '';
 
-    html += `<div class="gantt-row">
+    taskPosMap[t.id] = {left, right, row: rowIdx};
+
+    html += `<div class="gantt-row" data-rowid="${t.id}">
       <div class="gantt-row-label">
         ${t.assignee ? avatarHTML(t.assignee, 18, 'g-avatar') : `<div class="g-dot" style="background:${statusColor[t.status]||'var(--todo)'}"></div>`}
         ${escH(t.title||'Untitled')}
+        ${depLabel ? `<span style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-left:4px" title="Depends on: ${escH(depLabel)}">⛓</span>` : ''}
       </div>
       <div class="gantt-row-bar">
         <div class="gantt-bar ${st}" style="left:${left}%;width:${width}%"
              data-tid="${t.id}" data-title="${escH(t.title||'')}" data-status="${t.status||'todo'}"
              data-assignee="${escH(assigneeName)}" data-due="${t.dueDate||''}"
              data-pri="${t.priority||'med'}" data-start="${startD.toISOString().slice(0,10)}"
-             onclick="openEditTask('${t.id}')"
+             data-dep="${escH(depLabel)}"
+             onclick="showGanttCtx(event,'${t.id}')"
              onmouseenter="showGanttTip(event,this)" onmouseleave="hideGanttTip()">
           ${t.assignee ? avatarHTML(t.assignee, 16, 'bar-avatar') : ''}
           <div class="bar-text">${escH(t.title||'')}</div>
         </div>
       </div>
     </div>`;
+  });
+
+  // Dependency arrows (SVG overlay)
+  sorted.forEach(t => {
+    if(!t.dependsOn || !taskPosMap[t.dependsOn] || !taskPosMap[t.id]) return;
+    const from = taskPosMap[t.dependsOn];
+    const to = taskPosMap[t.id];
+    const fromX = from.right;
+    const toX = to.left;
+    const fromY = from.row * 34 + 56;
+    const toY = to.row * 34 + 56;
+    html += `<svg class="gantt-dep-line" style="left:220px;top:0;width:calc(100% - 220px);height:${Math.max(fromY,toY)+20}px;position:absolute">
+      <line x1="${fromX}%" y1="${fromY}" x2="${toX}%" y2="${toY}"/>
+      <polygon points="${toX}%,${toY} ${toX-0.5}%,${toY-4} ${toX-0.5}%,${toY+4}"/>
+    </svg>`;
   });
 
   // Milestones
@@ -1794,7 +1856,9 @@ function showGanttTip(e, el, isMilestone){
       ${d.assignee ? `<div class="tip-row"><span>Assignee</span><b>${escH(d.assignee)}</b></div>` : ''}
       <div class="tip-row"><span>Start</span><b>${d.start||'—'}</b></div>
       <div class="tip-row"><span>Due</span><b>${d.due||'No deadline'}</b></div>
-      <div class="tip-row"><span>Priority</span><b>${priLabel}</b></div>`;
+      <div class="tip-row"><span>Priority</span><b>${priLabel}</b></div>
+      ${d.dep ? `<div class="tip-row"><span>Depends on</span><b>${escH(d.dep)}</b></div>` : ''}
+      <div style="font-size:9px;color:var(--muted);margin-top:6px;font-family:var(--mono);text-align:center">Click to change status or edit</div>`;
   }
   const r = el.getBoundingClientRect();
   tip.style.left = Math.min(r.left, window.innerWidth-280)+'px';
@@ -1802,6 +1866,68 @@ function showGanttTip(e, el, isMilestone){
   tip.classList.add('show');
 }
 function hideGanttTip(){ $('gantt-tip').classList.remove('show'); }
+
+// Gantt context menu — click bar to change status or open editor
+window.showGanttCtx = function(e, taskId){
+  e.stopPropagation();
+  hideGanttTip();
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p) return;
+  const t = (p.tasks || {})[taskId];
+  if(!t) return;
+  let existing = document.getElementById('gantt-ctx');
+  if(existing) existing.remove();
+
+  const menu = document.createElement('div');
+  menu.className = 'gantt-ctx';
+  menu.id = 'gantt-ctx';
+
+  const statuses = [
+    {key:'todo', label:'To do', color:'var(--todo)'},
+    {key:'prog', label:'In progress', color:'var(--prog)'},
+    {key:'rev',  label:'In review', color:'var(--rev)'},
+    {key:'done', label:'Done', color:'var(--done)'}
+  ];
+
+  menu.innerHTML = `<div class="gantt-ctx-title">${escH(t.title||'Task')}</div>` +
+    statuses.map(s =>
+      `<div class="gantt-ctx-item${t.status===s.key?' style="font-weight:700"':''}" onclick="ganttSetStatus('${taskId}','${s.key}')">
+        <div class="ctx-dot" style="background:${s.color}"></div>
+        ${s.label}${t.status===s.key?' ✓':''}
+      </div>`
+    ).join('') +
+    `<div class="gantt-ctx-sep"></div>
+     <div class="gantt-ctx-item" onclick="closeGanttCtx();openEditTask('${taskId}')">📝 Edit task details</div>`;
+
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 250) + 'px';
+  document.body.appendChild(menu);
+
+  setTimeout(() => {
+    document.addEventListener('click', closeGanttCtx, {once:true});
+  }, 10);
+};
+
+window.closeGanttCtx = function(){
+  const m = document.getElementById('gantt-ctx');
+  if(m) m.remove();
+};
+
+window.ganttSetStatus = async function(taskId, newStatus){
+  closeGanttCtx();
+  const p = PROJECTS[ACTIVE_PROJECT_ID];
+  if(!p || !p.tasks || !p.tasks[taskId]) return;
+  if(p.tasks[taskId].status === newStatus) return;
+  try {
+    await db.ref(`faster_projects/${ACTIVE_PROJECT_ID}/tasks/${taskId}`).update({
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    });
+    toast('Status updated','ok');
+  } catch(e){
+    toast('Failed: '+(e.message||''),'err');
+  }
+};
 
 // ════════════════════════════════════════════════
 // TASK REVIEW WORKFLOW
