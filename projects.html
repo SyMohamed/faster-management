@@ -148,6 +148,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .col-add:hover{background:var(--s3);color:var(--pm)}
 .col-body{padding:10px;display:flex;flex-direction:column;gap:8px;flex:1;min-height:80px}
 
+/* Collapsed card stack — when 3+ cards, show first 2 full, rest stacked */
+.col-body.stacked .card.stacked-card{
+  margin-top:-52px;position:relative;z-index:1;
+  max-height:28px;overflow:hidden;opacity:.85;
+  transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.col-body.stacked .card.stacked-card:hover{
+  max-height:none;overflow:visible;opacity:1;z-index:10;
+  transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.col-body.stacked .card.stacked-card .card-desc,
+.col-body.stacked .card.stacked-card .card-actions,
+.col-body.stacked .card.stacked-card .card-review{display:none}
+.col-body.stacked .card.stacked-card:hover .card-desc,
+.col-body.stacked .card.stacked-card:hover .card-actions,
+.col-body.stacked .card.stacked-card:hover .card-review{display:block}
+.col-body.stacked .card.stacked-card .card-foot{display:none}
+.col-body.stacked .card.stacked-card:hover .card-foot{display:flex}
+.col-body.stacked .card.stacked-card .card-title{
+  margin-bottom:0;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col-body.stacked .card.stacked-card:hover .card-title{
+  margin-bottom:6px;font-size:13px;white-space:normal}
+
+/* Show all toggle */
+.stack-toggle{display:flex;align-items:center;justify-content:center;gap:4px;
+  padding:4px 0;font-size:10px;font-family:var(--mono);color:var(--muted);
+  cursor:pointer;transition:color .15s;border:none;background:none;width:100%}
+.stack-toggle:hover{color:var(--pm)}
+.stack-toggle .arrow{transition:transform .2s;display:inline-block}
+.stack-toggle.expanded .arrow{transform:rotate(180deg)}
+
 /* Task cards */
 .card{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:11px 12px;
   cursor:grab;transition:all .15s;position:relative}
@@ -1072,20 +1101,48 @@ function renderBoard(){
 
   const canEdit = canEditProject(p);
 
+  const STACK_THRESHOLD = 3;
   ['todo','prog','rev','done'].forEach(st => {
     const body = $('col-'+st);
-    $('c-'+st).textContent = cols[st].length;
-    if(!cols[st].length){
+    const count = cols[st].length;
+    $('c-'+st).textContent = count;
+    if(!count){
+      body.className = 'col-body';
       body.innerHTML = '<div class="empty-col">No tasks</div>';
       return;
     }
-    body.innerHTML = cols[st].map(t => cardHTML(t, canEdit)).join('');
+    const shouldStack = count > STACK_THRESHOLD;
+    const expanded = body.dataset.expanded === 'true';
+    body.className = 'col-body' + (shouldStack && !expanded ? ' stacked' : '');
+
+    let html = cols[st].map((t, i) => {
+      const isStacked = shouldStack && !expanded && i >= 2;
+      const cls = isStacked ? ' stacked-card' : '';
+      return cardHTML(t, canEdit, cls);
+    }).join('');
+
+    if(shouldStack){
+      const label = expanded ? 'Collapse' : `Show all ${count} tasks`;
+      const arrow = expanded ? '▲' : '▼';
+      html += `<button class="stack-toggle${expanded?' expanded':''}" onclick="toggleStack('${st}')">
+        ${label} <span class="arrow">${arrow}</span></button>`;
+    }
+    body.innerHTML = html;
   });
 
   renderGantt();
 }
 
-function cardHTML(t, canEdit){
+window.toggleStack = function(st){
+  const body = $('col-'+st);
+  if(!body) return;
+  const isExpanded = body.dataset.expanded === 'true';
+  body.dataset.expanded = isExpanded ? 'false' : 'true';
+  renderBoard();
+};
+
+function cardHTML(t, canEdit, extraCls){
+  extraCls = extraCls || '';
   const assigneeName = USERS[t.assignee]?.name || t.assignee || '';
   const dueC = dueClass(t.dueDate);
   const dueTxt = fmtDue(t.dueDate);
@@ -1114,7 +1171,7 @@ function cardHTML(t, canEdit){
 
   const myClass = isMyTask ? ' my-task' : '';
   return `
-    <div class="card pri-${priCls}${myClass}" ${draggable} ${clickHandler} data-taskid="${t.id}">
+    <div class="card pri-${priCls}${myClass}${extraCls}" ${draggable} ${clickHandler} data-taskid="${t.id}">
       <div class="card-pri"></div>
       <div class="card-title">${escH(t.title||'Untitled task')}</div>
       ${t.desc ? `<div class="card-desc">${escH(t.desc)}</div>` : ''}
