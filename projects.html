@@ -370,14 +370,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
 /* Dependency arrows on Gantt */
 .gantt-dep-svg{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:4;overflow:visible}
-.gantt-dep-path{fill:none;stroke:var(--muted);stroke-width:2;opacity:.3;
-  transition:opacity .25s,stroke .25s,stroke-width .25s}
-.gantt-dep-arrow{fill:var(--muted);opacity:.3;transition:opacity .25s,fill .25s}
+.gantt-dep-path{fill:none;stroke:var(--muted);stroke-width:2;opacity:.2;stroke-linecap:round;stroke-linejoin:round;
+  transition:opacity .3s,stroke .3s,stroke-width .3s,filter .3s}
+.gantt-dep-glow{fill:none;stroke:var(--pm);stroke-width:6;opacity:0;stroke-linecap:round;filter:blur(4px);
+  transition:opacity .3s}
+.gantt-dep-arrow-head{fill:var(--muted);opacity:.25;transition:opacity .3s,fill .3s,transform .2s}
+.gantt-dep-dot{fill:var(--muted);opacity:.2;transition:opacity .3s,fill .3s}
 .gantt-dep-group{pointer-events:all;cursor:pointer}
-.gantt-dep-group:hover .gantt-dep-path{stroke:var(--pm);stroke-width:3;opacity:1}
-.gantt-dep-group:hover .gantt-dep-arrow{fill:var(--pm);opacity:1}
-.gantt-dep-hit{fill:transparent;stroke:transparent;stroke-width:16}
-.gantt-row.dep-highlight .gantt-bar{box-shadow:0 0 0 2px var(--pm),0 4px 16px rgba(20,184,166,.3)!important;z-index:6}
+.gantt-dep-group:hover .gantt-dep-path{stroke:var(--pm);stroke-width:2.5;opacity:1;filter:drop-shadow(0 0 3px rgba(20,184,166,.4))}
+.gantt-dep-group:hover .gantt-dep-glow{opacity:.3}
+.gantt-dep-group:hover .gantt-dep-arrow-head{fill:var(--pm);opacity:1}
+.gantt-dep-group:hover .gantt-dep-dot{fill:var(--pm);opacity:1}
+.gantt-dep-hit{fill:transparent;stroke:transparent;stroke-width:18}
+.gantt-row.dep-highlight .gantt-bar{box-shadow:0 0 0 2px var(--pm),0 4px 16px rgba(20,184,166,.35)!important;z-index:6}
 
 /* Milestone inputs in project modal */
 .ms-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
@@ -1988,20 +1993,11 @@ function drawGanttDeps(){
   svg.setAttribute('class', 'gantt-dep-svg');
   svg.style.height = wrap.scrollHeight + 'px';
 
-  const defs = document.createElementNS(svgNS, 'defs');
-  const marker = document.createElementNS(svgNS, 'marker');
-  marker.setAttribute('id', 'dep-arrow');
-  marker.setAttribute('markerWidth', '10');
-  marker.setAttribute('markerHeight', '8');
-  marker.setAttribute('refX', '10');
-  marker.setAttribute('refY', '4');
-  marker.setAttribute('orient', 'auto');
-  const markerPath = document.createElementNS(svgNS, 'path');
-  markerPath.setAttribute('d', 'M0,0 L10,4 L0,8 Z');
-  markerPath.setAttribute('class', 'gantt-dep-arrow');
-  marker.appendChild(markerPath);
-  defs.appendChild(marker);
-  svg.appendChild(defs);
+  function makeEl(tag, attrs){
+    const el = document.createElementNS(svgNS, tag);
+    Object.entries(attrs||{}).forEach(([k,v]) => el.setAttribute(k,v));
+    return el;
+  }
 
   deps.forEach(d => {
     const fromBar = bars[d.fromId];
@@ -2010,31 +2006,56 @@ function drawGanttDeps(){
 
     const fRect = fromBar.getBoundingClientRect();
     const tRect = toBar.getBoundingClientRect();
-    const x1 = fRect.right - wrapRect.left;
+    const x1 = fRect.right - wrapRect.left + 4;
     const y1 = fRect.top + fRect.height/2 - wrapRect.top;
-    const x2 = tRect.left - wrapRect.left;
+    const x2 = tRect.left - wrapRect.left - 4;
     const y2 = tRect.top + tRect.height/2 - wrapRect.top;
 
-    const dx = x2 - x1;
-    const cp = Math.max(30, Math.abs(dx) * 0.4);
+    // Step-connector path: right → down/up (rounded) → right into target
+    const gap = 14;
+    const r = 8;
+    const midX = x1 + gap;
+    const dy = y2 - y1;
+    const dirY = dy > 0 ? 1 : dy < 0 ? -1 : 0;
+    const absY = Math.abs(dy);
+    let pathD;
 
-    const g = document.createElementNS(svgNS, 'g');
-    g.setAttribute('class', 'gantt-dep-group');
-    g.setAttribute('data-from', d.fromId);
-    g.setAttribute('data-to', d.toId);
+    if(absY < 2){
+      // Same row — simple horizontal line
+      pathD = `M${x1},${y1} L${x2},${y2}`;
+    } else {
+      // Step connector with rounded corners
+      const ry = Math.min(r, absY/2);
+      pathD = `M${x1},${y1} L${midX-ry},${y1}` +
+              ` Q${midX},${y1} ${midX},${y1+dirY*ry}` +
+              ` L${midX},${y2-dirY*ry}` +
+              ` Q${midX},${y2} ${midX+ry},${y2}` +
+              ` L${x2},${y2}`;
+    }
+
+    const g = makeEl('g', {'class':'gantt-dep-group','data-from':d.fromId,'data-to':d.toId});
     g.addEventListener('mouseenter', () => highlightDep(d.fromId, d.toId, true));
     g.addEventListener('mouseleave', () => highlightDep(d.fromId, d.toId, false));
 
-    const hitPath = document.createElementNS(svgNS, 'path');
-    hitPath.setAttribute('class', 'gantt-dep-hit');
-    hitPath.setAttribute('d', `M${x1},${y1} C${x1+cp},${y1} ${x2-cp},${y2} ${x2},${y2}`);
-    g.appendChild(hitPath);
+    // Glow layer (visible on hover)
+    g.appendChild(makeEl('path', {'class':'gantt-dep-glow', d:pathD}));
 
-    const visPath = document.createElementNS(svgNS, 'path');
-    visPath.setAttribute('class', 'gantt-dep-path');
-    visPath.setAttribute('d', `M${x1},${y1} C${x1+cp},${y1} ${x2-cp},${y2} ${x2},${y2}`);
-    visPath.setAttribute('marker-end', 'url(#dep-arrow)');
-    g.appendChild(visPath);
+    // Hit area (invisible, fat, for easy hovering)
+    g.appendChild(makeEl('path', {'class':'gantt-dep-hit', d:pathD}));
+
+    // Visible path
+    g.appendChild(makeEl('path', {'class':'gantt-dep-path', d:pathD}));
+
+    // Start dot
+    g.appendChild(makeEl('circle', {'class':'gantt-dep-dot', cx:x1, cy:y1, r:'3'}));
+
+    // Arrowhead at the end
+    const aSize = 7;
+    const ax = x2, ay = y2;
+    g.appendChild(makeEl('polygon', {
+      'class':'gantt-dep-arrow-head',
+      'points':`${ax},${ay-aSize} ${ax+aSize+2},${ay} ${ax},${ay+aSize}`
+    }));
 
     svg.appendChild(g);
   });
